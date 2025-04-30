@@ -30,7 +30,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 
-import static front.meetudy.config.jwt.JwtProcess.createCookieJwt;
 
 
 /*
@@ -39,20 +38,21 @@ import static front.meetudy.config.jwt.JwtProcess.createCookieJwt;
 @Slf4j
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     private final MemberRepository memberRepository;
+    private final boolean useCookie = true; // true: 쿠키 사용 / false: 헤더 사용
+    private final JwtProcess jwtProcess;
 
-    private final boolean localCookie = false; //true : 로컬  false : 쿠키
-
-    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, MemberRepository memberRepository) {
+    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, MemberRepository memberRepository,JwtProcess jwtProcess) {
         super(authenticationManager);
         this.memberRepository = memberRepository;
+        this.jwtProcess = jwtProcess;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        if(localCookie) {
-            localVerify(request, response);
-        } else {
+        if(useCookie) {
             cookieVerify(request, response);
+        } else {
+            headerVerify(request, response);
         }
 
         /*inputStream은 한번만 가능 하기 때문에 실패 시 유저 정보를 가져올수 없어서
@@ -62,18 +62,18 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         chain.doFilter(rereadableRequestWrapper, response);
     }
 
-    private void localVerify(HttpServletRequest request, HttpServletResponse response) {
+    private void headerVerify(HttpServletRequest request, HttpServletResponse response) {
         if (isHeaderVerify(request)) {
             //토큰이 존재
             String token = request.getHeader(JwtProperty.getHeader()).split(" ")[1].trim();
 
             try {   //토큰에 아무 이상이 없을 경우
-                LoginUser loginUser = JwtProcess.verify(token);
+                LoginUser loginUser = jwtProcess.verifyAccessToken(token);
                 //임시 세션 (UserDetails 타입 or username) id , role 만 있음
                 setAuthentication(loginUser);
             } catch (TokenExpiredException e) {
                 //로그인 auto 체크
-                if(!Boolean.parseBoolean(request.getHeader("PA_AUT"))) {
+                if(!Boolean.parseBoolean(request.getHeader("isAutoLogin"))) {
                     if(autoChkVerifyExpired(e.getExpiredOn())) {
                         request.setAttribute("exception", "access토큰 만료");
                     }
@@ -96,22 +96,23 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         }
     }
 
+
     private void cookieVerify(HttpServletRequest request, HttpServletResponse response) {
-        if (StringUtils.hasText(isCookieVerify(request,"PA_T")) && StringUtils.hasText(isCookieVerify(request,"PA_AUT"))) {
+        if (StringUtils.hasText(isCookieVerify(request,"access")) && StringUtils.hasText(isCookieVerify(request,"isAutoLogin"))) {
             //토큰이 존재
-            String token = isCookieVerify(request , "PA_T");
+            String token = isCookieVerify(request , "access");
             try {   //토큰에 아무 이상이 없을 경우
-                LoginUser loginUser = JwtProcess.verify(token);
+                LoginUser loginUser = jwtProcess.verifyAccessToken(token);
                 //임시 세션 (UserDetails 타입 or username) id , role 만 있음
                 setAuthentication(loginUser);
             } catch (TokenExpiredException e) {
-                if(!Boolean.parseBoolean(isCookieVerify(request, "PA_AUT"))) {
+                if(!Boolean.parseBoolean(isCookieVerify(request, "isAutoLogin"))) {
                     if(autoChkVerifyExpired(e.getExpiredOn())) {
                         request.setAttribute("exception", "access토큰 만료");
                     }
                 }
                 //accessToken이 만료가 되었다면 client에서 refreshToken을 받아와
-                String refreshToken = isCookieVerify(request, "PR_T");
+                String refreshToken = isCookieVerify(request, "refresh");
                 refreshTokenNullChk(request, response, refreshToken);
             } catch (JWTDecodeException e){
                 //doesn't have a valid JSON format
@@ -130,23 +131,27 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     private void accessTokenGenerated(HttpServletResponse response, Long userId) {
         Member member = memberRepository.findById(userId).orElseThrow(() -> new CustomApiException(LoginErrorCode.LG_MEMBER_ID_PW_INVALID.getMessage()));
-        String accessToken = JwtProcess.create(new LoginUser(member));
+        String accessToken = jwtProcess.createAccessToken(new LoginUser(member));
+        String[] parts = accessToken.split(" ");
         String token = accessToken.split(" ")[1].trim();
-        if(localCookie) {
-            response.addHeader(JwtProperty.getHeader(), token); //header
-        } else {
-            response.addHeader("Set-cookie", createCookieJwt(accessToken, "PA_T").toString());
+        if (parts.length != 2) {
+            throw new IllegalArgumentException("잘못된 토큰 형식");
         }
-        setAuthentication(JwtProcess.verify(token));
+        if(useCookie) {
+            response.addHeader("Set-cookie", jwtProcess.createJwtCookie(accessToken, "access").toString());
+        } else {
+            response.addHeader(JwtProperty.getHeader(), token); //header
+        }
+        setAuthentication(jwtProcess.verifyAccessToken(token));
     }
 
     private void refreshTokenGenerated(HttpServletResponse response, Long userId ,boolean dbInsert) {
         Member member = memberRepository.findById(userId).orElseThrow(() -> new CustomApiException(LoginErrorCode.LG_MEMBER_ID_PW_INVALID.getMessage()));
-        String newRefreshToken = JwtProcess.refresh(new LoginUser(member));
-        if(localCookie) {
-            response.addHeader("REFRESH_TOKEN", newRefreshToken); //header
+        String newRefreshToken = jwtProcess.createRefreshToken(new LoginUser(member));
+        if(useCookie) {
+            response.addHeader("Set-cookie", jwtProcess.createJwtCookie(newRefreshToken, "refresh").toString());
         } else {
-            response.addHeader("Set-cookie", createCookieJwt(newRefreshToken, "PR_T").toString());
+            response.addHeader("REFRESH_TOKEN", newRefreshToken); //header
         }
     }
 
@@ -157,7 +162,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     private boolean isHeaderVerify(HttpServletRequest request) {
         String header = request.getHeader(JwtProperty.getHeader());
-        String autoChk = request.getHeader("PA_AUT");
+        String autoChk = request.getHeader("isAutoLogin");
 
         return (header != null && header.startsWith(JwtProperty.getTokenPrefix())) && (autoChk != null);
     }
@@ -188,11 +193,11 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             try {
                 log.info("사용자 토큰 만료 -> 리프래시 토큰 인증 후 토큰 재 생성");
                 //refresh 토큰이 만료가 되지 않았을 경우
-                Long loginId = JwtProcess.verifyRefresh(refreshToken);
+                Long loginId = jwtProcess.verifyRefreshToken(refreshToken);
                 //새 accessToken 생성
                 accessTokenGenerated(response,  loginId);
                 // 만료일이 하루 남았을 경우 refreshToken 재생성 마지막 파라미터 true : dbInsert false: dbInsert X
-                if(JwtProcess.verifyExpired(refreshToken)) {
+                if(jwtProcess.verifyExpired(refreshToken)) {
                     refreshTokenGenerated(response,  loginId , false);
                 }
             } catch (TokenExpiredException e2) {

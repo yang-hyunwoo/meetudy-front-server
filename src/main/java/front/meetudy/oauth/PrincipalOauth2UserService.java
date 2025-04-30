@@ -4,6 +4,7 @@ package front.meetudy.oauth;
 
 import front.meetudy.auth.LoginUser;
 import front.meetudy.constant.member.MemberEnum;
+import front.meetudy.constant.member.MemberProviderType;
 import front.meetudy.domain.member.Member;
 import front.meetudy.oauth.provider.*;
 import front.meetudy.repository.member.MemberRepository;
@@ -56,7 +57,7 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
             System.out.println("xx");
 
         }
-        String provider = oAuth2UserInfo.getProvider(); //google 계정
+        MemberProviderType providerType = oAuth2UserInfo.getProvider(); //google 계정
         String providerId = oAuth2UserInfo.getProviderId();
 //        String username = provider + "_" + providerId;  //google_sub
         String username = oAuth2UserInfo.getName();  //google_sub
@@ -64,16 +65,16 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
         String email = oAuth2UserInfo.getEmail();
 
         Member memberEntity;
-        if(memberRepository.findByEmailAndProvider(email , provider).isPresent()) {
+        if(memberRepository.findByEmailAndProvider(email , providerType).isPresent()) {
             //존재한다면 TODO: 탈퇴여부 체크 해야 함
-            memberEntity = memberRepository.findByEmailAndProvider(email, provider).orElseThrow();
+            memberEntity = memberRepository.findByEmailAndProvider(email, providerType).orElseThrow();
         } else {
             memberEntity = Member.builder()
                     .name(username)
                     .password(password)
                     .email(email)
                     .role(MemberEnum.USER)
-                    .provider(provider)
+                    .provider(providerType)
                     .providerId(providerId)
                     .build();
 

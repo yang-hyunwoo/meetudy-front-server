@@ -4,6 +4,7 @@ import front.meetudy.auth.LoginUser;
 import front.meetudy.config.jwt.JwtProcess;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -11,12 +12,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 
-import static front.meetudy.config.jwt.JwtProcess.createCookie;
-import static front.meetudy.config.jwt.JwtProcess.createCookieJwt;
 
 
 @Component
+@RequiredArgsConstructor
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+
+    private final JwtProcess jwtProcess;
+
 
     /**
      * 성공시 쿠키 생성
@@ -31,14 +34,14 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String targetUrl = determineTargetUrl(request, response, authentication);
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
 
-        String accessToken = JwtProcess.create(loginUser);
-        String refreshToken = JwtProcess.refresh(loginUser);
+        String accessToken = jwtProcess.createAccessToken(loginUser);
+        String refreshToken = jwtProcess.createRefreshToken(loginUser);
 
 
 
-        response.addHeader("Set-cookie", createCookieJwt(accessToken, "access").toString());
-        response.addHeader("Set-cookie", createCookieJwt(refreshToken, "access_refresh").toString());
-        response.addHeader("Set-cookie", createCookie("true", "access_auto").toString());
+        response.addHeader("Set-cookie", jwtProcess.createJwtCookie(accessToken, "access").toString());
+        response.addHeader("Set-cookie", jwtProcess.createJwtCookie(refreshToken, "access_refresh").toString());
+        response.addHeader("Set-cookie", jwtProcess.createPlainCookie("true", "isAutoLogin").toString());
 
         clearAuthenticationAttributes(request, response);
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
