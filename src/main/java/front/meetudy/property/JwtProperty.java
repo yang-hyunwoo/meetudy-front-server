@@ -1,14 +1,19 @@
 package front.meetudy.property;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class JwtProperty {
 
+public class JwtProperty {
+    @Getter
     private static String secretKey;
+    @Getter
     private static int expirationTime;
+    @Getter
     private static String tokenPrefix;
+    @Getter
     private static String header;
 
     @Value("${jwt.secret-key}")
@@ -16,17 +21,9 @@ public class JwtProperty {
         this.secretKey = secretKey;
     }
 
-    public static String getSecretKey() {
-        return secretKey;
-    }
-
     @Value("${jwt.expiration-time}")
     public void setExpirationTime(int date) {
         expirationTime = date;
-    }
-
-    public static int getExpirationTime() {
-        return expirationTime;
     }
 
     @Value("${jwt.token-prefix}")
@@ -34,16 +31,8 @@ public class JwtProperty {
         tokenPrefix = prefix;
     }
 
-    public static String getTokenPrefix() {
-        return tokenPrefix;
-    }
-
     @Value("${jwt.header}")
     public void setHeader(String header) {
         this.header = header;
-    }
-
-    public static String getHeader() {
-        return header;
     }
 }

@@ -1,5 +1,6 @@
 package front.meetudy.repository.member;
 
+import front.meetudy.constant.member.MemberProviderType;
 import front.meetudy.domain.member.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -11,7 +12,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByEmail(String email);
 
-    Optional<Member> findByEmailAndProvider(String email, String provider);
+    Optional<Member> findByEmailAndProvider(String email, MemberProviderType providerType);
 
 
 }

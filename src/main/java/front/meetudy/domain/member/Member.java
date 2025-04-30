@@ -1,6 +1,7 @@
 package front.meetudy.domain.member;
 
 import front.meetudy.constant.member.MemberEnum;
+import front.meetudy.constant.member.MemberProviderType;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -48,7 +49,7 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberEnum role;
 
-    private String provider;
+    private MemberProviderType provider;
 
     private String providerId;
 
@@ -68,7 +69,7 @@ public class Member {
                   String password,
                   String email,
                   MemberEnum role,
-                  String provider,
+                  MemberProviderType provider,
                   String providerId,
                   boolean isUsed,
                   LocalDateTime lastAccessDate,
