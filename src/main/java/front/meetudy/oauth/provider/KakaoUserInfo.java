@@ -1,5 +1,7 @@
 package front.meetudy.oauth.provider;
 
+import front.meetudy.constant.member.MemberProviderTypeEnum;
+
 import java.util.Map;
 
 
@@ -17,8 +19,8 @@ public class KakaoUserInfo implements OAuth2UserInfo{
     }
 
     @Override
-    public String getProvider() {
-        return "kakao";
+    public MemberProviderTypeEnum getProvider() {
+        return MemberProviderTypeEnum.KAKAO;
     }
 
     @Override

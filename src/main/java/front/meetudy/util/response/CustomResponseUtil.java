@@ -15,7 +15,6 @@ public class CustomResponseUtil {
         try {
             Response<Object> responseDto = Response.successRead(msg, dto);
             String responseBody = om.writeValueAsString(responseDto);
-
             response.setContentType("application/json; charset=utf-8");
             response.setStatus(HttpStatus.OK.value());
             response.getWriter().println(responseBody);

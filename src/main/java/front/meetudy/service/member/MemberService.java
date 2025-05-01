@@ -4,12 +4,16 @@ import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.member.JoinMemberReqDto;
 import front.meetudy.dto.response.member.JoinMemberResDto;
 import front.meetudy.exception.CustomApiException;
+import front.meetudy.exception.join.JoinErrorCode;
 import front.meetudy.exception.login.LoginErrorCode;
 import front.meetudy.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static front.meetudy.exception.join.JoinErrorCode.*;
+import static front.meetudy.exception.login.LoginErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +31,7 @@ public class MemberService {
 
         //1. 동일 유저네임 존재 검사
         memberRepository.findByEmail(joinReqDto.getEmail()).ifPresent(user -> {
-            throw new CustomApiException(LoginErrorCode.LG_MEMBER_ID_PW_INVALID.getMessage()); //TODO : 중복 이메일 에러코드로 변경
+            throw new CustomApiException(JI_DUPLICATION_EMAIL.getStatus(),JI_DUPLICATION_EMAIL.getMessage()); //TODO : 중복 이메일 에러코드로 변경
         });
         //2. 패스워드 인코딩
 //        Member member = memberRepository.save(joinReqDto.toEntity(bCryptPasswordEncoder));
@@ -35,15 +39,14 @@ public class MemberService {
         //3. dto 응답
         return new JoinMemberResDto(member);
     }
-
     public void memberLgnFailCnt(String email) {
-        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new CustomApiException(LoginErrorCode.LG_MEMBER_ID_PW_INVALID.getMessage()));
-        if(member.getFailLoginCount() <=4) {
-            member.getFailLoginCount();
-        }
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomApiException(LG_MEMBER_ID_PW_INVALID.getStatus(),LG_MEMBER_ID_PW_INVALID.getMessage()));
+
+        member.increaseFailLoginCount(); // 도메인 메서드 호출
     }
 
     public void memberLgnFailInit(Long id) {
-        memberRepository.findById(id).orElseThrow(() -> new CustomApiException(LoginErrorCode.LG_MEMBER_ID_PW_INVALID.getMessage())).getFailLoginCount();
+        memberRepository.findById(id).orElseThrow(() -> new CustomApiException(LG_MEMBER_ID_PW_INVALID.getStatus(),LG_MEMBER_ID_PW_INVALID.getMessage())).getFailLoginCount();
     }
 }

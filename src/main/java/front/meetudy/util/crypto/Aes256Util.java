@@ -1,8 +1,10 @@
 package front.meetudy.util.crypto;
 
 
+import front.meetudy.exception.CustomApiException;
+import front.meetudy.exception.crypto.CryptoErrorCode;
+import front.meetudy.exception.login.LoginErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
@@ -10,6 +12,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 
+import static front.meetudy.exception.crypto.CryptoErrorCode.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Component
@@ -35,8 +38,7 @@ public class Aes256Util {
             byte[] encrypted = cipher.doFinal(text.getBytes(UTF_8));
             return Base64.getEncoder().encodeToString(encrypted);
         } catch (Exception e) {
-            throw new IllegalArgumentException(); // 임시 방편
-//            throw new CustomApiException(ErrorCode.LG_ENCRYPTION_ERROR.getMessage());
+            throw new CustomApiException(ENCRYPTION_FAILED.getHttpStatus(),ENCRYPTION_FAILED.getMessage());
         }
     }
 
@@ -58,8 +60,7 @@ public class Aes256Util {
             byte[] decrypted = cipher.doFinal(decodedBytes);
             return new String(decrypted, UTF_8);
         } catch (Exception e){
-            throw new IllegalArgumentException(); // 임시 방편
-//            throw new CustomApiException(ErrorCode.LG_DECODE_ERROR.getMessage());
+            throw new CustomApiException(DECRYPTION_FAILED.getHttpStatus(),DECRYPTION_FAILED.getMessage());
         }
     }
 

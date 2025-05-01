@@ -1,12 +1,12 @@
 package front.meetudy.oauth.provider;
 
-import front.meetudy.constant.member.MemberProviderType;
+import front.meetudy.constant.member.MemberProviderTypeEnum;
 
 public interface OAuth2UserInfo {
 
     String getProviderId();
 
-    MemberProviderType getProvider();
+    MemberProviderTypeEnum getProvider();
 
     String getEmail();
 

@@ -1,8 +1,15 @@
 package front.meetudy.exception;
 
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
+@Getter
 public class CustomApiException extends RuntimeException{
 
-    public CustomApiException(String message) {
+    private final HttpStatus status;
+
+    public CustomApiException(HttpStatus status, String message) {
         super(message);
+        this.status = status;
     }
 }

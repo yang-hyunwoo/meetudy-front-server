@@ -7,6 +7,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import front.meetudy.auth.LoginUser;
 import front.meetudy.constant.member.MemberEnum;
+import front.meetudy.constant.security.CookieNameEnum;
 import front.meetudy.domain.member.Member;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.property.JwtProperty;
@@ -14,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
-
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -22,41 +22,56 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.UUID;
 
+import static front.meetudy.constant.security.CookieNameEnum.*;
+import static front.meetudy.constant.security.TokenErrorCodeEnum.*;
 import static java.nio.charset.StandardCharsets.*;
+import static org.springframework.http.HttpStatus.*;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class JwtProcess {
 
-    private static final String TOKEN_PREFIX = JwtProperty.getTokenPrefix();
     private static final String SUBJECT = "meetudy-study";
     private static final String CLAIM_ID = "id";
     private static final String CLAIM_ROLE = "role";
-    private static final String CLAIM_REFRESH = "refreshToken";
 
-    //토큰 생성
+    private  final JwtProperty jwtProperty;
+
+    /**
+     * 액세스 토큰 생성
+     * @param loginUser
+     * @return
+     */
     public String createAccessToken(LoginUser loginUser) {
 
-        return TOKEN_PREFIX + JWT.create()
+        return jwtProperty.getTokenPrefix() + JWT.create()
                 .withSubject(SUBJECT)
-                .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperty.getExpirationTime()))
+                .withExpiresAt(new Date(System.currentTimeMillis() + jwtProperty.getExpirationTime()))
                 .withClaim(CLAIM_ID, loginUser.getMember().getId().toString())
                 .withClaim(CLAIM_ROLE, loginUser.getMember().getRole().name())
                 .sign(algorithm());
     }
 
-    //refresh 토큰 생성
+    /**
+     * refresh 토큰 생성
+     * @param loginUser
+     * @return
+     */
     public String createRefreshToken(LoginUser loginUser) {
-        String refreshUuid = UUID.randomUUID().toString();
-        return TOKEN_PREFIX + JWT.create()
+        return jwtProperty.getTokenPrefix() + JWT.create()
                 .withSubject(SUBJECT)
-                .withExpiresAt(new Date(System.currentTimeMillis() +JwtProperty.getExpirationTime()* 20L))
+                .withExpiresAt(new Date(System.currentTimeMillis() +jwtProperty.getExpirationTime()* 20L))
                 .withClaim(CLAIM_ID, loginUser.getMember().getId().toString())
-                .withClaim("refreshToken", refreshUuid)
+                .withClaim(refreshToken.getValue(), UUID.randomUUID().toString())
                 .sign(algorithm());
     }
 
-    //토큰 검증 (return 되는 LoginUser 객체를 강제로 시큐리티 세션에 직접 주입)
+    /**
+     * 액세스 토큰 검증 (return 되는 LoginUser 객체를 강제로 시큐리티 세션에 직접 주입)
+     * @param token
+     * @return
+     */
     public LoginUser verifyAccessToken(String token)  {
         try {
             DecodedJWT decodedJWT = JWT.require(algorithm()).build().verify(token);
@@ -65,21 +80,26 @@ public class JwtProcess {
                     .role(MemberEnum.valueOf(decodedJWT.getClaim(CLAIM_ROLE).asString())).build();
             return new LoginUser(member);
         } catch (JWTVerificationException e) {
-            throw new CustomApiException("액세스 토큰 검증 실패: " + e.getMessage());
+            throw new CustomApiException(UNAUTHORIZED,SC_ACCESS_TOKEN_INVALID.getValue());
         }
     }
 
+    /**
+     * 리프레시 토큰 검증
+     * @param token
+     * @return
+     */
     public Long verifyRefreshToken(String token) {
         try {
             DecodedJWT decodedJWT = JWT.require(algorithm()).build().verify(token);
-            String refreshUuid = decodedJWT.getClaim(CLAIM_REFRESH).asString();
 
             return Long.parseLong(decodedJWT.getClaim(CLAIM_ID).asString());
         } catch (JWTVerificationException e) {
-            throw new CustomApiException("리프레시 토큰 검증 실패: " + e.getMessage());
+            throw new CustomApiException(UNAUTHORIZED,SC_REFRESH_TOKEN_INVALID.getValue());
         }
     }
 
+    //
     public boolean verifyExpired(String token) {
         try {
             DecodedJWT decodedJWT = JWT.require(algorithm()).build().verify(token);
@@ -92,8 +112,8 @@ public class JwtProcess {
         }
     }
 
-    public ResponseCookie createJwtCookie(String accessToken , String cookieName) {
-        return ResponseCookie.from(cookieName, removeTokenPrefix(accessToken))
+    public ResponseCookie createJwtCookie(String accessToken , CookieNameEnum cookieName) {
+        return ResponseCookie.from(cookieName.getValue(), removeTokenPrefix(accessToken))
                 .maxAge(7 * 24 * 60 * 60)
 //                    .httpOnly(true)
 //                    .secure(true)
@@ -102,8 +122,8 @@ public class JwtProcess {
                 .build();
     }
 
-    public ResponseCookie createPlainCookie(String cookieValue , String cookieName) {
-        return ResponseCookie.from(cookieName, cookieValue)
+    public ResponseCookie createPlainCookie(String cookieValue , CookieNameEnum cookieName) {
+        return ResponseCookie.from(cookieName.getValue(), cookieValue)
                 .maxAge(7 * 24 * 60 * 60)
 //                    .httpOnly(true)
 //                    .secure(true)
@@ -117,15 +137,15 @@ public class JwtProcess {
     }
 
 
-    private static Algorithm algorithm() {
-        return Algorithm.HMAC512(returnByte(JwtProperty.getSecretKey()));
+    private Algorithm algorithm() {
+        return Algorithm.HMAC512(jwtProperty.getSecretKey().getBytes(StandardCharsets.UTF_8));
     }
 
-    private static String removeTokenPrefix(String token) {
-        if (token != null && token.startsWith(TOKEN_PREFIX)) {
-            return token.substring(TOKEN_PREFIX.length()).trim();
+    private String removeTokenPrefix(String token) {
+        if (token != null && token.startsWith(jwtProperty.getTokenPrefix())) {
+            return token.substring(jwtProperty.getTokenPrefix().length()).trim();
         }
-        throw new CustomApiException("유효하지 않은 토큰 형식입니다.");
+        throw new CustomApiException(UNAUTHORIZED,SC_INVALID_TOKEN_FORMAT.getValue());
     }
 
 }

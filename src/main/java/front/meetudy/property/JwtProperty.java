@@ -1,38 +1,49 @@
 package front.meetudy.property;
 
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
-@Component
-
+@Getter
+@Setter
+@Configuration
+@ConfigurationProperties(prefix = "jwt")
 public class JwtProperty {
     @Getter
-    private static String secretKey;
+    private  String secretKey;
     @Getter
-    private static int expirationTime;
+    private int expirationTime;
     @Getter
-    private static String tokenPrefix;
+    private String tokenPrefix;
     @Getter
-    private static String header;
+    private String header;
 
-    @Value("${jwt.secret-key}")
-    public void setSecretKey(String secretKey) {
-        this.secretKey = secretKey;
-    }
+    @Getter
+    private boolean useCookie; // true: 쿠키 사용 / false: 헤더 사용
 
-    @Value("${jwt.expiration-time}")
-    public void setExpirationTime(int date) {
-        expirationTime = date;
-    }
-
-    @Value("${jwt.token-prefix}")
-    public void setTokenPrefix(String prefix) {
-        tokenPrefix = prefix;
-    }
-
-    @Value("${jwt.header}")
-    public void setHeader(String header) {
-        this.header = header;
-    }
+//    @Value("${jwt.secret-key}")
+//    public void setSecretKey(String secretKey) {
+//        this.secretKey = secretKey;
+//    }
+//
+//    @Value("${jwt.expiration-time}")
+//    public void setExpirationTime(int date) {
+//        expirationTime = date;
+//    }
+//
+//    @Value("${jwt.token-prefix}")
+//    public void setTokenPrefix(String prefix) {
+//        tokenPrefix = prefix;
+//    }
+//
+//    @Value("${jwt.header}")
+//    public void setHeader(String header) {
+//        this.header = header;
+//    }
+//
+//    @Value("${jwt.use-cookie}")
+//    public void setUseCookie(boolean useCookie) {
+//        this.useCookie = useCookie;
+//    }
 }

@@ -1,7 +1,9 @@
 package front.meetudy.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import front.meetudy.constant.security.CookieNameEnum;
 import front.meetudy.exception.login.LoginErrorCode;
+import front.meetudy.property.JwtProperty;
 import front.meetudy.util.response.Response;
 import front.meetudy.util.response.ResponseBuilder;
 import jakarta.servlet.ServletException;
@@ -15,10 +17,16 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 
 import java.io.IOException;
 
+import static front.meetudy.constant.security.CookieNameEnum.*;
+
 
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
+    private final JwtProperty jwtProperty;
 
-    private boolean localCookie = false; //true : 로컬  false : 쿠키
+    public CustomAuthenticationEntryPoint(JwtProperty jwtProperty) {
+        this.jwtProperty = jwtProperty;
+    }
+
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         //인증이 필요 없는 url 에서는 작동 하지 않는다.
@@ -26,23 +34,23 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         if(exception==null) {
             exception = LoginErrorCode.LG_FIRST_LOGIN_ING.getMessage();
         }
-            if (localCookie) {
+        if (jwtProperty.isUseCookie()) {
 
-            } else {
-                //쿠키 소멸
-                Cookie[] cookies = request.getCookies();
-                if (cookies != null) {
-                    for (Cookie cookie : cookies) {
-                        if (cookie.getName().equals("access") || cookie.getName().equals("refresh")||cookie.getName().equals("isAutoLogin")) {
-                            ResponseCookie build = ResponseCookie.from(cookie.getName(), "")
-                                    .maxAge(0)
-                                    .path("/")
-                                    .build();
-                            response.addHeader("Set-cookie", build.toString());
-                        }
+        } else {
+            //쿠키 소멸
+            Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if (cookie.getName().equals(access.getValue()) || cookie.getName().equals(refresh.getValue())||cookie.getName().equals(isAutoLogin.getValue())) {
+                        ResponseCookie build = ResponseCookie.from(cookie.getName(), "")
+                                .maxAge(0)
+                                .path("/")
+                                .build();
+                        response.addHeader("Set-Cookie", build.toString());
                     }
                 }
             }
+        }
         responseWrite(response,exception);
     }
 
@@ -52,7 +60,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         String responseBody = om.writeValueAsString(error);
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");
-        response.setStatus(401);
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.getWriter().println(responseBody);
     }
 }

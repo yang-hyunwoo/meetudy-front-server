@@ -12,7 +12,9 @@ import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-
+/**
+ * 패스워드 인코딩
+ */
 @Configuration
 @RequiredArgsConstructor
 public class PasswordConfig {
