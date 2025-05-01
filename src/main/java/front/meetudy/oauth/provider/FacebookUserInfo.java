@@ -1,6 +1,10 @@
 package front.meetudy.oauth.provider;
 
+import front.meetudy.constant.member.MemberProviderTypeEnum;
+
 import java.util.Map;
+
+import static front.meetudy.constant.member.MemberProviderTypeEnum.*;
 
 
 public class FacebookUserInfo implements OAuth2UserInfo{
@@ -17,8 +21,8 @@ public class FacebookUserInfo implements OAuth2UserInfo{
     }
 
     @Override
-    public String getProvider() {
-        return "facebook";
+    public MemberProviderTypeEnum getProvider() {
+        return FACEBOOK;
     }
 
     @Override

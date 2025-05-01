@@ -31,8 +31,8 @@ public class Response<T> {
 
     private static final String ERROR_CODE = "ERROR";
 
-    public static <T> ResponseEntity<Response<T>> error(String code, HttpStatus status,String message, T messageOrData) {
-        return ResponseEntity.status(status).body(new Response<>(code, status.value(), message, messageOrData));
+    public static <T> ResponseEntity<Response<T>> error(HttpStatus status,String message, T messageOrData) {
+        return ResponseEntity.status(status).body(new Response<>("ERROR", status.value(), message, messageOrData));
     }
 
     public static <T> ResponseEntity<Response<T>> ok(String message, T data) {
@@ -75,7 +75,6 @@ public class Response<T> {
         return new Response<>(SUCCESS_CODE, HttpStatus.OK.value(), message, data);
     }
 
-
     @Override
     public String toString() {
         return "Response{" +
@@ -85,5 +84,4 @@ public class Response<T> {
                 ", data=" + data +
                 '}';
     }
-
 }

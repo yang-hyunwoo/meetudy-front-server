@@ -26,7 +26,7 @@ public class CorsConfig {
         //쿠키/헤더로 인증정보 전송 허용
         corsConfiguration.setAllowCredentials(true);
         //프론트가 응답 헤더(Access, Refresh Token)를 읽을 수 있도록 설정
-        corsConfiguration.setExposedHeaders(List.of("Authorization", "Refresh-Token"));
+        corsConfiguration.setExposedHeaders(List.of("Authorization", "refreshToken"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);

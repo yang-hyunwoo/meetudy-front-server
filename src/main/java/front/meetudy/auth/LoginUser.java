@@ -5,13 +5,11 @@ import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-
 
 @Getter
 public class LoginUser implements UserDetails , OAuth2User {
@@ -19,12 +17,19 @@ public class LoginUser implements UserDetails , OAuth2User {
     private final Member member;
     private Map<String , Object> attributes;
 
-    //일반 로그인
+    /**
+     * 일반 로그인
+     * @param member
+     */
     public LoginUser(Member member) {
         this.member = member;
     }
 
-    //OAuth 로그인
+    /**
+     * OAuth 로그인
+     * @param member
+     * @param attributes
+     */
     public LoginUser(Member member, Map<String, Object> attributes) {
         this.member = member;
         this.attributes = attributes;
@@ -60,7 +65,6 @@ public class LoginUser implements UserDetails , OAuth2User {
     @Override
     public boolean isAccountNonExpired() {
         return true;
-//        return ChronoUnit.DAYS.between(member.getLastAccessDate().toLocalDate(),LocalDate.now()) <=365;
     }
 
     /**

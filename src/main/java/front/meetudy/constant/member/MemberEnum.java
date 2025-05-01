@@ -9,6 +9,6 @@ public enum MemberEnum {
 
     ADMIN("관리자") , USER("사용자");
 
-    private String value;
+    private final String value;
 
 }

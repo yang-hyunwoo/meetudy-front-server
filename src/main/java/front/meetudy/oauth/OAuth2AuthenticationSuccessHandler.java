@@ -12,6 +12,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 
+import static front.meetudy.constant.security.CookieNameEnum.*;
 
 
 @Component
@@ -39,9 +40,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
 
 
-        response.addHeader("Set-cookie", jwtProcess.createJwtCookie(accessToken, "access").toString());
-        response.addHeader("Set-cookie", jwtProcess.createJwtCookie(refreshToken, "access_refresh").toString());
-        response.addHeader("Set-cookie", jwtProcess.createPlainCookie("true", "isAutoLogin").toString());
+        response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(accessToken, access).toString());
+        response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(refreshToken, refresh).toString());
+        response.addHeader("Set-Cookie", jwtProcess.createPlainCookie("true", isAutoLogin).toString());
 
         clearAuthenticationAttributes(request, response);
         getRedirectStrategy().sendRedirect(request, response, targetUrl);

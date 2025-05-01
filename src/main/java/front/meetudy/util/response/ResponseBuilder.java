@@ -9,5 +9,4 @@ public class ResponseBuilder {
     public static Response<String> buildError(int httpCode, String message) {
         return Response.error(httpCode, message);
     }
-
 }

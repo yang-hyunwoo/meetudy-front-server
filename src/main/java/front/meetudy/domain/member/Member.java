@@ -1,17 +1,17 @@
 package front.meetudy.domain.member;
 
 import front.meetudy.constant.member.MemberEnum;
-import front.meetudy.constant.member.MemberProviderType;
-import jakarta.annotation.Nullable;
+import front.meetudy.constant.member.MemberProviderTypeEnum;
+import front.meetudy.exception.CustomApiException;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+
+import static front.meetudy.exception.login.LoginErrorCode.LG_PASSWORD_WRONG_LOCKED;
 
 @NoArgsConstructor  //스프링이 User 객체 생성시 빈 생성자로 new를 함
 @Getter
@@ -49,7 +49,7 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberEnum role;
 
-    private MemberProviderType provider;
+    private MemberProviderTypeEnum provider;
 
     private String providerId;
 
@@ -69,7 +69,7 @@ public class Member {
                   String password,
                   String email,
                   MemberEnum role,
-                  MemberProviderType provider,
+                  MemberProviderTypeEnum provider,
                   String providerId,
                   boolean isUsed,
                   LocalDateTime lastAccessDate,
@@ -83,6 +83,12 @@ public class Member {
         this.providerId = providerId;
     }
 
-
+    public void increaseFailLoginCount() {
+        if (this.failLoginCount < 5) {
+            this.failLoginCount++;
+        } else {
+            throw new CustomApiException(LG_PASSWORD_WRONG_LOCKED.getStatus(),LG_PASSWORD_WRONG_LOCKED.getMessage());
+        }
+    }
 }
 

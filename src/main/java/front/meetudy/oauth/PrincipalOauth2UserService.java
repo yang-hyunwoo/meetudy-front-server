@@ -4,7 +4,7 @@ package front.meetudy.oauth;
 
 import front.meetudy.auth.LoginUser;
 import front.meetudy.constant.member.MemberEnum;
-import front.meetudy.constant.member.MemberProviderType;
+import front.meetudy.constant.member.MemberProviderTypeEnum;
 import front.meetudy.domain.member.Member;
 import front.meetudy.oauth.provider.*;
 import front.meetudy.repository.member.MemberRepository;
@@ -27,7 +27,12 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
     private final MemberRepository memberRepository;
 
 
-    //함수 종료시 @AuthenticationPrincipal 어노테이션이 만들어진다.
+    /**
+     * 함수 종료시 @AuthenticationPrincipal 어노테이션이 만들어진다.
+     * @param userRequest
+     * @return
+     * @throws OAuth2AuthenticationException
+     */
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         System.out.println("getClientRegistration :" +userRequest.getClientRegistration()); //registrationId로 어떤 OAuth로 로그인 했는지 확인 가능
@@ -57,7 +62,7 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
             System.out.println("xx");
 
         }
-        MemberProviderType providerType = oAuth2UserInfo.getProvider(); //google 계정
+        MemberProviderTypeEnum providerType = oAuth2UserInfo.getProvider(); //google 계정
         String providerId = oAuth2UserInfo.getProviderId();
 //        String username = provider + "_" + providerId;  //google_sub
         String username = oAuth2UserInfo.getName();  //google_sub

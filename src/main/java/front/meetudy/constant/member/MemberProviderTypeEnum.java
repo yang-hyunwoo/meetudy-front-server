@@ -5,12 +5,13 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum MemberProviderType {
+public enum MemberProviderTypeEnum {
     NORMAL("NORMAL"),
     NAVER("NAVER"),
     KAKAO("KAKAO"),
-    GOOGLE("GOOGLE")
+    GOOGLE("GOOGLE"),
+    FACEBOOK("FACEBOOK")
     ;
 
-    private String value;
+    private final String value;
 }
