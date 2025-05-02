@@ -19,8 +19,6 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
 
         String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:4000/errorLogin")
                 .build().toUriString();
-        System.out.println("e::::" + exception);
-
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 }

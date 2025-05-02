@@ -7,7 +7,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import front.meetudy.auth.LoginUser;
 import front.meetudy.constant.member.MemberEnum;
-import front.meetudy.constant.security.CookieNameEnum;
+import front.meetudy.constant.security.CookieEnum;
 import front.meetudy.domain.member.Member;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.property.JwtProperty;
@@ -16,13 +16,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.UUID;
 
-import static front.meetudy.constant.security.CookieNameEnum.*;
+import static front.meetudy.constant.security.CookieEnum.*;
 import static front.meetudy.constant.security.TokenErrorCodeEnum.*;
 import static java.nio.charset.StandardCharsets.*;
 import static org.springframework.http.HttpStatus.*;
@@ -36,7 +37,7 @@ public class JwtProcess {
     private static final String CLAIM_ID = "id";
     private static final String CLAIM_ROLE = "role";
 
-    private  final JwtProperty jwtProperty;
+    private final JwtProperty jwtProperty;
 
     /**
      * 액세스 토큰 생성
@@ -103,16 +104,16 @@ public class JwtProcess {
     public boolean verifyExpired(String token) {
         try {
             DecodedJWT decodedJWT = JWT.require(algorithm()).build().verify(token);
-            LocalDateTime now = LocalDateTime.now();
             LocalDateTime refreshExpired = decodedJWT.getExpiresAt().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-            return ChronoUnit.DAYS.between(now, refreshExpired) <= 1 && ChronoUnit.DAYS.between(now, refreshExpired) >= 0;
+            Duration duration = Duration.between(LocalDateTime.now(), refreshExpired);
+            return duration.toHours() <= 24 && duration.toHours() >= 0;
         } catch (JWTVerificationException e) {
             log.info("토큰 만료 검증 실패: "+e.getMessage());
             return false;
         }
     }
 
-    public ResponseCookie createJwtCookie(String accessToken , CookieNameEnum cookieName) {
+    public ResponseCookie createJwtCookie(String accessToken , CookieEnum cookieName) {
         return ResponseCookie.from(cookieName.getValue(), removeTokenPrefix(accessToken))
                 .maxAge(7 * 24 * 60 * 60)
 //                    .httpOnly(true)
@@ -122,7 +123,7 @@ public class JwtProcess {
                 .build();
     }
 
-    public ResponseCookie createPlainCookie(String cookieValue , CookieNameEnum cookieName) {
+    public ResponseCookie createPlainCookie(String cookieValue , CookieEnum cookieName) {
         return ResponseCookie.from(cookieName.getValue(), cookieValue)
                 .maxAge(7 * 24 * 60 * 60)
 //                    .httpOnly(true)

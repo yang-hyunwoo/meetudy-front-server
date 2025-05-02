@@ -3,6 +3,7 @@ package front.meetudy.config.jwt.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import front.meetudy.auth.LoginUser;
 import front.meetudy.config.jwt.JwtProcess;
+import front.meetudy.constant.security.CookieEnum;
 import front.meetudy.dto.request.member.LoginReqDto;
 import front.meetudy.dto.response.member.LoginResDto;
 import front.meetudy.exception.login.LoginErrorCode;
@@ -19,7 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import java.io.IOException;
-import static front.meetudy.constant.security.CookieNameEnum.*;
+import static front.meetudy.constant.security.CookieEnum.*;
 
 @Slf4j
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -83,14 +84,13 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         LoginResDto loginRespDto = new LoginResDto(loginUser.getMember());
 
         memberService.memberLgnFailInit(loginUser.getMember().getId()); // 로그인 실패 횟수 초기화
-
         if(jwtProperty.isUseCookie()) {
-            response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(accessToken, access).toString());
-            response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(refreshToken, refresh).toString());
+            response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(accessToken, CookieEnum.accessToken).toString());
+            response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(refreshToken, CookieEnum.refreshToken).toString());
             response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(loginReqDto.getChk(), isAutoLogin).toString());
         } else {
             response.addHeader(jwtProperty.getHeader(), accessToken);
-            response.addHeader(refresh.getValue(), refreshToken);
+            response.addHeader(CookieEnum.refreshToken.getValue(), refreshToken);
             response.addHeader(isAutoLogin.getValue(), loginReqDto.getChk());
         }
 

@@ -1,7 +1,6 @@
 package front.meetudy.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import front.meetudy.constant.security.CookieNameEnum;
 import front.meetudy.exception.login.LoginErrorCode;
 import front.meetudy.property.JwtProperty;
 import front.meetudy.util.response.Response;
@@ -17,7 +16,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 
 import java.io.IOException;
 
-import static front.meetudy.constant.security.CookieNameEnum.*;
+import static front.meetudy.constant.security.CookieEnum.*;
 
 
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
@@ -41,7 +40,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
             Cookie[] cookies = request.getCookies();
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
-                    if (cookie.getName().equals(access.getValue()) || cookie.getName().equals(refresh.getValue())||cookie.getName().equals(isAutoLogin.getValue())) {
+                    if (cookie.getName().equals(accessToken.getValue()) || cookie.getName().equals(refreshToken.getValue())||cookie.getName().equals(isAutoLogin.getValue())) {
                         ResponseCookie build = ResponseCookie.from(cookie.getName(), "")
                                 .maxAge(0)
                                 .path("/")

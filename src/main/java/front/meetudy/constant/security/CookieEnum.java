@@ -5,12 +5,12 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum CookieNameEnum {
+public enum CookieEnum {
 
-    access("access-token") ,
-    refreshToken("refreshToken"),
-    isAutoLogin("isAutoLogin"),
-    refresh("refresh");
+    accessToken("access-token") ,
+    refreshToken("refresh-token"),
+    isAutoLogin("isAutoLogin")
+    ;
 
     private final String value;
 
