@@ -41,6 +41,15 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
+    @Bean
+    public JwtAuthorizationFilter jwtAuthorizationFilter(AuthenticationManager authenticationManager) {
+        return new JwtAuthorizationFilter(authenticationManager, memberRepository, jwtProcess, jwtProperty);
+    }
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter(AuthenticationManager authenticationManager) {
+        return new JwtAuthenticationFilter(authenticationManager, memberService, jwtProcess, jwtProperty);
+    }
 
     /**
      * 운영 환경
@@ -82,9 +91,8 @@ public class SecurityConfig {
                         .successHandler(oAuth2AuthenticationSuccessHandler)
                         .failureHandler(oAuth2AuthenticationFailureHandler)
                 )
-                .addFilter(new JwtAuthenticationFilter(authenticationManager, memberService, jwtProcess, jwtProperty))
-                .addFilterBefore(new JwtAuthorizationFilter(authenticationManager, memberRepository, jwtProcess, jwtProperty), UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(handler -> handler.authenticationEntryPoint(new CustomAuthenticationEntryPoint(jwtProperty)))
+                .addFilterBefore(jwtAuthorizationFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class)
+                .addFilter(jwtAuthenticationFilter(authenticationManager))                .exceptionHandling(handler -> handler.authenticationEntryPoint(new CustomAuthenticationEntryPoint(jwtProperty)))
                 .exceptionHandling(handler -> handler.accessDeniedHandler(new CustomAccessDeniedHandler()))
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/api/user/**").authenticated()

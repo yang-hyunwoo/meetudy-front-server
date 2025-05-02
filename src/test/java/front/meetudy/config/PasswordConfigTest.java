@@ -6,7 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.assertj.core.api.Assertions.*;
 
-class PasswordConfigUnitTest {
+class PasswordConfigTest {
 
     PasswordConfig passwordConfig = new PasswordConfig("MY_TEST_SECRET");
 

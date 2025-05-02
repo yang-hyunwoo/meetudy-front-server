@@ -2,6 +2,7 @@ package front.meetudy.oauth;
 
 import front.meetudy.auth.LoginUser;
 import front.meetudy.config.jwt.JwtProcess;
+import front.meetudy.constant.security.CookieEnum;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +13,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 
-import static front.meetudy.constant.security.CookieNameEnum.*;
+import static front.meetudy.constant.security.CookieEnum.*;
 
 
 @Component
@@ -40,8 +41,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
 
 
-        response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(accessToken, access).toString());
-        response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(refreshToken, refresh).toString());
+        response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(accessToken, CookieEnum.accessToken).toString());
+        response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(refreshToken, CookieEnum.refreshToken).toString());
         response.addHeader("Set-Cookie", jwtProcess.createPlainCookie("true", isAutoLogin).toString());
 
         clearAuthenticationAttributes(request, response);

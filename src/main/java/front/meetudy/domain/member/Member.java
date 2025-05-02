@@ -49,6 +49,7 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberEnum role;
 
+    @Enumerated(EnumType.STRING)
     private MemberProviderTypeEnum provider;
 
     private String providerId;

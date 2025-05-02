@@ -1,10 +1,11 @@
 package front.meetudy.dto.request.member;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class LoginReqDto {
 
     private String email;
