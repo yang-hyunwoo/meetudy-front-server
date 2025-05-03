@@ -73,8 +73,12 @@ public class AspectAdvice {
     private LogContext extractContext(JoinPoint joinPoint) {
         MethodSignature sig = (MethodSignature) joinPoint.getSignature();
         HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+
+        AspectUUID aspectUUID = traceIdHolder.get();
+        String uuid = (aspectUUID != null) ? aspectUUID.getUUID() : "UNKNOWN";
+
         return new LogContext(
-                traceIdHolder.get().getUUID(),
+                uuid,
                 req.getMethod(),
                 sig.getDeclaringType().getSimpleName() + "." + sig.getMethod().getName()
         );

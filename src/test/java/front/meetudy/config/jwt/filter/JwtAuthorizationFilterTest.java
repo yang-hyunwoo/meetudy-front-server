@@ -62,7 +62,7 @@ public class JwtAuthorizationFilterTest {
     @DisplayName("유효한 토큰으로 요청하면 200")
     void validToken_returns200() throws Exception {
         // given
-        Member member = Member.builder().id(1L).email("test@example.com").role(MemberEnum.USER).build();
+        Member member = Member.partialOf(1L, MemberEnum.USER);
         LoginUser loginUser = new LoginUser(member);
 
         when(jwtProperty.isUseCookie()).thenReturn(false);
@@ -108,7 +108,7 @@ public class JwtAuthorizationFilterTest {
     @Test
     @DisplayName("access token 만료 + refresh token 유효 → 재발급")
     void expiredAccessToken_validRefreshToken_renewed() throws Exception {
-        Member member = Member.builder().id(1L).email("test@example.com").role(MemberEnum.USER).build();
+        Member member = Member.partialOf(1L, MemberEnum.USER);
         LoginUser loginUser = new LoginUser(member);
 
         // 실제 JWT 문자열을 만들어서 사용
@@ -181,7 +181,7 @@ public class JwtAuthorizationFilterTest {
     @DisplayName("[쿠키 방식] access token 만료 + refresh token 유효 → 재발급")
     void expiredAccessToken_validRefreshToken_cookieBased_renewed() throws Exception {
         // given
-        Member member = Member.builder().id(1L).email("test@example.com").role(MemberEnum.USER).build();
+        Member member = Member.partialOf(1L, MemberEnum.USER);
         LoginUser loginUser = new LoginUser(member);
 
         String expiredAccessToken = generateToken(-1000 * 60); // 만료된 access token
@@ -252,7 +252,7 @@ public class JwtAuthorizationFilterTest {
     @DisplayName("[쿠키 방식] access token 만료 + refresh token 유효 → 재발급 + Set-Cookie 헤더 확인")
     void expiredAccessToken_validRefreshToken_cookieBased_renewed_withSetCookie() throws Exception {
         // given
-        Member member = Member.builder().id(1L).email("test@example.com").role(MemberEnum.USER).build();
+        Member member = Member.partialOf(1L, MemberEnum.USER);
         LoginUser loginUser = new LoginUser(member);
 
         String expiredAccessToken = generateToken(-1000 * 60);

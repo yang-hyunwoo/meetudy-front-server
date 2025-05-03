@@ -3,7 +3,6 @@ package front.meetudy.oauth;
 
 
 import front.meetudy.auth.LoginUser;
-import front.meetudy.constant.member.MemberEnum;
 import front.meetudy.constant.member.MemberProviderTypeEnum;
 import front.meetudy.domain.member.Member;
 import front.meetudy.oauth.provider.*;
@@ -70,23 +69,22 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
         String password = encoder.encode("oauth2-user-" + UUID.randomUUID());
         String email = oAuth2UserInfo.getEmail();
 
-        Member memberEntity;
+        Member oauthMember;
         if(memberRepository.findByEmailAndProvider(email , providerType).isPresent()) {
             //존재한다면 TODO: 탈퇴여부 체크 해야 함
-            memberEntity = memberRepository.findByEmailAndProvider(email, providerType).orElseThrow();
+            oauthMember = memberRepository.findByEmailAndProvider(email, providerType).orElseThrow();
         } else {
-            memberEntity = Member.builder()
-                    .name(username)
-                    .password(password)
-                    .email(email)
-                    .role(MemberEnum.USER)
-                    .provider(providerType)
-                    .providerId(providerId)
-                    .build();
+            oauthMember = Member.createOauthMember(
+                    email
+                    , username
+                    , username
+                    , password
+                    , providerType
+                    , providerId);
 
-            memberRepository.save(memberEntity);
+            memberRepository.save(oauthMember);
         }
 
-        return new LoginUser(memberEntity, oAuth2User.getAttributes());
+        return new LoginUser(oauthMember, oAuth2User.getAttributes());
     }
 }
