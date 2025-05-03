@@ -28,7 +28,7 @@ public class JwtProcessTest {
     @Test
     @DisplayName("access token 생성 및 검증 성공")
     void createAndVerifyAccessToken_success() {
-        Member member = Member.builder().id(1L).role(MemberEnum.USER).build();
+        Member member = Member.partialOf(1L, MemberEnum.USER);
         LoginUser user = new LoginUser(member);
 
         String token = jwtProcess.createAccessToken(user);
@@ -41,7 +41,7 @@ public class JwtProcessTest {
     @Test
     @DisplayName("refresh token 생성 및 검증 성공")
     void createAndVerifyRefreshToken_success() {
-        Member member = Member.builder().id(1L).role(MemberEnum.USER).build();
+        Member member = Member.partialOf(1L, MemberEnum.USER);
         LoginUser user = new LoginUser(member);
 
         String refreshToken = jwtProcess.createRefreshToken(user);
@@ -56,7 +56,7 @@ public class JwtProcessTest {
         jwtProperty.setExpirationTime(60 * 1000); // 1분
         jwtProcess = new JwtProcess(jwtProperty);
 
-        Member member = Member.builder().id(1L).role(MemberEnum.USER).build();
+        Member member = Member.partialOf(1L, MemberEnum.USER);
         LoginUser user = new LoginUser(member);
         String token = jwtProcess.createAccessToken(user);
 
@@ -70,7 +70,7 @@ public class JwtProcessTest {
         jwtProperty.setExpirationTime(1000 * 60 * 60 * 48); // 48시간
         jwtProcess = new JwtProcess(jwtProperty);
 
-        Member member = Member.builder().id(1L).role(MemberEnum.USER).build();
+        Member member = Member.partialOf(1L, MemberEnum.USER);
         LoginUser user = new LoginUser(member);
         String token = jwtProcess.createAccessToken(user);
 

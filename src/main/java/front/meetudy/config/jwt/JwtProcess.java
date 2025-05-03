@@ -76,9 +76,10 @@ public class JwtProcess {
     public LoginUser verifyAccessToken(String token)  {
         try {
             DecodedJWT decodedJWT = JWT.require(algorithm()).build().verify(token);
-            Member member = Member.builder()
-                    .id(Long.parseLong(decodedJWT.getClaim(CLAIM_ID).asString()))
-                    .role(MemberEnum.valueOf(decodedJWT.getClaim(CLAIM_ROLE).asString())).build();
+            Member member = Member.partialOf(
+                            Long.parseLong(decodedJWT.getClaim(CLAIM_ID).asString()),
+                            MemberEnum.valueOf(decodedJWT.getClaim(CLAIM_ROLE).asString())
+                    );
             return new LoginUser(member);
         } catch (JWTVerificationException e) {
             throw new CustomApiException(UNAUTHORIZED,SC_ACCESS_TOKEN_INVALID.getValue());

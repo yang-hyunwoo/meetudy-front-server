@@ -1,50 +1,94 @@
 package front.meetudy.dto.request.member;
 
-import front.meetudy.constant.member.MemberEnum;
+import front.meetudy.annotation.customannotation.*;
+import front.meetudy.constant.member.MemberProviderTypeEnum;
 import front.meetudy.domain.member.Member;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import static front.meetudy.annotation.ValidationGroups.*;
 
-import java.time.LocalDateTime;
+//TODO: NotBlank를 커스텀 어노테이션에 추가할지는 추후 생각
 
 @Getter
 @Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class JoinMemberReqDto {
 
-    @Pattern(regexp = "^[a-zA-Z0-9]{2,20}$", message = "영문/숫자 2~20자 이내로 작성해 주세요.")
-    @NotEmpty
-    private String name;
-    @NotEmpty
-    @Size(min = 4, max = 20)
-    private String password;
-    @NotEmpty
-    @Pattern(regexp = "^[a-zA-Z0-9]{2,6}@[a-zA-Z0-9]{2,6}\\.[a-zA-Z]{2,3}$",message ="이메일 형식으로 작성해 주세요." )
+    @Schema(description = "프로필이미지ID", example = "1")
+    private Long profileImageId;
+
+    @Schema(description = "이메일", example = "xxx@naver.com")
+    @NotBlank(message = "{email.notBlank}",groups = Step1.class)
+    @Email(groups = Step1.class)
     private String email;
 
-    @NotEmpty
-    @Pattern(regexp = "^[a-zA-Z가-힣]{1,20}$" , message = "영문/한글 1~20자 이내로 작성해 주세요.")
-    private String fullname;
+    @Schema(description = "이름", example = "홍길동")
+    @NotBlank(message = "{name.notBlank}", groups = Step2.class)
+    @KoreanEnglish(min = 1, max = 50, message = "{name.pattern}",messageKey = "name.range", groups = Step2.class)
+    private String name;
+
+    @Schema(description = "닉네임", example = "홍길동")
+    @NotBlank(message = "{nickname.notBlank}", groups = Step3.class)
+    @KoreanEnglish(min = 1, max = 30, message = "{nickname.pattern}",messageKey = "nickname.range", groups = Step3.class)
+    private String nickName;
+
+    @Schema(description = "생년월일", example = "19990101")
+    @NotBlank(message = "{birth.notBlank}",groups = Step4.class)
+
+    @Numeric(message = "{birth.pattern}",
+            messageKey = "birth.range",
+            mid=8,
+            numberEquals = true,
+            groups = Step4.class)
+    private String birth;
+
+    @Schema(description = "휴대폰번호", example = "01011112222")
+    @NotBlank(message = "{phone.notBlank}",groups = Step5.class)
+    @PhoneNumber(groups = Step5.class)
+    private String phoneNumber;
+
+    @Schema(description = "비밀번호", example = "xxx")
+    @NotBlank(message = "{password.notBlank}",groups = Step6.class)
+    @Password(groups = Step6.class)
+    private String password;
+
+    @Schema(description = "이메일동의여부", example = "true")
+    private boolean isEmailAgreed;
+
+    @Schema(description = "소셜타입", example = "NORMAL")
+    private MemberProviderTypeEnum provider;
+
+    @Schema(description = "소셜ID", example = "asdf")
+    private String providerId;
 
     public Member toEntity(PasswordEncoder passwordEncoder) {
-        return Member.builder()
-                .name(name)
-                .password(passwordEncoder.encode(password))
-                .email(email)
-                .role(MemberEnum.USER)
-                .isUsed(true)
-                .pwChgDate(LocalDateTime.now())
-                .build();
+        return Member.createMember(
+                profileImageId,
+                email,
+                name,
+                nickName,
+                birth,
+                phoneNumber,
+                passwordEncoder.encode(password),
+                isEmailAgreed
+        );
     }
 
-
+    @Override
     public String toString() {
-        return "JoinMemberReqDto(username=" + this.getName() +
-                ", email=" + this.getEmail() +
-                ", fullname=" + this.getFullname() +
-                ")";
+        return "JoinMemberReqDto{" +
+                "profileImageId=" + profileImageId +
+                ", email='" + email + '\'' +
+                ", name='" + name + '\'' +
+                ", nickName='" + nickName + '\'' +
+                ", birth='" + birth + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", isEmailAgreed=" + isEmailAgreed +
+                '}';
     }
 }

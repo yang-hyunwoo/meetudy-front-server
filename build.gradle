@@ -59,3 +59,11 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+tasks.withType(ProcessResources).configureEach {
+	filteringCharset = 'UTF-8'
+}

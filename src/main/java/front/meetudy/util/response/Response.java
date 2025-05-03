@@ -31,10 +31,28 @@ public class Response<T> {
 
     private static final String ERROR_CODE = "ERROR";
 
+    /**
+     * 일반적인 에러
+     * @param status
+     * @param message
+     * @param messageOrData
+     * @return
+     * @param <T>
+     */
     public static <T> ResponseEntity<Response<T>> error(HttpStatus status,String message, T messageOrData) {
         return ResponseEntity.status(status).body(new Response<>("ERROR", status.value(), message, messageOrData));
     }
 
+    /**
+     * 변수 유효성 검사 에러
+     * @param status
+     * @param message
+     * @param field
+     * @return
+     */
+    public static ResponseEntity<Response<ValidationErrorResponse>> validationError(HttpStatus status, String message, String field) {
+        return ResponseEntity.status(status).body(new Response<>(ERROR_CODE, status.value(), message, new ValidationErrorResponse(field, message)));
+    }
     public static <T> ResponseEntity<Response<T>> ok(String message, T data) {
         return ResponseEntity.status(HttpStatus.OK).body(successRead(message, data));
     }
@@ -58,6 +76,7 @@ public class Response<T> {
     protected static Response<String> error(int httpCode, String message) {
         return new Response<>(ERROR_CODE, httpCode, message, null);
     }
+
 
     protected static <T> Response<T> successRead(String message, T data) {
         return new Response<>(SUCCESS_CODE, HttpStatus.OK.value(), message, data);
