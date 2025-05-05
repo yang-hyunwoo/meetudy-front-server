@@ -6,6 +6,10 @@ import jakarta.validation.Payload;
 
 import java.lang.annotation.*;
 
+/**
+ * 한글 / 영문 커스텀 어노테이션
+ * @KoreanEnglish(min = 최소 자릿수, max = 최대 자릿수, message = "정규식메시지",messageKey = "범위메시지")
+ */
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = KoreanEnglishValidator.class)

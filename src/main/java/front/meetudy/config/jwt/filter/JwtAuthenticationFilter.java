@@ -3,6 +3,7 @@ package front.meetudy.config.jwt.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import front.meetudy.auth.LoginUser;
 import front.meetudy.config.jwt.JwtProcess;
+import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.constant.security.CookieEnum;
 import front.meetudy.dto.request.member.LoginReqDto;
 import front.meetudy.dto.response.member.LoginResDto;
@@ -20,6 +21,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import java.io.IOException;
+
+import static front.meetudy.constant.error.ErrorEnum.*;
 import static front.meetudy.constant.security.CookieEnum.*;
 
 @Slf4j
@@ -112,7 +115,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         log.warn("로그인 실패: {}", failed.getMessage(), failed);
         LoginReqDto loginReqDto = extractLoginDto(request);
         LoginErrorCode errorCode = LoginErrorResolver.resolve(failed.getCause(), loginReqDto, memberService);
-        CustomResponseUtil.fail(response, errorCode.getMessage(), errorCode.getStatus());
+        CustomResponseUtil.fail(response, errorCode.getMessage(), errorCode.getStatus(), ERR_004);
     }
 
     private LoginReqDto extractLoginDto(HttpServletRequest request) {

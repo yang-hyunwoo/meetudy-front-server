@@ -8,6 +8,11 @@ import org.springframework.context.MessageSource;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
+/**
+ * 숫자 커스텀 어노테이션
+ * 1.정규식
+ * 2.자릿수 (정확한지 / 최소 최대)
+ */
 public class NumericValidator implements ConstraintValidator<Numeric,String> {
     private final Pattern pattern = Pattern.compile("^[0-9]+$");
     private final MessageSource messageSource;

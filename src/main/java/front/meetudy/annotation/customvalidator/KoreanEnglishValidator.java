@@ -9,6 +9,11 @@ import org.springframework.stereotype.Component;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
+/**
+ * 한글 / 영문 커스텀 어노테이션
+ * 1 정규식 검사
+ * 2.자릿수 검사
+ */
 @Component
 public class KoreanEnglishValidator implements ConstraintValidator<KoreanEnglish, String> {
 

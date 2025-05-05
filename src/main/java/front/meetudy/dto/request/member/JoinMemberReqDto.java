@@ -1,5 +1,7 @@
 package front.meetudy.dto.request.member;
 
+import front.meetudy.annotation.ValidationMode;
+import front.meetudy.constant.error.ValidationType;
 import front.meetudy.annotation.customannotation.*;
 import front.meetudy.constant.member.MemberProviderTypeEnum;
 import front.meetudy.domain.member.Member;
@@ -17,6 +19,7 @@ import static front.meetudy.annotation.ValidationGroups.*;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ValidationMode(ValidationType.SINGLE)  // SINGLE 단일 / ALL 다중 에러 리턴
 public class JoinMemberReqDto {
 
     @Schema(description = "프로필이미지ID", example = "1")
@@ -54,7 +57,7 @@ public class JoinMemberReqDto {
 
     @Schema(description = "비밀번호", example = "xxx")
     @NotBlank(message = "{password.notBlank}",groups = Step6.class)
-    @Password(groups = Step6.class)
+    @Password(message = "{password.pattern}", groups = Step6.class)
     private String password;
 
     @Schema(description = "이메일동의여부", example = "true")

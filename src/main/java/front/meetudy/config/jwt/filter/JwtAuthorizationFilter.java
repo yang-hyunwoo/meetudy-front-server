@@ -6,6 +6,7 @@ import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import front.meetudy.auth.LoginUser;
 import front.meetudy.config.jwt.JwtProcess;
+import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.constant.security.CookieEnum;
 import front.meetudy.domain.member.Member;
 import front.meetudy.exception.CustomApiException;
@@ -31,6 +32,7 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
+import static front.meetudy.constant.error.ErrorEnum.*;
 import static front.meetudy.constant.security.CookieEnum.*;
 import static front.meetudy.constant.security.TokenErrorCodeEnum.*;
 import static front.meetudy.exception.login.LoginErrorCode.*;
@@ -139,7 +141,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
      * @param userId
      */
     private void accessTokenGenerated(HttpServletResponse response, Long userId) {
-        Member member = memberRepository.findById(userId).orElseThrow(() -> new CustomApiException(LG_MEMBER_ID_PW_INVALID.getStatus(),LG_MEMBER_ID_PW_INVALID.getMessage()));
+        Member member = memberRepository.findById(userId).orElseThrow(() -> new CustomApiException(LG_MEMBER_ID_PW_INVALID.getStatus(), ERR_004,LG_MEMBER_ID_PW_INVALID.getMessage()));
         String accessToken = jwtProcess.createAccessToken(new LoginUser(member));
         String token = extractToken(accessToken);
         if(jwtProperty.isUseCookie()) {
@@ -156,7 +158,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
      * @param userId
      */
     private void refreshTokenGenerated(HttpServletResponse response, Long userId) {
-        Member member = memberRepository.findById(userId).orElseThrow(() -> new CustomApiException(LG_MEMBER_ID_PW_INVALID.getStatus(),LG_MEMBER_ID_PW_INVALID.getMessage()));
+        Member member = memberRepository.findById(userId).orElseThrow(() -> new CustomApiException(LG_MEMBER_ID_PW_INVALID.getStatus(), ERR_004,LG_MEMBER_ID_PW_INVALID.getMessage()));
         String newRefreshToken = jwtProcess.createRefreshToken(new LoginUser(member));
         if(jwtProperty.isUseCookie()) {
             response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(newRefreshToken, refreshToken).toString());

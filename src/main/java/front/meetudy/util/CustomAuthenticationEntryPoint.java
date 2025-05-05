@@ -1,6 +1,7 @@
 package front.meetudy.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.exception.login.LoginErrorCode;
 import front.meetudy.property.JwtProperty;
 import front.meetudy.util.response.Response;
@@ -16,6 +17,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 
 import java.io.IOException;
 
+import static front.meetudy.constant.error.ErrorEnum.*;
 import static front.meetudy.constant.security.CookieEnum.*;
 
 
@@ -55,7 +57,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
     private static void responseWrite(HttpServletResponse response , String msg) throws IOException {
         ObjectMapper om = new ObjectMapper();
-        Response<String> error = ResponseBuilder.buildError(HttpStatus.UNAUTHORIZED.value(), msg);
+        Response<String> error = ResponseBuilder.buildError(HttpStatus.UNAUTHORIZED.value(), msg, ERR_004);
         String responseBody = om.writeValueAsString(error);
         response.setContentType("application/json");
         response.setCharacterEncoding("utf-8");

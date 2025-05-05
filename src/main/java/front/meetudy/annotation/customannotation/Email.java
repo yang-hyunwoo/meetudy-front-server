@@ -7,6 +7,10 @@ import jakarta.validation.Constraint;
 
 import java.lang.annotation.*;
 
+/**
+ * 이메일 커스텀 어노테이션
+ * @Email
+ */
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = EmailValidator.class)

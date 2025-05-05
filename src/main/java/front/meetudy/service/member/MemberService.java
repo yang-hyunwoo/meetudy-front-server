@@ -1,5 +1,6 @@
 package front.meetudy.service.member;
 
+import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.constant.member.MemberProviderTypeEnum;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.member.MemberDto;
@@ -14,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static front.meetudy.constant.error.ErrorEnum.*;
 import static front.meetudy.exception.join.JoinErrorCode.*;
 import static front.meetudy.exception.login.LoginErrorCode.*;
 
@@ -37,7 +39,7 @@ public class MemberService {
 
         //1. 동일 유저네임 존재 검사
         memberRepository.findByEmailAndProvider(joinReqDto.getEmail(), MemberProviderTypeEnum.NORMAL).ifPresent(user -> {
-            throw new CustomApiException(JI_DUPLICATION_EMAIL.getStatus(),JI_DUPLICATION_EMAIL.getMessage());
+            throw new CustomApiException(JI_DUPLICATION_EMAIL.getStatus(), ERR_004,JI_DUPLICATION_EMAIL.getMessage());
         });
 
         Member save = memberRepository.save(joinReqDto.toEntity(passwordEncoder));
@@ -50,7 +52,7 @@ public class MemberService {
      */
     public void memberLgnFailCnt(String email) {
        memberRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomApiException(LG_MEMBER_ID_PW_INVALID.getStatus(),LG_MEMBER_ID_PW_INVALID.getMessage()))
+                .orElseThrow(() -> new CustomApiException(LG_MEMBER_ID_PW_INVALID.getStatus(), ERR_004,LG_MEMBER_ID_PW_INVALID.getMessage()))
                 .increaseFailLoginCount();
     }
 
@@ -60,7 +62,7 @@ public class MemberService {
      */
     public void memberLgnFailInit(Long id) {
      memberRepository.findById(id)
-             .orElseThrow(() -> new CustomApiException(LG_MEMBER_ID_PW_INVALID.getStatus(), LG_MEMBER_ID_PW_INVALID.getMessage()))
+             .orElseThrow(() -> new CustomApiException(LG_MEMBER_ID_PW_INVALID.getStatus(), ERR_004, LG_MEMBER_ID_PW_INVALID.getMessage()))
              .initLoginCount();
     }
 }

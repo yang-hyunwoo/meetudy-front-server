@@ -6,6 +6,10 @@ import jakarta.validation.Payload;
 
 import java.lang.annotation.*;
 
+/**
+ * 비밀번호 커스텀 어노테이션
+ *  @Password
+ */
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = PasswordValidator.class)

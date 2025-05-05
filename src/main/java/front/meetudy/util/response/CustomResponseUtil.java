@@ -1,6 +1,7 @@
 package front.meetudy.util.response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import front.meetudy.constant.error.ErrorEnum;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,9 +25,9 @@ public class CustomResponseUtil {
     }
 
     // 실패 응답 - 에러 메시지와 상태코드를 내려줌
-    public static void fail(HttpServletResponse response, String msg, HttpStatus httpStatus) {
+    public static void fail(HttpServletResponse response, String msg, HttpStatus httpStatus, ErrorEnum errorEnum) {
         try {
-            Response<String> responseDto = Response.error(httpStatus.value(), msg);
+            Response<String> responseDto = Response.error(httpStatus.value(),errorEnum, msg);
             String responseBody = om.writeValueAsString(responseDto);
 
             response.setContentType("application/json; charset=utf-8");

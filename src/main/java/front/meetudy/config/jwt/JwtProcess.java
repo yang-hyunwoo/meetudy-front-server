@@ -6,6 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import front.meetudy.auth.LoginUser;
+import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.constant.member.MemberEnum;
 import front.meetudy.constant.security.CookieEnum;
 import front.meetudy.domain.member.Member;
@@ -23,6 +24,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.UUID;
 
+import static front.meetudy.constant.error.ErrorEnum.*;
 import static front.meetudy.constant.security.CookieEnum.*;
 import static front.meetudy.constant.security.TokenErrorCodeEnum.*;
 import static java.nio.charset.StandardCharsets.*;
@@ -82,7 +84,7 @@ public class JwtProcess {
                     );
             return new LoginUser(member);
         } catch (JWTVerificationException e) {
-            throw new CustomApiException(UNAUTHORIZED,SC_ACCESS_TOKEN_INVALID.getValue());
+            throw new CustomApiException(UNAUTHORIZED, ERR_004,SC_ACCESS_TOKEN_INVALID.getValue());
         }
     }
 
@@ -97,7 +99,7 @@ public class JwtProcess {
 
             return Long.parseLong(decodedJWT.getClaim(CLAIM_ID).asString());
         } catch (JWTVerificationException e) {
-            throw new CustomApiException(UNAUTHORIZED,SC_REFRESH_TOKEN_INVALID.getValue());
+            throw new CustomApiException(UNAUTHORIZED, ERR_004,SC_REFRESH_TOKEN_INVALID.getValue());
         }
     }
 
@@ -147,7 +149,7 @@ public class JwtProcess {
         if (token != null && token.startsWith(jwtProperty.getTokenPrefix())) {
             return token.substring(jwtProperty.getTokenPrefix().length()).trim();
         }
-        throw new CustomApiException(UNAUTHORIZED,SC_INVALID_TOKEN_FORMAT.getValue());
+        throw new CustomApiException(UNAUTHORIZED, ERR_004,SC_INVALID_TOKEN_FORMAT.getValue());
     }
 
 }
