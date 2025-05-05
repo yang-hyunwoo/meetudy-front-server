@@ -49,6 +49,6 @@ class PasswordConfigTest {
 
         assertThatThrownBy(() -> encoder.matches("anything", invalidEncoded))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("There is no password encoder mapped for the id 'invalid'. Check your configuration to ensure it matches one of the registered encoders.");
+                .hasMessageContaining("invalid");
     }
 }

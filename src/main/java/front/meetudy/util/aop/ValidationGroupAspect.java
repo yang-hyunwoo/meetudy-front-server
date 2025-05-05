@@ -1,6 +1,8 @@
 package front.meetudy.util.aop;
 
 import front.meetudy.annotation.DefaultValidationOrder;
+import front.meetudy.annotation.ValidationMode;
+import front.meetudy.constant.error.ValidationType;
 import front.meetudy.annotation.customannotation.ValidationSequence;
 import front.meetudy.annotation.SequentialValidator;
 import jakarta.validation.groups.Default;
@@ -27,7 +29,12 @@ public class ValidationGroupAspect {
 
             Class<?>[] groupOrder = getValidationOrder(arg.getClass());
             if (groupOrder != null) {
-                validator.validate(arg, groupOrder);
+                ValidationType type = getValidationType(arg.getClass());
+                if (type == ValidationType.ALL) {
+                    validator.validateAll(arg, groupOrder);
+                } else {
+                    validator.validate(arg, groupOrder);
+                }
             }
         }
         return joinPoint.proceed();
@@ -57,5 +64,10 @@ public class ValidationGroupAspect {
             }
         }
         return false;
+    }
+
+    private ValidationType getValidationType(Class<?> clazz) {
+        ValidationMode mode = clazz.getAnnotation(ValidationMode.class);
+        return (mode != null) ? mode.value() : ValidationType.SINGLE;
     }
 }

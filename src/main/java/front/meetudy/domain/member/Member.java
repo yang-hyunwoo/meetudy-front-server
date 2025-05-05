@@ -1,5 +1,6 @@
 package front.meetudy.domain.member;
 
+import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.constant.member.MemberEnum;
 import front.meetudy.constant.member.MemberProviderTypeEnum;
 import front.meetudy.domain.common.BaseEntity;
@@ -11,6 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import static front.meetudy.constant.error.ErrorEnum.*;
 import static front.meetudy.exception.login.LoginErrorCode.LG_PASSWORD_WRONG_LOCKED;
 
 
@@ -205,7 +207,7 @@ public class Member extends BaseEntity {
         if (this.failLoginCount < 5) {
             this.failLoginCount++;
         } else {
-            throw new CustomApiException(LG_PASSWORD_WRONG_LOCKED.getStatus(),LG_PASSWORD_WRONG_LOCKED.getMessage());
+            throw new CustomApiException(LG_PASSWORD_WRONG_LOCKED.getStatus(), ERR_004,LG_PASSWORD_WRONG_LOCKED.getMessage());
         }
     }
 
