@@ -1,6 +1,8 @@
 package front.meetudy.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.exception.login.LoginErrorCode;
 import front.meetudy.util.response.Response;
@@ -19,7 +21,9 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException {
-        ObjectMapper om = new ObjectMapper();
+        ObjectMapper om = new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         Response<String> error = ResponseBuilder.buildError(HttpStatus.UNAUTHORIZED.value(), LoginErrorCode.LG_ANOTHER_ERROR.getMessage(), ERR_004);
         String responseBody = om.writeValueAsString(error);
         response.setContentType("application/json");

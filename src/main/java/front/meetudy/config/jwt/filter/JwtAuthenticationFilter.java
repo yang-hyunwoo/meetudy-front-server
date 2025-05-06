@@ -1,6 +1,8 @@
 package front.meetudy.config.jwt.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import front.meetudy.auth.LoginUser;
 import front.meetudy.config.jwt.JwtProcess;
 import front.meetudy.constant.error.ErrorEnum;
@@ -30,7 +32,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     private final AuthenticationManager authenticationManager;
     private final MemberService memberService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     private final JwtProcess jwtProcess;
     private final JwtProperty jwtProperty;
 

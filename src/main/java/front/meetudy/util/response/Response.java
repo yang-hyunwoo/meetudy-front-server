@@ -1,5 +1,6 @@
 package front.meetudy.util.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import front.meetudy.constant.error.ErrorEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -38,6 +39,7 @@ public class Response<T> {
     private  T data;
 
     @Schema(description = "시간")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp;
 
     private static final String SUCCESS_CODE = "SUCCESS";

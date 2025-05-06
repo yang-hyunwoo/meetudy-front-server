@@ -6,6 +6,9 @@ build/
 !**/src/test/**/build/
 
 ### STS ###
+/data/postgres
+/data/redis
+.env
 .yml
 .apt_generated
 .classpath
