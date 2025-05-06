@@ -1,6 +1,8 @@
 package front.meetudy.util.response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import front.meetudy.constant.error.ErrorEnum;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +11,9 @@ import org.springframework.http.HttpStatus;
 @Slf4j
 public class CustomResponseUtil {
 
-    private static final ObjectMapper om = new ObjectMapper();
+    private static final ObjectMapper om = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     // 성공 응답 - 객체 data를 내려줌
     public static void success(HttpServletResponse response, Object dto, String msg) {

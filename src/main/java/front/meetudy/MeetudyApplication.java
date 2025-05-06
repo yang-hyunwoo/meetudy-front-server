@@ -16,7 +16,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-@EnableJpaAuditing
 @SpringBootApplication
 @EnableConfigurationProperties(JwtProperty.class)
 public class MeetudyApplication {

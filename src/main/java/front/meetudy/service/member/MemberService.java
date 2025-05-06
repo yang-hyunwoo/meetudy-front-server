@@ -39,7 +39,7 @@ public class MemberService {
 
         //1. 동일 유저네임 존재 검사
         memberRepository.findByEmailAndProvider(joinReqDto.getEmail(), MemberProviderTypeEnum.NORMAL).ifPresent(user -> {
-            throw new CustomApiException(JI_DUPLICATION_EMAIL.getStatus(), ERR_004,JI_DUPLICATION_EMAIL.getMessage());
+            throw new CustomApiException(JI_DUPLICATION_EMAIL.getStatus(), ERR_003,JI_DUPLICATION_EMAIL.getMessage());
         });
 
         Member save = memberRepository.save(joinReqDto.toEntity(passwordEncoder));

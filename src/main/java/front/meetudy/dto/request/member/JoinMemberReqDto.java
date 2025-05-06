@@ -1,5 +1,6 @@
 package front.meetudy.dto.request.member;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import front.meetudy.annotation.ValidationMode;
 import front.meetudy.constant.error.ValidationType;
 import front.meetudy.annotation.customannotation.*;
@@ -7,10 +8,7 @@ import front.meetudy.constant.member.MemberProviderTypeEnum;
 import front.meetudy.domain.member.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import static front.meetudy.annotation.ValidationGroups.*;
 
@@ -20,6 +18,8 @@ import static front.meetudy.annotation.ValidationGroups.*;
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ValidationMode(ValidationType.SINGLE)  // SINGLE 단일 / ALL 다중 에러 리턴
+@AllArgsConstructor
+@Builder
 public class JoinMemberReqDto {
 
     @Schema(description = "프로필이미지ID", example = "1")
@@ -61,6 +61,7 @@ public class JoinMemberReqDto {
     private String password;
 
     @Schema(description = "이메일동의여부", example = "true")
+    @JsonProperty("isEmailAgreed")
     private boolean isEmailAgreed;
 
     @Schema(description = "소셜타입", example = "NORMAL")
@@ -95,3 +96,6 @@ public class JoinMemberReqDto {
                 '}';
     }
 }
+
+
+

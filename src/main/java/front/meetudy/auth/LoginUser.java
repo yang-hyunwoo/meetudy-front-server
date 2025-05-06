@@ -91,7 +91,7 @@ public class LoginUser implements UserDetails , OAuth2User {
      */
     @Override
     public boolean isEnabled() {
-        return member.isDeleted();
+        return !member.isDeleted();
     }
 
     @Override

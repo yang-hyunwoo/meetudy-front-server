@@ -23,12 +23,12 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    @Operation(summary = "회원가입 요청", description = "회원가입 시 단일 또는 다중 유효성 실패 예시 제공")
+    @Operation(summary = "회원가입 요청", description = "회원가입 시 단일 유효성 실패 예시 제공")
     @JoinValidationErrorExample
     @PostMapping("/join")
-    public ResponseEntity<Response<JoinMemberResDto>> join(@RequestBody @Valid JoinMemberReqDto joinReqDto ) {
+    public ResponseEntity<Response<JoinMemberResDto>> join(@RequestBody JoinMemberReqDto joinReqDto ) {
         JoinMemberResDto join = memberService.join(joinReqDto);
-        return Response.ok("생성", join);
+        return Response.ok("회원가입이 완료 되었습니다.", join);
 
     }
 

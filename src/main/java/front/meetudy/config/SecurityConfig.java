@@ -77,6 +77,19 @@ public class SecurityConfig {
         return buildSecurityFilterChain(http, authenticationManager, true);
     }
 
+    /**
+     * 로컬 환경
+     * @param http
+     * @return
+     * @throws Exception
+     */
+    @Bean
+    @Profile("test")
+    public SecurityFilterChain securityFilterChainTest(HttpSecurity http) throws Exception {
+        AuthenticationManager authenticationManager = authenticationManager(http.getSharedObject(AuthenticationConfiguration.class));
+        return buildSecurityFilterChain(http, authenticationManager, true);
+    }
+
     private SecurityFilterChain buildSecurityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager, boolean isDev) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)

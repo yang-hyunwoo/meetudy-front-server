@@ -6,7 +6,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum ErrorEnum {
-    ERR_001(" 공백일 수 없습니다."),
+    ERR_001("공백일 수 없습니다."),
     ERR_002("유효성 검사에 실패했습니다."),
     ERR_003("DB에 중복된 값이 있습니다."),
     ERR_004("인증에 실패 하였습니다."),
