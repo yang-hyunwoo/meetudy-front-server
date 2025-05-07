@@ -12,6 +12,7 @@ import front.meetudy.dto.response.member.LoginResDto;
 import front.meetudy.exception.login.LoginErrorCode;
 import front.meetudy.property.JwtProperty;
 import front.meetudy.service.member.MemberService;
+import front.meetudy.service.redis.RedisService;
 import front.meetudy.util.response.CustomResponseUtil;
 import front.meetudy.util.security.LoginErrorResolver;
 import jakarta.servlet.FilterChain;
@@ -23,6 +24,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import java.io.IOException;
+import java.time.Duration;
 
 import static front.meetudy.constant.error.ErrorEnum.*;
 import static front.meetudy.constant.security.CookieEnum.*;
@@ -38,16 +40,20 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private final JwtProcess jwtProcess;
     private final JwtProperty jwtProperty;
 
+    private final RedisService redisService;
+
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager
-                                  , MemberService memberService
-                                  , JwtProcess jwtProcess
-                                  , JwtProperty jwtProperty) {
+            , MemberService memberService
+            , JwtProcess jwtProcess
+            , JwtProperty jwtProperty
+            , RedisService redisService) {
         super(authenticationManager);
         setFilterProcessesUrl("/api/login");
         this.authenticationManager = authenticationManager;
         this.memberService = memberService;
         this.jwtProcess = jwtProcess;
         this.jwtProperty = jwtProperty;
+        this.redisService = redisService;
 
     }
 
@@ -101,9 +107,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             response.addHeader(isAutoLogin.getValue(), loginReqDto.getChk());
         }
 
-        // TODO: Redis 저장 (refreshToken UUID 추출 후 memberId와 함께 저장)
-        // String refreshUuid = jwtProcess.extractRefreshUuid(refreshToken);
-        // redisService.saveRefreshToken(refreshUuid, loginUser.getMember().getId());
+        String refreshUuid = jwtProcess.extractRefreshUuid(refreshToken);
+        Duration ttl = Duration.ofDays(jwtProperty.getRefreshTokenExpireDays()); // 설정에 따라 TTL 결정
+        redisService.saveRefreshToken(refreshUuid, loginUser.getMember().getId(), ttl);
 
         CustomResponseUtil.success(response, loginRespDto,"로그인 성공");
     }

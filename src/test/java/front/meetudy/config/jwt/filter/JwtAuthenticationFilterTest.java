@@ -8,6 +8,7 @@ import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.member.LoginReqDto;
 import front.meetudy.property.JwtProperty;
 import front.meetudy.service.member.MemberService;
+import front.meetudy.service.redis.RedisService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,6 +47,9 @@ class JwtAuthenticationFilterTest {
     @Mock
     private JwtProperty jwtProperty;
 
+    @Mock
+    private RedisService redisService;
+
     private MockMvc mockMvc;
 
     @InjectMocks
@@ -53,7 +57,7 @@ class JwtAuthenticationFilterTest {
 
     @BeforeEach
     void setup() {
-        jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager, memberService, jwtProcess, jwtProperty);
+        jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager, memberService, jwtProcess, jwtProperty,redisService);
         mockMvc = MockMvcBuilders.standaloneSetup(new DummyController())
                 .addFilter(jwtAuthenticationFilter, "/api/login")
                 .build();

@@ -3,12 +3,15 @@ package front.meetudy.config;
 import front.meetudy.config.jwt.JwtProcess;
 import front.meetudy.config.jwt.filter.JwtAuthenticationFilter;
 import front.meetudy.config.jwt.filter.JwtAuthorizationFilter;
+import front.meetudy.constant.security.CookieEnum;
 import front.meetudy.oauth.OAuth2AuthenticationFailureHandler;
 import front.meetudy.oauth.OAuth2AuthenticationSuccessHandler;
 import front.meetudy.oauth.PrincipalOauth2UserService;
 import front.meetudy.property.JwtProperty;
 import front.meetudy.repository.member.MemberRepository;
+import front.meetudy.security.handler.CustomLogOutHandler;
 import front.meetudy.service.member.MemberService;
+import front.meetudy.service.redis.RedisService;
 import front.meetudy.util.CustomAccessDeniedHandler;
 import front.meetudy.util.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +39,7 @@ public class SecurityConfig {
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
     private final JwtProcess jwtProcess;
     private final JwtProperty jwtProperty;
+    private final RedisService redisService;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -43,12 +47,12 @@ public class SecurityConfig {
     }
     @Bean
     public JwtAuthorizationFilter jwtAuthorizationFilter(AuthenticationManager authenticationManager) {
-        return new JwtAuthorizationFilter(authenticationManager, memberRepository, jwtProcess, jwtProperty);
+        return new JwtAuthorizationFilter(authenticationManager, memberRepository, jwtProcess, jwtProperty,redisService);
     }
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter(AuthenticationManager authenticationManager) {
-        return new JwtAuthenticationFilter(authenticationManager, memberService, jwtProcess, jwtProperty);
+        return new JwtAuthenticationFilter(authenticationManager, memberService, jwtProcess, jwtProperty,redisService);
     }
 
     /**
@@ -104,8 +108,9 @@ public class SecurityConfig {
                         .successHandler(oAuth2AuthenticationSuccessHandler)
                         .failureHandler(oAuth2AuthenticationFailureHandler)
                 )
+                .logout(logout-> logout.logoutUrl("/api/logout").logoutSuccessHandler(new CustomLogOutHandler(jwtProcess,redisService)))
                 .addFilterBefore(jwtAuthorizationFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class)
-                .addFilter(jwtAuthenticationFilter(authenticationManager))                .exceptionHandling(handler -> handler.authenticationEntryPoint(new CustomAuthenticationEntryPoint(jwtProperty)))
+                .addFilter(jwtAuthenticationFilter(authenticationManager)).exceptionHandling(handler -> handler.authenticationEntryPoint(new CustomAuthenticationEntryPoint(jwtProperty)))
                 .exceptionHandling(handler -> handler.accessDeniedHandler(new CustomAccessDeniedHandler()))
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers(

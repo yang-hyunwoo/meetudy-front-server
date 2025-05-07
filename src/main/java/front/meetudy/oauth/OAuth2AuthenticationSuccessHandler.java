@@ -6,6 +6,7 @@ import front.meetudy.constant.member.MemberProviderTypeEnum;
 import front.meetudy.constant.security.CookieEnum;
 import front.meetudy.dto.request.member.LoginReqDto;
 import front.meetudy.property.JwtProperty;
+import front.meetudy.service.redis.RedisService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.time.Duration;
 
 import static front.meetudy.constant.security.CookieEnum.*;
 
@@ -26,6 +28,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final JwtProcess jwtProcess;
 
     private final JwtProperty jwtProperty;
+
+    private final RedisService redisService;
 
 
     /**
@@ -53,8 +57,10 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
            response.addHeader(CookieEnum.refreshToken.getValue(), refreshToken);
            response.addHeader(isAutoLogin.getValue(), loginReqDto.getChk());
        }
-
-
+       String refreshUuid = jwtProcess.extractRefreshUuid(refreshToken);
+       Duration ttl = Duration.ofDays(jwtProperty.getRefreshTokenExpireDays()); // 설정에 따라 TTL 결정
+       redisService.saveRefreshToken(refreshUuid, loginUser.getMember().getId(), ttl);
+       
         clearAuthenticationAttributes(request, response);
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }

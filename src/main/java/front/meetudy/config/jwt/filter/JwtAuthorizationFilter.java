@@ -8,12 +8,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import front.meetudy.auth.LoginUser;
 import front.meetudy.config.jwt.JwtProcess;
-import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.constant.security.CookieEnum;
 import front.meetudy.domain.member.Member;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.property.JwtProperty;
 import front.meetudy.repository.member.MemberRepository;
+import front.meetudy.service.redis.RedisService;
 import front.meetudy.util.MultiReadHttpServletRequest;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -28,6 +28,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.util.StringUtils;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -49,18 +50,23 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     private final MemberRepository memberRepository;
     private final JwtProcess jwtProcess;
     private final JwtProperty jwtProperty;
+
+    private final RedisService redisService;
     private static final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     public JwtAuthorizationFilter(AuthenticationManager authenticationManager
-                                  , MemberRepository memberRepository
-                                  , JwtProcess jwtProcess
-                                  , JwtProperty jwtProperty) {
+            , MemberRepository memberRepository
+            , JwtProcess jwtProcess
+            , JwtProperty jwtProperty
+            , RedisService redisService) {
+
         super(authenticationManager);
         this.memberRepository = memberRepository;
         this.jwtProcess = jwtProcess;
         this.jwtProperty = jwtProperty;
+        this.redisService = redisService;
     }
 
     @Override
@@ -121,21 +127,33 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             }
             //accessToken이 만료가 되었다면 client에서 refreshToken을 받아와
             String refreshToken = getCookieValue(request, CookieEnum.refreshToken);
-            handleRefreshToken(response, refreshToken);
+            String refreshUuid = jwtProcess.extractRefreshUuid(refreshToken);
+            String redisMemberId = redisService.getRefreshToken(refreshUuid); // null이면 만료 or 조작
+
+            if (redisMemberId != null) {
+                Long memberId = jwtProcess.verifyRefreshToken(refreshToken); // signature & exp 체크
+                if (redisMemberId.equals(memberId.toString())) {
+                    handleRefreshToken(response, refreshToken); // 재발급
+                } else {
+                    sendError(response, SC_REFRESH_TOKEN_EXPIRED.getValue());
+                }
+            } else {
+                sendError(response, SC_REFRESH_TOKEN_EXPIRED.getValue());
+            }
         } catch (JWTDecodeException e){
             //doesn't have a valid JSON format
             //JwtDecode 시 exception
             e.printStackTrace();
             sendError(response, SC_TOKEN_DECODE_ERROR.getValue());
-            return; // 🔥 무조건 return 필요
+            return;
         } catch (SignatureVerificationException e) {
             e.printStackTrace();
             sendError(response, SC_ALGORITHM_ERROR.getValue());
-            return; // 🔥 무조건 return 필요
+            return;
         } catch (CustomApiException e) {
             e.printStackTrace();
             sendError(response, e.getMessage());
-            return; // 🔥 무조건 return 필요
+            return;
         }
     }
 
@@ -164,6 +182,11 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     private void refreshTokenGenerated(HttpServletResponse response, Long userId) {
         Member member = memberRepository.findById(userId).orElseThrow(() -> new CustomApiException(LG_MEMBER_ID_PW_INVALID.getStatus(), ERR_004,LG_MEMBER_ID_PW_INVALID.getMessage()));
         String newRefreshToken = jwtProcess.createRefreshToken(new LoginUser(member));
+
+        String refreshUuid = jwtProcess.extractRefreshUuid(newRefreshToken);
+        Duration ttl = Duration.ofDays(jwtProperty.getRefreshTokenExpireDays()); // 설정에 따라 TTL 결정
+        redisService.saveRefreshToken(refreshUuid, member.getId(), ttl);
+
         if(jwtProperty.isUseCookie()) {
             response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(newRefreshToken, refreshToken).toString());
         } else {
