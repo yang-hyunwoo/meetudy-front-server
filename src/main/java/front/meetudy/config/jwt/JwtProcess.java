@@ -5,6 +5,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.auth0.jwt.interfaces.JWTVerifier;
 import front.meetudy.auth.LoginUser;
 import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.constant.member.MemberEnum;
@@ -31,7 +32,6 @@ import static java.nio.charset.StandardCharsets.*;
 import static org.springframework.http.HttpStatus.*;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class JwtProcess {
 
@@ -40,6 +40,15 @@ public class JwtProcess {
     private static final String CLAIM_ROLE = "role";
 
     private final JwtProperty jwtProperty;
+
+    private final JWTVerifier jwtVerifier;
+
+    public JwtProcess(JwtProperty jwtProperty) {
+        this.jwtProperty = jwtProperty;
+        this.jwtVerifier = JWT.require(algorithm()).build();
+    }
+
+
 
     /**
      * 액세스 토큰 생성
@@ -116,9 +125,18 @@ public class JwtProcess {
         }
     }
 
+    public String extractRefreshUuid(String refreshToken) {
+        DecodedJWT decodedJWT = jwtVerifier.verify(removeTokenPrefix(refreshToken));
+        return decodedJWT.getClaim(CookieEnum.refreshToken.getValue()).asString();
+    }
+
     public ResponseCookie createJwtCookie(String accessToken , CookieEnum cookieName) {
+        int time = 600;
+        if(cookieName.getValue().equals(refreshToken.getValue())) {
+            time = 7 * 24 * 60 * 60;
+        }
         return ResponseCookie.from(cookieName.getValue(), removeTokenPrefix(accessToken))
-                .maxAge(7 * 24 * 60 * 60)
+                .maxAge(time)
 //                    .httpOnly(true)
 //                    .secure(true)
                 //.sameSite("Lax")

@@ -42,7 +42,6 @@ public class JoinMemberReqDto {
 
     @Schema(description = "생년월일", example = "19990101")
     @NotBlank(message = "{birth.notBlank}",groups = Step4.class)
-
     @Numeric(message = "{birth.pattern}",
             messageKey = "birth.range",
             mid=8,
