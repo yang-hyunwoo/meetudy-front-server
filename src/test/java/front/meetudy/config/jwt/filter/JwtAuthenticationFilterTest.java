@@ -24,8 +24,11 @@ import org.springframework.security.authentication.*;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.Duration;
+
 import static front.meetudy.constant.security.CookieEnum.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -82,9 +85,9 @@ class JwtAuthenticationFilterTest {
 
         when(authenticationManager.authenticate(any())).thenReturn(sampleAuthToken(loginUser, loginDto));
         when(jwtProcess.createAccessToken(any())).thenReturn("access-token");
-        when(jwtProcess.createRefreshToken(any())).thenReturn("refresh-token");
+        when(jwtProcess.createRefreshToken(any(),eq(Duration.ofDays(7)))).thenReturn("refresh-token");
         when(jwtProcess.createJwtCookie("access-token", accessToken)).thenReturn(ResponseCookie.from(accessToken.getValue(), "access-token").path("/").build());
-        when(jwtProcess.createRefreshJwtCookie("refresh-token", refreshToken,true)).thenReturn(ResponseCookie.from(refreshToken.getValue(), "refresh-token").path("/").build());
+        when(jwtProcess.createRefreshJwtCookie("refresh-token", refreshToken, Duration.ofDays(7))).thenReturn(ResponseCookie.from(refreshToken.getValue(), "refresh-token").path("/").build());
         when(jwtProcess.createPlainCookie("true", isAutoLogin)).thenReturn(ResponseCookie.from(isAutoLogin.getValue(), "true").path("/").build());
         when(jwtProperty.isUseCookie()).thenReturn(true);
 
@@ -109,10 +112,10 @@ class JwtAuthenticationFilterTest {
 
         when(authenticationManager.authenticate(any())).thenReturn(sampleAuthToken(loginUser, loginDto));
         when(jwtProcess.createAccessToken(any())).thenReturn("access-token");
-        when(jwtProcess.createRefreshToken(any())).thenReturn("refresh-token");
+        when(jwtProcess.createRefreshToken(any(),eq(Duration.ofDays(1)))).thenReturn("refresh-token");
         when(jwtProperty.isUseCookie()).thenReturn(false);
         when(jwtProperty.getHeader()).thenReturn("Authorization");
-        when(jwtProcess.createRefreshJwtCookie("refresh-token", refreshToken,false)).thenReturn(ResponseCookie.from(refreshToken.getValue(), "refresh-token").path("/").build());
+        when(jwtProcess.createRefreshJwtCookie("refresh-token", refreshToken,Duration.ofDays(1))).thenReturn(ResponseCookie.from(refreshToken.getValue(), "refresh-token").path("/").build());
         when(jwtProcess.createPlainCookie("false", isAutoLogin)).thenReturn(ResponseCookie.from(isAutoLogin.getValue(), "false").path("/").build());
         mockMvc.perform(post("/api/login")
                         .contentType(MediaType.APPLICATION_JSON)

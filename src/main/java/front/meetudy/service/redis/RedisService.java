@@ -20,13 +20,15 @@ public class RedisService {
 
     /**
      * redis에 refreshToken 저장
+     *
      * @param uuid
      * @param memberId
      * @param duration
      */
-    public void saveRefreshToken(String uuid, Long memberId, Duration duration) {
+    public void saveRefreshToken(String uuid, Long memberId, boolean chk, Duration duration) {
         ValueOperations<String, Object> ops = redisTemplate.opsForValue();
-        ops.set(uuid, memberId.toString(), duration);
+        ops.set(uuid, memberId.toString() + "|" + chk, duration);
+        log.info("Redis 저장용 Value = {}", memberId.toString() + "|" + chk);
         log.info("Redis 저장 확인용 get: {}", ops.get(uuid));
     }
 

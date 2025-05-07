@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseCookie;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
@@ -137,7 +138,7 @@ public class JwtAuthorizationFilterTest {
         when(jwtProcess.verifyAccessToken(eq(newAccessToken))).thenReturn(loginUser);
 
         // 새 refreshToken 발급 시에도 고정된 값 반환
-        when(jwtProcess.createRefreshToken(any())).thenReturn(fixedRefreshToken);
+        when(jwtProcess.createRefreshToken(any(),any())).thenReturn(fixedRefreshToken);
 
         // 모든 verifyExpired 는 false (만료 안 됨)
         when(jwtProcess.verifyExpired(anyString())).thenAnswer(invocation -> {
@@ -207,13 +208,13 @@ public class JwtAuthorizationFilterTest {
 
         when(jwtProcess.createJwtCookie(anyString(), eq(CookieEnum.accessToken)))
                 .thenReturn(ResponseCookie.from("access-token", "mocked-token").path("/").build());
-        when(jwtProcess.createRefreshJwtCookie(anyString(), eq(CookieEnum.refreshToken),anyBoolean()))
+        when(jwtProcess.createRefreshJwtCookie(anyString(), eq(CookieEnum.refreshToken), eq(Duration.ofDays(1))))
                 .thenReturn(ResponseCookie.from("refresh-token", "mocked-token").path("/").build());
 
         // 새 access token 및 refresh token 발급
         when(jwtProcess.createAccessToken(any())).thenReturn("Bearer " + newAccessToken);
         when(jwtProcess.verifyAccessToken(eq("Bearer "+newAccessToken))).thenReturn(loginUser);
-        when(jwtProcess.createRefreshToken(any())).thenReturn(validRefreshToken);
+        when(jwtProcess.createRefreshToken(any(),any())).thenReturn(validRefreshToken);
 
         // 만료 검증은 모두 false 처리
         when(jwtProcess.verifyExpired(anyString())).thenReturn(false);
@@ -285,10 +286,10 @@ public class JwtAuthorizationFilterTest {
                 .build();
 
         when(jwtProcess.createJwtCookie(anyString(), eq(CookieEnum.accessToken))).thenReturn(mockedAccessCookie);
-        when(jwtProcess.createRefreshJwtCookie(anyString(), eq(CookieEnum.refreshToken),anyBoolean())).thenReturn(mockedRefreshCookie);
+        when(jwtProcess.createRefreshJwtCookie(anyString(), eq(CookieEnum.refreshToken),eq(Duration.ofDays(1)))).thenReturn(mockedRefreshCookie);
 
 
-        when(jwtProcess.createRefreshToken(any())).thenReturn(validRefreshToken);
+        when(jwtProcess.createRefreshToken(any(),eq(Duration.ofDays(7)))).thenReturn(validRefreshToken);
         when(jwtProcess.verifyExpired(anyString())).thenReturn(false);
         when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
         when(jwtProcess.createAccessToken(any())).thenReturn("Bearer " + newAccessToken);

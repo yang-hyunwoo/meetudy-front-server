@@ -128,12 +128,17 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             //accessToken이 만료가 되었다면 client에서 refreshToken을 받아와
             String refreshToken = getCookieValue(request, CookieEnum.refreshToken);
             String refreshUuid = jwtProcess.extractRefreshUuid(refreshToken);
-            String redisMemberId = redisService.getRefreshToken(refreshUuid); // null이면 만료 or 조작
-
+            String value = redisService.getRefreshToken(refreshUuid); // null이면 만료 or 조작
+            if (value == null) {
+                sendError(response, SC_REFRESH_TOKEN_EXPIRED.getValue());
+                return;
+            }
+            String[] parts = value.split("\\|");
+            String redisMemberId = parts[0];
             if (redisMemberId != null) {
                 Long memberId = jwtProcess.verifyRefreshToken(refreshToken); // signature & exp 체크
                 if (redisMemberId.equals(memberId.toString())) {
-                    handleRefreshToken(response, refreshToken); // 재발급
+                    handleRefreshToken(request,response, refreshToken); // 재발급
                 } else {
                     sendError(response, SC_REFRESH_TOKEN_EXPIRED.getValue());
                 }
@@ -173,17 +178,22 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     /**
      * 새 refreshToken 생성 메서드
+     *
      * @param response
      * @param userId
      */
-    private void refreshTokenGenerated(HttpServletResponse response, Long userId) {
-        Member member = memberRepository.findById(userId).orElseThrow(() -> new CustomApiException(LG_MEMBER_ID_PW_INVALID.getStatus(), ERR_004,LG_MEMBER_ID_PW_INVALID.getMessage()));
-        String newRefreshToken = jwtProcess.createRefreshToken(new LoginUser(member));
+    private void refreshTokenGenerated(HttpServletRequest request, HttpServletResponse response, Long userId) {
+        Member member = memberRepository.findById(userId).orElseThrow(() -> new CustomApiException(LG_MEMBER_ID_PW_INVALID.getStatus(), ERR_004, LG_MEMBER_ID_PW_INVALID.getMessage()));
+        String cookieValue = getCookieValue(request, isAutoLogin);
+        Duration ttl = cookieValue.equals("true") ? Duration.ofDays(7) : Duration.ofDays(1);   // 자동 로그인: 7일;  // 일반 로그인: 1일
+        String newRefreshToken = jwtProcess.createRefreshToken(new LoginUser(member),ttl);
 
         String refreshUuid = jwtProcess.extractRefreshUuid(newRefreshToken);
-        Duration ttl = Duration.ofDays(jwtProperty.getRefreshTokenExpireDays()); // 설정에 따라 TTL 결정
-        redisService.saveRefreshToken(refreshUuid, member.getId(), ttl);
-        response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(newRefreshToken, CookieEnum.refreshToken,member.isAutoLogin()).toString());
+
+        boolean chk = Boolean.parseBoolean(cookieValue);
+
+        redisService.saveRefreshToken(refreshUuid, member.getId(),chk, ttl);
+        response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(newRefreshToken, CookieEnum.refreshToken,ttl ).toString());
     }
 
     private static void setAuthentication(LoginUser loginUser) {
@@ -232,7 +242,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
      * @param response
      * @param refreshToken
      */
-    private void handleRefreshToken(HttpServletResponse response, String refreshToken) {
+    private void handleRefreshToken(HttpServletRequest request,HttpServletResponse response, String refreshToken) {
         if(refreshToken==null) {
             sendError(response, SC_REFRESH_TOKEN_MISSING.getValue());
         } else {
@@ -244,7 +254,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 accessTokenGenerated(response, loginId);
                 // 만료일이 하루 남았을 경우 refreshToken 재생성
                 if(jwtProcess.verifyExpired(refreshToken)) {
-                    refreshTokenGenerated(response, loginId);
+                    refreshTokenGenerated(request,response, loginId);
                 }
             } catch (TokenExpiredException e2) {
                 // 로그아웃 시키기

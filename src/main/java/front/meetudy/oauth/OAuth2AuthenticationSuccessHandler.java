@@ -46,21 +46,21 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String targetUrl = determineTargetUrl(request, response, authentication);
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
         LoginReqDto loginReqDto = (LoginReqDto) authentication.getDetails();
+        Duration ttl = loginReqDto.isChk() ? Duration.ofDays(7) : Duration.ofDays(1);   // 자동 로그인: 7일;  // 일반 로그인: 1일
         String accessToken = jwtProcess.createAccessToken(loginUser);
-        String refreshToken = jwtProcess.createRefreshToken(loginUser);
-
+        String refreshToken = jwtProcess.createRefreshToken(loginUser,ttl);
        if(jwtProperty.isUseCookie()) {
            response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(accessToken, CookieEnum.accessToken).toString());
-           response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken,loginReqDto.isChk()).toString());
+           response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken,ttl).toString());
            response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(String.valueOf(loginReqDto.isChk()), isAutoLogin).toString());
        } else {
            response.addHeader(jwtProperty.getHeader(), accessToken);
-           response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken,loginReqDto.isChk()).toString());
+           response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken,ttl).toString());
            response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(String.valueOf(loginReqDto.isChk()), isAutoLogin).toString());
        }
        String refreshUuid = jwtProcess.extractRefreshUuid(refreshToken);
-       Duration ttl = Duration.ofDays(jwtProperty.getRefreshTokenExpireDays()); // 설정에 따라 TTL 결정
-       redisService.saveRefreshToken(refreshUuid, loginUser.getMember().getId(), ttl);
+
+       redisService.saveRefreshToken(refreshUuid, loginUser.getMember().getId(),loginReqDto.isChk(), ttl);
        
         clearAuthenticationAttributes(request, response);
         getRedirectStrategy().sendRedirect(request, response, targetUrl);

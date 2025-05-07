@@ -20,6 +20,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -71,10 +72,11 @@ public class JwtProcess {
      * @param loginUser
      * @return
      */
-    public String createRefreshToken(LoginUser loginUser) {
+    public String createRefreshToken(LoginUser loginUser,Duration ttl) {
+        Date expiry = Date.from(Instant.now().plus(ttl));
         return JWT.create()
                 .withSubject(SUBJECT)
-                .withExpiresAt(new Date(System.currentTimeMillis() + jwtProperty.getExpirationTime() * 20L))
+                .withExpiresAt(expiry)
                 .withClaim(CLAIM_ID, loginUser.getMember().getId().toString())
                 .withClaim(refreshToken.getValue(), UUID.randomUUID().toString())
                 .sign(algorithm());
@@ -163,13 +165,9 @@ public class JwtProcess {
      * @param cookieName
      * @return
      */
-    public ResponseCookie createRefreshJwtCookie(String accessToken , CookieEnum cookieName , boolean chk) {
-        int time = 24 * 60 * 60;
-        if(chk) {
-            time = 7 * 24 * 60 * 60;
-        }
+    public ResponseCookie createRefreshJwtCookie(String accessToken , CookieEnum cookieName , Duration ttl) {
         return ResponseCookie.from(cookieName.getValue(), accessToken)
-                .maxAge(time)
+                .maxAge(ttl)
 //                    .httpOnly(true)
 //                    .secure(true)
                 //.sameSite("Lax")

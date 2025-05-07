@@ -8,6 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JwtProcessTest {
@@ -44,7 +46,7 @@ public class JwtProcessTest {
         Member member = Member.partialOf(1L, MemberEnum.USER);
         LoginUser user = new LoginUser(member);
 
-        String refreshToken = jwtProcess.createRefreshToken(user);
+        String refreshToken = jwtProcess.createRefreshToken(user, Duration.ofDays(1));
         Long parsedId = jwtProcess.verifyRefreshToken(refreshToken.replace(jwtProperty.getTokenPrefix(), ""));
 
         assertEquals(1L, parsedId);
