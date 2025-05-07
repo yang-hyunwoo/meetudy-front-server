@@ -12,5 +12,5 @@ public class LoginReqDto {
 
     private String password;
 
-    private String chk;
+    private boolean chk;
 }

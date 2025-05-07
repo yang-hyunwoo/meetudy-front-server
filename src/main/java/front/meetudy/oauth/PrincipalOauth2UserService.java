@@ -36,8 +36,8 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
      */
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        System.out.println("getClientRegistration :" +userRequest.getClientRegistration()); //registrationId로 어떤 OAuth로 로그인 했는지 확인 가능
-        System.out.println("getAccessToken :" +userRequest.getAccessToken().getTokenValue());
+        log.info("getClientRegistration :{}",userRequest.getClientRegistration());//registrationId로 어떤 OAuth로 로그인 했는지 확인 가능
+        log.info("getAccessToken :{}",userRequest.getAccessToken().getTokenValue());
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
         //구글 로그인 버튼 클릭 -> 구글 로그인 창 -> 로그인 완료 -> code를 리턴(OAuth->Client라이브러리) -> AccessToken요청
@@ -60,7 +60,7 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
             log.info("카카오 로그인 요청");
             oAuth2UserInfo = new KakaoUserInfo((Map) oAuth2User.getAttributes().get("response"));
         }else {
-            System.out.println("오류");
+            log.error("오류");
         }
         MemberProviderTypeEnum providerType = oAuth2UserInfo.getProvider(); //google 계정
         String providerId = oAuth2UserInfo.getProviderId();

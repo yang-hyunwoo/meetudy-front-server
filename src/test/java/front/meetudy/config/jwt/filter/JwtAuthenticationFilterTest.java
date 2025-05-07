@@ -63,7 +63,7 @@ class JwtAuthenticationFilterTest {
                 .build();
     }
 
-    private LoginReqDto sampleDto(String auto) {
+    private LoginReqDto sampleDto(boolean auto) {
         return new LoginReqDto("test@example.com", "password", auto);
     }
 
@@ -76,7 +76,7 @@ class JwtAuthenticationFilterTest {
     @Test
     @DisplayName("로그인_성공_토큰_쿠키_반환")
     void loginSuccessTokenCookieReturn() throws Exception {
-        LoginReqDto loginDto = sampleDto("true");
+        LoginReqDto loginDto = sampleDto(true);
         Member member = Member.partialOf(1L, MemberEnum.USER);
         LoginUser loginUser = new LoginUser(member);
 
@@ -84,7 +84,7 @@ class JwtAuthenticationFilterTest {
         when(jwtProcess.createAccessToken(any())).thenReturn("access-token");
         when(jwtProcess.createRefreshToken(any())).thenReturn("refresh-token");
         when(jwtProcess.createJwtCookie("access-token", accessToken)).thenReturn(ResponseCookie.from(accessToken.getValue(), "access-token").path("/").build());
-        when(jwtProcess.createJwtCookie("refresh-token", refreshToken)).thenReturn(ResponseCookie.from(refreshToken.getValue(), "refresh-token").path("/").build());
+        when(jwtProcess.createRefreshJwtCookie("refresh-token", refreshToken,true)).thenReturn(ResponseCookie.from(refreshToken.getValue(), "refresh-token").path("/").build());
         when(jwtProcess.createPlainCookie("true", isAutoLogin)).thenReturn(ResponseCookie.from(isAutoLogin.getValue(), "true").path("/").build());
         when(jwtProperty.isUseCookie()).thenReturn(true);
 
@@ -103,7 +103,7 @@ class JwtAuthenticationFilterTest {
     @Test
     @DisplayName("로그인_성공_토큰_헤더_반환")
     void loginSuccessTokenHeaderReturn() throws Exception {
-        LoginReqDto loginDto = sampleDto("false");
+        LoginReqDto loginDto = sampleDto(false);
         Member member = Member.partialOf(1L, MemberEnum.USER);
         LoginUser loginUser = new LoginUser(member);
 
@@ -112,14 +112,18 @@ class JwtAuthenticationFilterTest {
         when(jwtProcess.createRefreshToken(any())).thenReturn("refresh-token");
         when(jwtProperty.isUseCookie()).thenReturn(false);
         when(jwtProperty.getHeader()).thenReturn("Authorization");
-
+        when(jwtProcess.createRefreshJwtCookie("refresh-token", refreshToken,false)).thenReturn(ResponseCookie.from(refreshToken.getValue(), "refresh-token").path("/").build());
+        when(jwtProcess.createPlainCookie("false", isAutoLogin)).thenReturn(ResponseCookie.from(isAutoLogin.getValue(), "false").path("/").build());
         mockMvc.perform(post("/api/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginDto)))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Authorization", "access-token"))
-                .andExpect(header().string(refreshToken.getValue(), "refresh-token"))
-                .andExpect(header().string(isAutoLogin.getValue(), "false"))
+                .andExpect(header().stringValues("Set-Cookie", Matchers.hasItems(
+                        Matchers.containsString(refreshToken.getValue()),
+                        Matchers.containsString(isAutoLogin.getValue())
+                )))
+
                 .andExpect(jsonPath("$.message").value("로그인 성공"));
     }
 
@@ -128,7 +132,7 @@ class JwtAuthenticationFilterTest {
 
         mockMvc.perform(post("/api/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(sampleDto("false"))))
+                        .content(objectMapper.writeValueAsString(sampleDto(false))))
                 .andExpect(status().is(status))
                 .andExpect(jsonPath("$.message").value(message));
     }

@@ -78,14 +78,4 @@ public class JwtProcessTest {
         assertFalse(result); // 하루 초과 → false
     }
 
-    @Test
-    @DisplayName("쿠키 생성 테스트 - 접두어 제거 확인")
-    void createJwtCookie_success() {
-        String tokenWithPrefix = "Bearer abc.def.ghi";
-        var cookie = jwtProcess.createJwtCookie(tokenWithPrefix, front.meetudy.constant.security.CookieEnum.accessToken);
-
-        assertEquals("access-token", cookie.getName());
-        assertEquals("abc.def.ghi", cookie.getValue());
-        assertEquals("/", cookie.getPath());
-    }
 }

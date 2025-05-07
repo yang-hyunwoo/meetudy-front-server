@@ -1,8 +1,10 @@
 package front.meetudy.controller.member;
 
+import front.meetudy.auth.LoginUser;
 import front.meetudy.docs.join.JoinValidationErrorExample;
 import front.meetudy.dto.request.member.JoinMemberReqDto;
 import front.meetudy.dto.response.member.JoinMemberResDto;
+import front.meetudy.dto.response.member.LoginResDto;
 import front.meetudy.service.member.MemberService;
 import front.meetudy.util.response.Response;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -29,7 +32,11 @@ public class MemberController {
     public ResponseEntity<Response<JoinMemberResDto>> join(@RequestBody JoinMemberReqDto joinReqDto ) {
         JoinMemberResDto join = memberService.join(joinReqDto);
         return Response.ok("회원가입이 완료 되었습니다.", join);
+    }
 
+    @GetMapping("/user/me")
+    public ResponseEntity<Response<LoginResDto>> getUser(@AuthenticationPrincipal LoginUser loginUser) {
+        return Response.ok("LoginOk",new LoginResDto(loginUser.getMember()));
     }
 
 }

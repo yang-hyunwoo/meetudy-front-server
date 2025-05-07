@@ -8,6 +8,7 @@ import front.meetudy.config.jwt.JwtProcess;
 import front.meetudy.constant.member.MemberEnum;
 import front.meetudy.constant.security.CookieEnum;
 import front.meetudy.domain.member.Member;
+import front.meetudy.exception.CustomApiException;
 import front.meetudy.property.JwtProperty;
 import front.meetudy.repository.member.MemberRepository;
 import front.meetudy.service.redis.RedisService;
@@ -20,20 +21,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseCookie;
-import org.springframework.security.oauth2.jwt.SupplierJwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static front.meetudy.constant.error.ErrorEnum.ERR_004;
+import static front.meetudy.constant.security.TokenErrorCodeEnum.SC_ACCESS_TOKEN_INVALID;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.mockito.ArgumentMatchers.eq;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -51,8 +52,6 @@ public class JwtAuthorizationFilterTest {
     MemberRepository memberRepository;
     @MockBean
     RedisService redisService;
-    @MockBean
-    private SupplierJwtDecoder supplierJwtDecoder;
 
     private static final String SECRET = "teststs";
 
@@ -80,7 +79,7 @@ public class JwtAuthorizationFilterTest {
         // when & then
         mockMvc.perform(get("/api/user/any-endpoint") // 실제 필터를 타게 하려면 authenticated 경로 필요
                         .header("Authorization", "Bearer " + token)
-                        .header("isAutoLogin", "true"))
+                        .cookie(new Cookie("isAutoLogin", "true")))
                 .andExpect(status().isOk());
 
     }
@@ -102,7 +101,7 @@ public class JwtAuthorizationFilterTest {
         when(jwtProperty.getHeader()).thenReturn("Authorization");
         when(jwtProperty.getTokenPrefix()).thenReturn("Bearer ");
         when(jwtProperty.getSecretKey()).thenReturn(SECRET);
-        when(jwtProcess.verifyAccessToken(anyString())).thenThrow(new RuntimeException("expired"));
+        when(jwtProcess.verifyAccessToken(anyString())).thenThrow(new CustomApiException(UNAUTHORIZED, ERR_004, SC_ACCESS_TOKEN_INVALID.getValue()));
 
         String expiredToken = generateToken(-1000 * 60);
 
@@ -134,7 +133,7 @@ public class JwtAuthorizationFilterTest {
         when(jwtProcess.verifyRefreshToken(eq(fixedRefreshToken))).thenReturn(1L);
 
         // access token 새로 발급 + 그것도 검증 성공하게
-        when(jwtProcess.createAccessToken(any())).thenReturn("Bearer " + newAccessToken);
+        when(jwtProcess.createAccessToken(any())).thenReturn(newAccessToken);
         when(jwtProcess.verifyAccessToken(eq(newAccessToken))).thenReturn(loginUser);
 
         // 새 refreshToken 발급 시에도 고정된 값 반환
@@ -151,7 +150,7 @@ public class JwtAuthorizationFilterTest {
         when(redisService.getRefreshToken("mocked-refresh-uuid")).thenReturn("1"); // 또는 "1L"을 String으로
         mockMvc.perform(get("/api/user/any-endpoint")
                         .header("Authorization", "Bearer " + expiredToken)
-                        .header("isAutoLogin", "true")
+                        .cookie(new Cookie("isAutoLogin", "true"))
                         .cookie(new Cookie("refresh-token", fixedRefreshToken)))
                 .andExpect(status().isOk());
     }
@@ -179,7 +178,7 @@ public class JwtAuthorizationFilterTest {
         // when & then
         mockMvc.perform(get("/api/user/any-endpoint")
                         .header("Authorization", "Bearer " + expiredAccessToken)
-                        .header("isAutoLogin", "true")
+                        .cookie(new Cookie("isAutoLogin", "true"))
                         .cookie(new Cookie("refresh-token", expiredRefreshToken)))
                 .andExpect(status().isUnauthorized());
     }
@@ -208,12 +207,12 @@ public class JwtAuthorizationFilterTest {
 
         when(jwtProcess.createJwtCookie(anyString(), eq(CookieEnum.accessToken)))
                 .thenReturn(ResponseCookie.from("access-token", "mocked-token").path("/").build());
-        when(jwtProcess.createJwtCookie(anyString(), eq(CookieEnum.refreshToken)))
+        when(jwtProcess.createRefreshJwtCookie(anyString(), eq(CookieEnum.refreshToken),anyBoolean()))
                 .thenReturn(ResponseCookie.from("refresh-token", "mocked-token").path("/").build());
 
         // 새 access token 및 refresh token 발급
         when(jwtProcess.createAccessToken(any())).thenReturn("Bearer " + newAccessToken);
-        when(jwtProcess.verifyAccessToken(eq(newAccessToken))).thenReturn(loginUser);
+        when(jwtProcess.verifyAccessToken(eq("Bearer "+newAccessToken))).thenReturn(loginUser);
         when(jwtProcess.createRefreshToken(any())).thenReturn(validRefreshToken);
 
         // 만료 검증은 모두 false 처리
@@ -252,7 +251,7 @@ public class JwtAuthorizationFilterTest {
         mockMvc.perform(get("/api/user/any-endpoint")
                         .cookie(new Cookie("access-token", expiredAccessToken))
                         .cookie(new Cookie("refresh-token", expiredRefreshToken))
-                        .header("isAutoLogin", "true"))
+                        .cookie(new Cookie("isAutoLogin", "true")))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -286,13 +285,14 @@ public class JwtAuthorizationFilterTest {
                 .build();
 
         when(jwtProcess.createJwtCookie(anyString(), eq(CookieEnum.accessToken))).thenReturn(mockedAccessCookie);
-        when(jwtProcess.createJwtCookie(anyString(), eq(CookieEnum.refreshToken))).thenReturn(mockedRefreshCookie);
+        when(jwtProcess.createRefreshJwtCookie(anyString(), eq(CookieEnum.refreshToken),anyBoolean())).thenReturn(mockedRefreshCookie);
 
-        when(jwtProcess.createAccessToken(any())).thenReturn("Bearer " + newAccessToken);
-        when(jwtProcess.verifyAccessToken(eq(newAccessToken))).thenReturn(loginUser);
+
         when(jwtProcess.createRefreshToken(any())).thenReturn(validRefreshToken);
         when(jwtProcess.verifyExpired(anyString())).thenReturn(false);
         when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+        when(jwtProcess.createAccessToken(any())).thenReturn("Bearer " + newAccessToken);
+        when(jwtProcess.verifyAccessToken(eq("Bearer " + newAccessToken))).thenReturn(loginUser);
         when(jwtProcess.extractRefreshUuid(validRefreshToken)).thenReturn("mocked-refresh-uuid");
         when(redisService.getRefreshToken("mocked-refresh-uuid")).thenReturn("1"); // 또는 "1L"을 String으로
         // when & then

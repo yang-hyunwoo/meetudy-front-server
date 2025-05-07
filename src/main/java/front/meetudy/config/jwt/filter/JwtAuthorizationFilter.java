@@ -102,7 +102,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
      * @param response
      */
     private void cookieVerify(HttpServletRequest request, HttpServletResponse response) {
-        String access = getCookieValue(request, CookieEnum.accessToken);
+        String access = getCookieValue(request, accessToken);
         String isAutoLogin = getCookieValue(request, CookieEnum.isAutoLogin);
         if (StringUtils.hasText(access) && StringUtils.hasText(isAutoLogin)) {
             handleAccessTokenValidation(request, response, access);
@@ -141,8 +141,6 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 sendError(response, SC_REFRESH_TOKEN_EXPIRED.getValue());
             }
         } catch (JWTDecodeException e){
-            //doesn't have a valid JSON format
-            //JwtDecode 시 exception
             e.printStackTrace();
             sendError(response, SC_TOKEN_DECODE_ERROR.getValue());
             return;
@@ -165,13 +163,12 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     private void accessTokenGenerated(HttpServletResponse response, Long userId) {
         Member member = memberRepository.findById(userId).orElseThrow(() -> new CustomApiException(LG_MEMBER_ID_PW_INVALID.getStatus(), ERR_004,LG_MEMBER_ID_PW_INVALID.getMessage()));
         String accessToken = jwtProcess.createAccessToken(new LoginUser(member));
-        String token = extractToken(accessToken);
         if(jwtProperty.isUseCookie()) {
-            response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(token, CookieEnum.accessToken).toString());
+            response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(accessToken, CookieEnum.accessToken).toString());
         } else {
-            response.addHeader(jwtProperty.getHeader(), token); //header
+            response.addHeader(jwtProperty.getHeader(), accessToken); //header
         }
-        setAuthentication(jwtProcess.verifyAccessToken(token));
+        setAuthentication(jwtProcess.verifyAccessToken(accessToken));
     }
 
     /**
@@ -186,24 +183,17 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         String refreshUuid = jwtProcess.extractRefreshUuid(newRefreshToken);
         Duration ttl = Duration.ofDays(jwtProperty.getRefreshTokenExpireDays()); // 설정에 따라 TTL 결정
         redisService.saveRefreshToken(refreshUuid, member.getId(), ttl);
-
-        if(jwtProperty.isUseCookie()) {
-            response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(newRefreshToken, refreshToken).toString());
-        } else {
-            response.addHeader(refreshToken.getValue(), newRefreshToken); //header
-        }
+        response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(newRefreshToken, CookieEnum.refreshToken,member.isAutoLogin()).toString());
     }
 
     private static void setAuthentication(LoginUser loginUser) {
-        Authentication authentication = new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
+        Authentication authentication = new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities()); //인증용 객체 생성
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
     private boolean isHeaderVerify(HttpServletRequest request) {
         String header = request.getHeader(jwtProperty.getHeader());
-        String autoChk = request.getHeader(isAutoLogin.getValue());
-
-        return (header != null && header.startsWith(jwtProperty.getTokenPrefix())) && (autoChk != null);
+        return (header != null && header.startsWith(jwtProperty.getTokenPrefix()));
     }
 
     private String getCookieValue(HttpServletRequest request, CookieEnum cookieNameEnum) {

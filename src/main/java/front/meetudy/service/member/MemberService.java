@@ -52,7 +52,7 @@ public class MemberService {
      */
     public void memberLgnFailCnt(String email) {
        memberRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomApiException(LG_MEMBER_ID_PW_INVALID.getStatus(), ERR_004,LG_MEMBER_ID_PW_INVALID.getMessage()))
+                .orElseThrow(() -> new CustomApiException(LG_MEMBER_ID_PW_INVALID.getStatus(), ERR_007,LG_MEMBER_ID_PW_INVALID.getMessage()))
                 .increaseFailLoginCount();
     }
 
@@ -62,7 +62,7 @@ public class MemberService {
      */
     public void memberLgnFailInit(Long id) {
      memberRepository.findById(id)
-             .orElseThrow(() -> new CustomApiException(LG_MEMBER_ID_PW_INVALID.getStatus(), ERR_004, LG_MEMBER_ID_PW_INVALID.getMessage()))
+             .orElseThrow(() -> new CustomApiException(LG_MEMBER_ID_PW_INVALID.getStatus(), ERR_007, LG_MEMBER_ID_PW_INVALID.getMessage()))
              .initLoginCount();
     }
 }

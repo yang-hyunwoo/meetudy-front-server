@@ -4,6 +4,7 @@ package front.meetudy.config.jwt;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import front.meetudy.auth.LoginUser;
@@ -71,9 +72,9 @@ public class JwtProcess {
      * @return
      */
     public String createRefreshToken(LoginUser loginUser) {
-        return jwtProperty.getTokenPrefix() + JWT.create()
+        return JWT.create()
                 .withSubject(SUBJECT)
-                .withExpiresAt(new Date(System.currentTimeMillis() +jwtProperty.getExpirationTime()* 20L))
+                .withExpiresAt(new Date(System.currentTimeMillis() + jwtProperty.getExpirationTime() * 20L))
                 .withClaim(CLAIM_ID, loginUser.getMember().getId().toString())
                 .withClaim(refreshToken.getValue(), UUID.randomUUID().toString())
                 .sign(algorithm());
@@ -86,12 +87,17 @@ public class JwtProcess {
      */
     public LoginUser verifyAccessToken(String token)  {
         try {
+            if (token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            }
             DecodedJWT decodedJWT = JWT.require(algorithm()).build().verify(token);
             Member member = Member.partialOf(
                             Long.parseLong(decodedJWT.getClaim(CLAIM_ID).asString()),
                             MemberEnum.valueOf(decodedJWT.getClaim(CLAIM_ROLE).asString())
                     );
             return new LoginUser(member);
+        } catch (TokenExpiredException e) {
+            throw e;
         } catch (JWTVerificationException e) {
             throw new CustomApiException(UNAUTHORIZED, ERR_004,SC_ACCESS_TOKEN_INVALID.getValue());
         }
@@ -112,13 +118,17 @@ public class JwtProcess {
         }
     }
 
-    //
+    /**
+     * 리프래시 토큰이 30분 이하로 남앗는지 체크
+     * @param token
+     * @return
+     */
     public boolean verifyExpired(String token) {
         try {
             DecodedJWT decodedJWT = JWT.require(algorithm()).build().verify(token);
             LocalDateTime refreshExpired = decodedJWT.getExpiresAt().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
             Duration duration = Duration.between(LocalDateTime.now(), refreshExpired);
-            return duration.toHours() <= 24 && duration.toHours() >= 0;
+            return !duration.isNegative() && duration.toMinutes() <= 30;
         } catch (JWTVerificationException e) {
             log.info("토큰 만료 검증 실패: "+e.getMessage());
             return false;
@@ -126,16 +136,39 @@ public class JwtProcess {
     }
 
     public String extractRefreshUuid(String refreshToken) {
-        DecodedJWT decodedJWT = jwtVerifier.verify(removeTokenPrefix(refreshToken));
+        DecodedJWT decodedJWT = jwtVerifier.verify(refreshToken);
         return decodedJWT.getClaim(CookieEnum.refreshToken.getValue()).asString();
     }
 
+    /**
+     * accessToken
+     * @param accessToken
+     * @param cookieName
+     * @return
+     */
     public ResponseCookie createJwtCookie(String accessToken , CookieEnum cookieName) {
-        int time = 600;
-        if(cookieName.getValue().equals(refreshToken.getValue())) {
+
+        return ResponseCookie.from(cookieName.getValue(), accessToken)
+                .maxAge(600)
+//                    .httpOnly(true)
+//                    .secure(true)
+                //.sameSite("Lax")
+                .path("/")
+                .build();
+    }
+
+    /**
+     * refreshToken
+     * @param accessToken
+     * @param cookieName
+     * @return
+     */
+    public ResponseCookie createRefreshJwtCookie(String accessToken , CookieEnum cookieName , boolean chk) {
+        int time = 24 * 60 * 60;
+        if(chk) {
             time = 7 * 24 * 60 * 60;
         }
-        return ResponseCookie.from(cookieName.getValue(), removeTokenPrefix(accessToken))
+        return ResponseCookie.from(cookieName.getValue(), accessToken)
                 .maxAge(time)
 //                    .httpOnly(true)
 //                    .secure(true)
@@ -161,13 +194,6 @@ public class JwtProcess {
 
     private Algorithm algorithm() {
         return Algorithm.HMAC512(jwtProperty.getSecretKey().getBytes(StandardCharsets.UTF_8));
-    }
-
-    private String removeTokenPrefix(String token) {
-        if (token != null && token.startsWith(jwtProperty.getTokenPrefix())) {
-            return token.substring(jwtProperty.getTokenPrefix().length()).trim();
-        }
-        throw new CustomApiException(UNAUTHORIZED, ERR_004,SC_INVALID_TOKEN_FORMAT.getValue());
     }
 
 }

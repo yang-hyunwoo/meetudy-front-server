@@ -34,6 +34,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     /**
      * 성공시 쿠키 생성
+     * 자동 로그인 시 refresh 쿠키 7일 아닐시 1일
      * @param request the request which caused the successful authentication
      * @param response the response
      * @param authentication the <tt>Authentication</tt> object which was created during
@@ -50,12 +51,12 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
        if(jwtProperty.isUseCookie()) {
            response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(accessToken, CookieEnum.accessToken).toString());
-           response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(refreshToken, CookieEnum.refreshToken).toString());
-           response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(loginReqDto.getChk(), isAutoLogin).toString());
+           response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken,loginReqDto.isChk()).toString());
+           response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(String.valueOf(loginReqDto.isChk()), isAutoLogin).toString());
        } else {
            response.addHeader(jwtProperty.getHeader(), accessToken);
-           response.addHeader(CookieEnum.refreshToken.getValue(), refreshToken);
-           response.addHeader(isAutoLogin.getValue(), loginReqDto.getChk());
+           response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken,loginReqDto.isChk()).toString());
+           response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(String.valueOf(loginReqDto.isChk()), isAutoLogin).toString());
        }
        String refreshUuid = jwtProcess.extractRefreshUuid(refreshToken);
        Duration ttl = Duration.ofDays(jwtProperty.getRefreshTokenExpireDays()); // 설정에 따라 TTL 결정

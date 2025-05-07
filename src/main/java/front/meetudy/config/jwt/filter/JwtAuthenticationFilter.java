@@ -99,12 +99,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         memberService.memberLgnFailInit(loginUser.getMember().getId()); // 로그인 실패 횟수 초기화
         if(jwtProperty.isUseCookie()) {
             response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(accessToken, CookieEnum.accessToken).toString());
-            response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(refreshToken, CookieEnum.refreshToken).toString());
-            response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(loginReqDto.getChk(), isAutoLogin).toString());
+            response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken,loginReqDto.isChk()).toString());
+            response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(String.valueOf(loginReqDto.isChk()) , isAutoLogin).toString());
         } else {
             response.addHeader(jwtProperty.getHeader(), accessToken);
-            response.addHeader(CookieEnum.refreshToken.getValue(), refreshToken);
-            response.addHeader(isAutoLogin.getValue(), loginReqDto.getChk());
+            response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken,loginReqDto.isChk()).toString());
+            response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(String.valueOf(loginReqDto.isChk()), isAutoLogin).toString());
         }
 
         String refreshUuid = jwtProcess.extractRefreshUuid(refreshToken);
@@ -125,7 +125,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         log.warn("로그인 실패: {}", failed.getMessage(), failed);
         LoginReqDto loginReqDto = extractLoginDto(request);
         LoginErrorCode errorCode = LoginErrorResolver.resolve(failed.getCause(), loginReqDto, memberService);
-        CustomResponseUtil.fail(response, errorCode.getMessage(), errorCode.getStatus(), ERR_004);
+        CustomResponseUtil.fail(response, errorCode.getMessage(), errorCode.getStatus(), ERR_007);
     }
 
     private LoginReqDto extractLoginDto(HttpServletRequest request) {

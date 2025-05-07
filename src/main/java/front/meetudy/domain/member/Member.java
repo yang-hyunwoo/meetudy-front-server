@@ -69,6 +69,8 @@ public class Member extends BaseEntity {
 
     private LocalDateTime passwordChangeAt;
 
+    private boolean autoLogin;
+
     @Builder
     protected Member(Long id,
                      Long profileImageId,
@@ -85,7 +87,8 @@ public class Member extends BaseEntity {
                      int failLoginCount,
                      boolean  isDeleted,
                      LocalDateTime deletedAt,
-                     LocalDateTime passwordChangeAt) {
+                     LocalDateTime passwordChangeAt,
+                     boolean autoLogin) {
         this.id = id;
         this.profileImageId = profileImageId;
         this.email = email;
@@ -102,6 +105,7 @@ public class Member extends BaseEntity {
         this.isDeleted = isDeleted;
         this.deletedAt = deletedAt;
         this.passwordChangeAt = passwordChangeAt;
+        this.autoLogin = autoLogin;
     }
 
     /**
@@ -138,6 +142,7 @@ public class Member extends BaseEntity {
                 .failLoginCount(0)
                 .isDeleted(false)
                 .passwordChangeAt(LocalDateTime.now())
+                .autoLogin(false)
                 .build();
 
     }
@@ -171,6 +176,7 @@ public class Member extends BaseEntity {
                 .failLoginCount(0)
                 .isDeleted(false)
                 .passwordChangeAt(LocalDateTime.now())
+                .autoLogin(false)
                 .build();
 
     }
@@ -207,7 +213,7 @@ public class Member extends BaseEntity {
         if (this.failLoginCount < 5) {
             this.failLoginCount++;
         } else {
-            throw new CustomApiException(LG_PASSWORD_WRONG_LOCKED.getStatus(), ERR_004,LG_PASSWORD_WRONG_LOCKED.getMessage());
+            throw new CustomApiException(LG_PASSWORD_WRONG_LOCKED.getStatus(), ERR_007,LG_PASSWORD_WRONG_LOCKED.getMessage());
         }
     }
 
