@@ -16,8 +16,8 @@ public class LoginResDto {
     private boolean passwordExpired;
 
     public LoginResDto(Member member) {
+
         this.id = member.getId();
         this.name = member.getName();
-        this.passwordExpired = member.getPasswordChangeAt().isBefore(LocalDateTime.now().minusDays(90));
     }
 }

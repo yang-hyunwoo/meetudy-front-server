@@ -62,8 +62,11 @@ public class MemberLoginController {
             Duration ttl = loginReqDtoAuth.isChk() ? Duration.ofDays(7) : Duration.ofDays(1);   // 자동 로그인: 7일;  // 일반 로그인: 1일
             String accessToken = jwtProcess.createAccessToken(loginUser);
             String refreshToken = jwtProcess.createRefreshToken(loginUser, ttl);
-
             LoginResDto loginRespDto = new LoginResDto(loginUser.getMember());
+
+            if (loginUser.getMember().getPasswordChangeAt().isBefore(LocalDateTime.now().minusDays(90))) {
+                loginRespDto.setPasswordExpired(true);
+            }
             memberService.memberLgnFailInit(loginUser.getMember().getId()); // 로그인 실패 횟수 초기화
 
             jetGenerated(response, accessToken, refreshToken, ttl, loginReqDtoAuth);
