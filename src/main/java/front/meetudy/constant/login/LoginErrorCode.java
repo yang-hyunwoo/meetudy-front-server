@@ -1,4 +1,4 @@
-package front.meetudy.exception.login;
+package front.meetudy.constant.login;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

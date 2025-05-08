@@ -5,11 +5,10 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import front.meetudy.auth.LoginUser;
 import front.meetudy.config.jwt.JwtProcess;
-import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.constant.security.CookieEnum;
 import front.meetudy.dto.request.member.LoginReqDto;
 import front.meetudy.dto.response.member.LoginResDto;
-import front.meetudy.exception.login.LoginErrorCode;
+import front.meetudy.constant.login.LoginErrorCode;
 import front.meetudy.property.JwtProperty;
 import front.meetudy.service.member.MemberService;
 import front.meetudy.service.redis.RedisService;
@@ -29,6 +28,10 @@ import java.time.Duration;
 import static front.meetudy.constant.error.ErrorEnum.*;
 import static front.meetudy.constant.security.CookieEnum.*;
 
+/**
+ * 커스텀 로그인 컨트롤러 사용으로 사용하지 않음
+ */
+@Deprecated
 @Slf4j
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
@@ -48,7 +51,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             , JwtProperty jwtProperty
             , RedisService redisService) {
         super(authenticationManager);
-        setFilterProcessesUrl("/api/login");
+        //setFilterProcessesUrl("/api/login");
         this.authenticationManager = authenticationManager;
         this.memberService = memberService;
         this.jwtProcess = jwtProcess;
@@ -110,7 +113,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String refreshUuid = jwtProcess.extractRefreshUuid(refreshToken);
 
         redisService.saveRefreshToken(refreshUuid, loginUser.getMember().getId(),loginReqDto.isChk(), ttl);
-
+        response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken,ttl ).toString());
         CustomResponseUtil.success(response, loginRespDto,"로그인 성공");
     }
 

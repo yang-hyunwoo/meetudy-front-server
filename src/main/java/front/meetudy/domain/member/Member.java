@@ -1,6 +1,5 @@
 package front.meetudy.domain.member;
 
-import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.constant.member.MemberEnum;
 import front.meetudy.constant.member.MemberProviderTypeEnum;
 import front.meetudy.domain.common.BaseEntity;
@@ -13,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import static front.meetudy.constant.error.ErrorEnum.*;
-import static front.meetudy.exception.login.LoginErrorCode.LG_PASSWORD_WRONG_LOCKED;
+import static front.meetudy.constant.login.LoginErrorCode.LG_PASSWORD_WRONG_LOCKED;
 
 
 @Entity

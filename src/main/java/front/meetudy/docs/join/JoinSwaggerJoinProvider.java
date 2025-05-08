@@ -4,7 +4,7 @@ public class JoinSwaggerJoinProvider {
     public static final String JOIN_VALIDATION_NOT_NULL = "{\n" +
             "  \"resultCode\": \"ERROR\",\n" +
             "  \"httpCode\": 400,\n" +
-            "  \"message\": \"XXXX은 필수값잉ㅊㅍ,,,qw21.\",\n" +
+            "  \"message\": \"XXXX은 필수입니다.\",\n" +
             "  \"errCode\": \"ERR_001\",\n" +
             "  \"errCodeMsg\": \"필수값이 없습니다.\",\n" +
             "  \"data\": {\n" +
@@ -17,7 +17,7 @@ public class JoinSwaggerJoinProvider {
     public static final String JOIN_VALIDATION_LIST_NOT_NULL = "{\n" +
             "  \"resultCode\": \"ERROR\",\n" +
             "  \"httpCode\": 400,\n" +
-            "  \"message\": \"XXXX은 필수값잉ㅊㅍ,,,qw21.\",\n" +
+            "  \"message\": \"XXXX은 필수입니다.\",\n" +
             "  \"errCode\": \"ERR_001\",\n" +
             "  \"errCodeMsg\": \"필수값이 없습니다.\",\n" +
             "  \"data\": {\n" +

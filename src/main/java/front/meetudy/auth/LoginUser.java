@@ -77,12 +77,12 @@ public class LoginUser implements UserDetails , OAuth2User {
     }
 
     /**
-     * 비밀번호 3개월 이상 시
+     * 비밀번호 만료
      * @return
      */
     @Override
     public boolean isCredentialsNonExpired() {
-        return ChronoUnit.DAYS.between(member.getPasswordChangeAt().toLocalDate(),LocalDate.now()) <=90;
+        return true;
     }
 
     /**

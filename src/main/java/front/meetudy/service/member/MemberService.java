@@ -1,14 +1,11 @@
 package front.meetudy.service.member;
 
-import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.constant.member.MemberProviderTypeEnum;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.member.MemberDto;
 import front.meetudy.dto.request.member.JoinMemberReqDto;
 import front.meetudy.dto.response.member.JoinMemberResDto;
 import front.meetudy.exception.CustomApiException;
-import front.meetudy.exception.join.JoinErrorCode;
-import front.meetudy.exception.login.LoginErrorCode;
 import front.meetudy.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static front.meetudy.constant.error.ErrorEnum.*;
 import static front.meetudy.exception.join.JoinErrorCode.*;
-import static front.meetudy.exception.login.LoginErrorCode.*;
+import static front.meetudy.constant.login.LoginErrorCode.*;
 
 @Service
 @RequiredArgsConstructor

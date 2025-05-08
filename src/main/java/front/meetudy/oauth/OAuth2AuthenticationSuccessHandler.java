@@ -61,7 +61,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
        String refreshUuid = jwtProcess.extractRefreshUuid(refreshToken);
 
        redisService.saveRefreshToken(refreshUuid, loginUser.getMember().getId(),loginReqDto.isChk(), ttl);
-       
+       response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken,ttl ).toString());
         clearAuthenticationAttributes(request, response);
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
