@@ -38,8 +38,7 @@ import java.util.Map;
 import static front.meetudy.constant.error.ErrorEnum.*;
 import static front.meetudy.constant.security.CookieEnum.*;
 import static front.meetudy.constant.security.TokenErrorCodeEnum.*;
-import static front.meetudy.exception.login.LoginErrorCode.*;
-import static front.meetudy.util.security.securityUtil.extractToken;
+import static front.meetudy.constant.login.LoginErrorCode.*;
 
 /*
  모든 주소에서 동작 (토큰 검증)

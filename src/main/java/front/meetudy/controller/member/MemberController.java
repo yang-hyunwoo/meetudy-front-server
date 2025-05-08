@@ -34,6 +34,7 @@ public class MemberController {
         return Response.ok("회원가입이 완료 되었습니다.", join);
     }
 
+    @Operation(summary = "로그인 여부 체크", description = "로그인 여부 체크")
     @GetMapping("/user/me")
     public ResponseEntity<Response<LoginResDto>> getUser(@AuthenticationPrincipal LoginUser loginUser) {
         return Response.ok("LoginOk",new LoginResDto(loginUser.getMember()));

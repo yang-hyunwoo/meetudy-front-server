@@ -50,11 +50,6 @@ public class SecurityConfig {
         return new JwtAuthorizationFilter(authenticationManager, memberRepository, jwtProcess, jwtProperty,redisService);
     }
 
-    @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter(AuthenticationManager authenticationManager) {
-        return new JwtAuthenticationFilter(authenticationManager, memberService, jwtProcess, jwtProperty,redisService);
-    }
-
     /**
      * 운영 환경
      * @param http
@@ -109,7 +104,6 @@ public class SecurityConfig {
                         .failureHandler(oAuth2AuthenticationFailureHandler)
                 )
                 .addFilterBefore(jwtAuthorizationFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class)
-                .addFilter(jwtAuthenticationFilter(authenticationManager)) //api/login 호출
                 .exceptionHandling(handler -> handler.authenticationEntryPoint(new CustomAuthenticationEntryPoint(jwtProperty)))
                 .exceptionHandling(handler -> handler.accessDeniedHandler(new CustomAccessDeniedHandler()))
                 .logout(logout-> logout.logoutUrl("/api/logout").logoutSuccessHandler(new CustomLogOutHandler(jwtProcess,redisService)))
@@ -118,7 +112,8 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
-                                "/webjars/**"
+                                "/webjars/**",
+                                "/api/login"
                         ).permitAll()
                         .requestMatchers("/api/user/**").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")

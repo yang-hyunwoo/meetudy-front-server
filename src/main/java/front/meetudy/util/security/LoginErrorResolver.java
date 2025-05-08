@@ -1,18 +1,22 @@
 package front.meetudy.util.security;
 
 import front.meetudy.dto.request.member.LoginReqDto;
-import front.meetudy.exception.login.LoginErrorCode;
+import front.meetudy.constant.login.LoginErrorCode;
 import front.meetudy.service.member.MemberService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;
 
-import static front.meetudy.exception.login.LoginErrorCode.*;
+import static front.meetudy.constant.login.LoginErrorCode.*;
 
 @Slf4j
 public class LoginErrorResolver {
 
     public static LoginErrorCode resolve(Throwable failed, LoginReqDto loginReqDto, MemberService memberService) {
+        if (failed == null) {
+            log.warn("resolve()에 전달된 예외가 null입니다.");
+            return LG_ANOTHER_ERROR;
+        }
         String exceptionType = failed.getClass().getSimpleName();
         LoginErrorCode errorCode;
 
