@@ -86,7 +86,32 @@ public class SecurityConfig {
     @Profile("test")
     public SecurityFilterChain securityFilterChainTest(HttpSecurity http) throws Exception {
         AuthenticationManager authenticationManager = authenticationManager(http.getSharedObject(AuthenticationConfiguration.class));
-        return buildSecurityFilterChain(http, authenticationManager, true);
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfig.configurationSource()))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+
+                .addFilterBefore(jwtAuthorizationFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(handler -> handler.authenticationEntryPoint(new CustomAuthenticationEntryPoint(jwtProperty)))
+                .exceptionHandling(handler -> handler.accessDeniedHandler(new CustomAccessDeniedHandler()))
+                .logout(logout-> logout.logoutUrl("/api/logout").logoutSuccessHandler(new CustomLogOutHandler(jwtProcess,redisService)))
+                .authorizeHttpRequests(requests -> requests
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**",
+                                "/api/login"
+                        ).permitAll()
+                        .requestMatchers("/api/private/**","/api/user/**").authenticated()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .anyRequest().permitAll()
+
+                );
+            http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
+        return http.build();
     }
 
     private SecurityFilterChain buildSecurityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager, boolean isDev) throws Exception {
@@ -115,7 +140,7 @@ public class SecurityConfig {
                                 "/webjars/**",
                                 "/api/login"
                         ).permitAll()
-                        .requestMatchers("/api/user/**").authenticated()
+                        .requestMatchers("/api/private/**","/api/user/**").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().permitAll()
 

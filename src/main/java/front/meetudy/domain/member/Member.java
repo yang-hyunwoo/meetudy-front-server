@@ -30,17 +30,20 @@ public class Member extends BaseEntity {
 
     private Long profileImageId;
 
-    @Column(nullable = false)
+    @Column(nullable = false ,length = 100)
+
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false ,length = 50)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false , length = 30)
     private String nickname;
 
+    @Column(length = 8)
     private String birth;
 
+    @Column(length = 20)
     private String phoneNumber;
 
     @Column(nullable = false)
@@ -54,8 +57,10 @@ public class Member extends BaseEntity {
     private MemberEnum role;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 10)
     private MemberProviderTypeEnum provider;
 
+    @Column(length = 100)
     private String providerId;
 
     @Column(nullable = false)
