@@ -17,8 +17,8 @@ import java.util.Objects;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "faq_board",
         indexes = {
-                @Index(name = "idx_question", columnList = "question"),
-                @Index(name = "idx_deleted", columnList = "deleted")
+                @Index(name = "idx_faq_board_question", columnList = "question"),
+                @Index(name = "idx_faq_board_deleted", columnList = "deleted")
         })
 public class FaqBoard extends BaseEntity {
 
@@ -99,5 +99,20 @@ public class FaqBoard extends BaseEntity {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+
+    @Override
+    public String toString() {
+        return "FaqBoard{" +
+                "id=" + id +
+                ", member=" + member +
+                ", question='" + question + '\'' +
+                ", answer='" + answer + '\'' +
+                ", faqType=" + faqType +
+                ", sort=" + sort +
+                ", visible=" + visible +
+                ", deleted=" + deleted +
+                '}';
     }
 }

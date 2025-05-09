@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/contact")
 @RequiredArgsConstructor
-@Tag(name="FAQ " ,description = "FaqController")
+@Tag(name="FAQ 관리 API" ,description = "FaqController")
 @Slf4j
 public class FaqController {
 
