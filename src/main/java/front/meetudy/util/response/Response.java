@@ -5,11 +5,14 @@ import front.meetudy.constant.error.ErrorEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static org.springframework.http.HttpHeaders.*;
 
 /**
  * API 공통 응답 포맷팅
@@ -83,6 +86,9 @@ public class Response<T> {
     }
     public static <T> ResponseEntity<Response<T>> ok(String message, T data) {
         return ResponseEntity.status(HttpStatus.OK).body(successRead(message, data));
+    }
+    public static <T> ResponseEntity<Response<T>> ok(String headerValues, String message, T data) {
+        return ResponseEntity.status(HttpStatus.OK).header(SET_COOKIE,headerValues).body(successRead(message, data));
     }
 
     public static <T> ResponseEntity<Response<T>> create(String message, T data) {

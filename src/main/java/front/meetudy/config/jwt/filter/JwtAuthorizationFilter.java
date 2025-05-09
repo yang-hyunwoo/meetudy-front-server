@@ -26,6 +26,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import java.io.IOException;
 import java.time.Duration;
@@ -33,6 +34,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
 
 import static front.meetudy.constant.error.ErrorEnum.*;
@@ -45,7 +47,16 @@ import static front.meetudy.constant.login.LoginErrorCode.*;
  */
 @Slf4j
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
+    private boolean isProtected(String uri) {
+        return PROTECTED_PATHS.stream().anyMatch(pattern -> pathMatcher.match(pattern, uri));
+    }
+    private static final List<String> PROTECTED_PATHS = List.of(
+            "/api/private/**",
+            "/api/admin/**",
+            "/api/user/**"
+    );
 
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
     private final MemberRepository memberRepository;
     private final JwtProcess jwtProcess;
     private final JwtProperty jwtProperty;
@@ -68,8 +79,17 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         this.redisService = redisService;
     }
 
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+        String uri = request.getRequestURI();
+
+        // 인증 대상이 아닌 경우 필터 통과
+        if (!isProtected(uri)) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         if(jwtProperty.isUseCookie()) {
             cookieVerify(request, response);
         } else {

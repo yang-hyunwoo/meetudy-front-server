@@ -34,6 +34,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 
 import static front.meetudy.constant.security.CookieEnum.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -88,7 +89,10 @@ class MemberLoginControllerTest {
     @DisplayName("로그인_성공_토큰_쿠키_반환")
     void loginSuccessTokenCookieReturn() throws Exception {
         LoginReqDto loginDto = sampleDto(true);
-        Member member = Member.partialOf(1L, MemberEnum.USER);
+        Member member = Member.builder()
+                .id(1L)
+                .role(MemberEnum.USER)
+                .passwordChangeAt(LocalDateTime.now()).build();
         LoginUser loginUser = new LoginUser(member);
 
         when(authenticationManager.authenticate(any())).thenReturn(sampleAuthToken(loginUser, loginDto));
@@ -116,7 +120,11 @@ class MemberLoginControllerTest {
     @DisplayName("로그인_성공_토큰_헤더_반환")
     void loginSuccessTokenHeaderReturn() throws Exception {
         LoginReqDto loginDto = sampleDto(false);
-        Member member = Member.partialOf(1L, MemberEnum.USER);
+//        Member member = Member.partialOf(1L, MemberEnum.USER);
+        Member member = Member.builder()
+                .id(1L)
+                .role(MemberEnum.USER)
+                .passwordChangeAt(LocalDateTime.now()).build();
         LoginUser loginUser = new LoginUser(member);
 
         when(authenticationManager.authenticate(any())).thenReturn(sampleAuthToken(loginUser, loginDto));
