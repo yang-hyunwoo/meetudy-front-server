@@ -23,6 +23,7 @@ public class QnaService {
         return qnaRepository.save(qnaWriteReqDto.toEntity(member)).getId();
     }
 
+    @Transactional(readOnly = true)
     public List<QnaListResDto> qnaList(Member member) {
         List<QnaBoard> byQuestionUserIdNative = qnaRepository.findByQuestionUserIdNative(member.getId());
         return byQuestionUserIdNative.stream().map(QnaListResDto::from).toList();

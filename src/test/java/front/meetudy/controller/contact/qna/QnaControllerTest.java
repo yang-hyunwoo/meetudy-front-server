@@ -6,18 +6,12 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import front.meetudy.annotation.SequentialValidator;
 import front.meetudy.auth.LoginUser;
 import front.meetudy.constant.contact.faq.FaqType;
-import front.meetudy.controller.member.MemberController;
-import front.meetudy.domain.contact.faq.FaqBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.contact.qna.QnaWriteReqDto;
-import front.meetudy.dto.request.member.JoinMemberReqDto;
-import front.meetudy.dto.response.member.JoinMemberResDto;
 import front.meetudy.exception.CustomApiFieldException;
 import front.meetudy.exception.CustomExceptionHandler;
 import front.meetudy.service.contact.qna.QnaService;
 import front.meetudy.util.aop.ValidationGroupAspect;
-import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +50,6 @@ class QnaControllerTest {
     @MockBean
     private QnaService qnaService;
 
-
     private  final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -75,7 +68,7 @@ class QnaControllerTest {
                 new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        mockMvc.perform(post("/api/private/qna/insert")
+        mockMvc.perform(post("/api/private/contact/qna/insert")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(qnaWriteReqDto)))
                 .andExpect(status().isCreated())
@@ -96,7 +89,7 @@ class QnaControllerTest {
                 new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        mockMvc.perform(post("/api/private/qna/insert")
+        mockMvc.perform(post("/api/private/contact/qna/insert")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(qnaWriteReqDto)))
                 .andExpect(status().isBadRequest())
@@ -122,7 +115,7 @@ class QnaControllerTest {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         qnaService.qnaSave(qnaWriteReqDto, loginUser.getMember());
 
-        mockMvc.perform(get("/api/private/qna/list"))
+        mockMvc.perform(get("/api/private/contact/qna/list"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Qna 목록 조회 완료"));
     }

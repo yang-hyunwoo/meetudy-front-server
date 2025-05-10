@@ -28,6 +28,7 @@ class QnaRepositoryTest {
     @Autowired
     private TestEntityManager em;
     Member member;
+
     @BeforeEach
     void setUp() {
         member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
