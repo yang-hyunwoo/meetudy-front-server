@@ -3,6 +3,7 @@ package front.meetudy.controller.contact.qna;
 import front.meetudy.auth.LoginUser;
 import front.meetudy.docs.join.JoinValidationErrorExample;
 import front.meetudy.dto.request.contact.qna.QnaWriteReqDto;
+import front.meetudy.dto.response.contact.qna.QnaListResDto;
 import front.meetudy.service.contact.qna.QnaService;
 import front.meetudy.util.response.Response;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,10 +12,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/private")
@@ -28,9 +28,16 @@ public class QnaController {
     @Operation(summary = "Qna 저장", description = "Qna 저장")
     @PostMapping("/qna/insert")
     @JoinValidationErrorExample
-    public ResponseEntity<Response<Object>> qnaInsert(@RequestBody QnaWriteReqDto qnaWriteReqDto , @AuthenticationPrincipal LoginUser loginUser) {
+    public ResponseEntity<Response<Object>> qnaInsert(@RequestBody QnaWriteReqDto qnaWriteReqDto, @AuthenticationPrincipal LoginUser loginUser) {
         qnaService.qnaSave(qnaWriteReqDto, loginUser.getMember());
         return Response.create("정상적으로 문의 등록이 되었습니다.", null);
+    }
+
+    @Operation(summary = "Qna 조회", description = "Qna 조회")
+    @GetMapping("/qna/list")
+    public ResponseEntity<Response<List<QnaListResDto>>> qnaList(@AuthenticationPrincipal LoginUser loginUser) {
+        List<QnaListResDto> qnaListResDtos = qnaService.qnaList(loginUser.getMember());
+        return Response.ok("Qna 목록 조회 완료", qnaListResDtos);
     }
 
 }

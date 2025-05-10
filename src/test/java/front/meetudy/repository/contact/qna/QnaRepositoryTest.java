@@ -14,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,6 +53,20 @@ class QnaRepositoryTest {
         assertThat(save.getQuestionContent()).isEqualTo("질문내용");
         assertThat(save.getQnaType()).isEqualTo(FaqType.SERVICE);
 
+    }
+
+    @Test
+    @DisplayName("QNA 조회")
+    void qna_select() {
+        // given
+        QnaBoard qnaBoard = QnaBoard.createQnaBoard(member, "질문", "질문내용", null, null, FaqType.SERVICE, LocalDateTime.now());
+        qnaRepository.save(qnaBoard);
+        // when
+        List<QnaBoard> byQuestionUserIdNative = qnaRepository.findByQuestionUserIdNative(member.getId());
+
+        // then
+        assertThat(byQuestionUserIdNative.get(0).getQuestionTitle()).isEqualTo("질문");
+        assertThat(byQuestionUserIdNative.size()).isEqualTo(1);
     }
 
 }

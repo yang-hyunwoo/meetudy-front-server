@@ -35,6 +35,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -54,6 +55,7 @@ class QnaControllerTest {
 
     @MockBean
     private QnaService qnaService;
+
 
     private  final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
@@ -102,5 +104,26 @@ class QnaControllerTest {
                     Exception resolvedException = result.getResolvedException();
                     assertTrue(resolvedException instanceof CustomApiFieldException);
                 });
+    }
+
+
+    @Test
+    @DisplayName("QNA 조회")
+    void qnaListSuccess() throws Exception {
+        QnaWriteReqDto qnaWriteReqDto = QnaWriteReqDto.builder()
+                .qnaType(FaqType.SERVICE)
+                .questionContent("22")
+                .questionTitle("11")
+                .build();
+
+        LoginUser loginUser = new LoginUser(Member.createMember(1L, "test@naver.com", "닉네임", "이름", "19950101", "01012345678", "test", false));
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        qnaService.qnaSave(qnaWriteReqDto, loginUser.getMember());
+
+        mockMvc.perform(get("/api/private/qna/list"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Qna 목록 조회 완료"));
     }
 }
