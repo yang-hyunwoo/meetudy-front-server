@@ -33,11 +33,13 @@ public class JoinMemberReqDto {
     @Schema(description = "이름", example = "홍길동")
     @NotBlank(message = "{name.notBlank}", groups = Step2.class)
     @KoreanEnglish(min = 1, max = 50, message = "{name.pattern}",messageKey = "name.range", groups = Step2.class)
+    @Sanitize(groups = Step2.class)
     private String name;
 
     @Schema(description = "닉네임", example = "홍길동")
     @NotBlank(message = "{nickname.notBlank}", groups = Step3.class)
     @KoreanEnglish(min = 1, max = 30, message = "{nickname.pattern}",messageKey = "nickname.range", groups = Step3.class)
+    @Sanitize(groups = Step3.class)
     private String nickName;
 
     @Schema(description = "생년월일", example = "19990101")
