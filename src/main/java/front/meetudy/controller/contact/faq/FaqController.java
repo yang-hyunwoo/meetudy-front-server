@@ -1,5 +1,6 @@
 package front.meetudy.controller.contact.faq;
 
+import front.meetudy.dto.PageDto;
 import front.meetudy.dto.request.contact.faq.FaqReqDto;
 import front.meetudy.dto.response.contact.faq.FaqResDto;
 import front.meetudy.service.contact.faq.FaqService;
@@ -27,7 +28,7 @@ public class FaqController {
 
     @Operation(summary = "Faq 조회", description = "Faq 조회")
     @GetMapping("/faq")
-    public ResponseEntity<Response<Page<FaqResDto>>> faqList(
+    public ResponseEntity<Response<PageDto<FaqResDto>>> faqList(
             @PageableDefault(size = 10, page = 0) Pageable pageable,
             FaqReqDto faqReqDto) {
         return Response.ok("Faq 리스트 조회 성공", faqService.findFaqListPage(pageable, faqReqDto));

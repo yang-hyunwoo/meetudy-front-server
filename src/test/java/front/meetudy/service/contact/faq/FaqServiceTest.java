@@ -3,6 +3,7 @@ package front.meetudy.service.contact.faq;
 import front.meetudy.constant.contact.faq.FaqType;
 import front.meetudy.domain.contact.faq.FaqBoard;
 import front.meetudy.domain.member.Member;
+import front.meetudy.dto.PageDto;
 import front.meetudy.dto.request.contact.faq.FaqReqDto;
 import front.meetudy.dto.response.contact.faq.FaqResDto;
 import front.meetudy.repository.contact.faq.FaqQueryDslRepository;
@@ -60,7 +61,7 @@ class FaqServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
-        Page<FaqResDto> faqListPage = faqService.findFaqListPage(pageable, faqReqDto);
+        PageDto<FaqResDto> faqListPage = faqService.findFaqListPage(pageable, faqReqDto);
 
         // then
         assertNotNull(faqListPage);
@@ -75,7 +76,7 @@ class FaqServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
-        Page<FaqResDto> faqListPage = faqService.findFaqListPage(pageable, faqReqDto);
+        PageDto<FaqResDto> faqListPage = faqService.findFaqListPage(pageable, faqReqDto);
 
         // then
         assertNotNull(faqListPage);
@@ -90,7 +91,7 @@ class FaqServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
-        Page<FaqResDto> faqListPage = faqService.findFaqListPage(pageable, faqReqDto);
+        PageDto<FaqResDto> faqListPage = faqService.findFaqListPage(pageable, faqReqDto);
 
         // then
         assertNotNull(faqListPage);
@@ -105,7 +106,7 @@ class FaqServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
-        Page<FaqResDto> faqListPage = faqService.findFaqListPage(pageable, faqReqDto);
+        PageDto<FaqResDto> faqListPage = faqService.findFaqListPage(pageable, faqReqDto);
 
         // then
         assertNotNull(faqListPage);

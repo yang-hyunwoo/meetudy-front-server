@@ -11,7 +11,7 @@ import lombok.Getter;
 @Builder
 public class FaqResDto {
 
-    @Schema(description = "FAQpk",example = "1")
+    @Schema(description = "FaqPk",example = "1")
     private Long id;
 
     @Schema(description = "질문" ,example = "출석은 어떻게")
@@ -20,7 +20,7 @@ public class FaqResDto {
     @Schema(description = "답변",example = "출석은 이렇게 하면 되요")
     private String answer;
 
-    @Schema(description = "FAQ타입", example = "ALL")
+    @Schema(description = "FAQ 유형", example = "ALL")
     private FaqType faqType;
 
 

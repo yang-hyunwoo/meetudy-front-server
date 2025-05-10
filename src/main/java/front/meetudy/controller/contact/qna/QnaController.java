@@ -26,7 +26,7 @@ public class QnaController {
     private final QnaService qnaService;
 
     @Operation(summary = "Qna 저장", description = "Qna 저장")
-    @PostMapping("/qna/insert")
+    @PostMapping("/contact/qna/insert")
     @JoinValidationErrorExample
     public ResponseEntity<Response<Object>> qnaInsert(@RequestBody QnaWriteReqDto qnaWriteReqDto, @AuthenticationPrincipal LoginUser loginUser) {
         qnaService.qnaSave(qnaWriteReqDto, loginUser.getMember());
@@ -34,7 +34,7 @@ public class QnaController {
     }
 
     @Operation(summary = "Qna 조회", description = "Qna 조회")
-    @GetMapping("/qna/list")
+    @GetMapping("/contact/qna/list")
     public ResponseEntity<Response<List<QnaListResDto>>> qnaList(@AuthenticationPrincipal LoginUser loginUser) {
         List<QnaListResDto> qnaListResDtos = qnaService.qnaList(loginUser.getMember());
         return Response.ok("Qna 목록 조회 완료", qnaListResDtos);

@@ -28,8 +28,7 @@ class FaqControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private FaqService faqService;
+
 
     @Autowired
     private EntityManager em;
