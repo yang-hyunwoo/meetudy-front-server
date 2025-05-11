@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 
-//TODO 확장자 체크 하기!
+//TODO 확장자 체크 하기! , 변경 시 상세 deleted 변경 하기
 
 @RestController
 @RequestMapping("/api")
@@ -25,10 +25,10 @@ public class FilesController {
     private final FilesService filesService;
 
     @PostMapping("/file-upload")
-    public void fileUpload(@RequestParam("files") List<MultipartFile> files) {
+    public void fileUpload(@RequestParam("files") List<MultipartFile> files,Long fileId) {
 
         //files 생성
-        Files filesGroup = filesService.createFilesGroup();
+        Files filesGroup = filesService.createFilesGroup(fileId);
 
         for (MultipartFile file : files) {
             String contentType = file.getContentType();
