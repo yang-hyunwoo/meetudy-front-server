@@ -58,6 +58,11 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation "io.micrometer:micrometer-registry-prometheus" //프로메테우스
 
+	//cloudinary
+	implementation 'com.cloudinary:cloudinary-http44:1.39.0'
+
+	implementation platform("software.amazon.awssdk:bom:2.25.48")
+	implementation 'software.amazon.awssdk:s3'
 }
 
 tasks.named('test') {
