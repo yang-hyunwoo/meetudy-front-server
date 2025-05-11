@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-@Tag(name = "회원관련", description = "MemberController")
+@Tag(name = "회원 관리 Controller", description = "MemberController")
 @Slf4j
 public class MemberController {
 
