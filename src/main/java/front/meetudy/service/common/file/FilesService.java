@@ -5,6 +5,7 @@ import com.cloudinary.utils.ObjectUtils;
 import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.domain.common.file.Files;
 import front.meetudy.domain.common.file.FilesDetails;
+import front.meetudy.domain.member.Member;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.common.file.FilesDetailsRepository;
 import front.meetudy.repository.common.file.FilesRepository;
@@ -21,6 +22,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 import static front.meetudy.constant.error.ErrorEnum.ERR_012;
@@ -42,14 +44,24 @@ public class FilesService {
     @Value("${cloudflare.r2.bucket-name}")
     private String bucketName;
 
-    public Files createFilesGroup(Long fileId) {
-        if(fileId.toString().isBlank()) {
-            return filesRepository.save(Files.createFiles(false));
+    /**
+     * fileId가 있다면 찾아서 반환 / 없다면 생성 후 반환
+     * @param fileId
+     * @return
+     */
+    public Files createFilesGroup(Member member,Long fileId) {
+        if(fileId == null) {
+            return filesRepository.save(Files.createFiles(member,false));
         } else {
             return filesRepository.findById(fileId).orElseThrow(()-> new CustomApiException(HttpStatus.BAD_REQUEST, ERR_012, ERR_012.getValue()));
         }
     }
 
+    /**
+     * cloudinary 업로드
+     * @param group
+     * @param file
+     */
     public void uploadImageCloudinary(Files group , MultipartFile file) {
         Cloudinary cloudinary = cloudinaryService.connectCloudinary();
         String fileUrl;
@@ -73,13 +85,18 @@ public class FilesService {
                     file.getContentType() ,
                     publicId ,
                    false);
-            filesDetails.linkToFiles(group);
+            group.addFileDetail(filesDetails);
             filesDetailsRepository.save(filesDetails);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+    /**
+     * cloudflare 업로드
+     * @param group
+     * @param file
+     */
     public void uploadEtcCloudflare(Files group , MultipartFile file) {
         try {
             String uniqueName = UUID.randomUUID() + "_" + file.getOriginalFilename();
@@ -103,6 +120,16 @@ public class FilesService {
             // R2는 public endpoint 별도 세팅해야 함
         } catch (IOException e) {
             throw new RuntimeException("Cloudflare R2 업로드 실패", e);
+        }
+    }
+
+    /**
+     * filesDetails -> deleted 처리
+     * @param delFileDetailsId
+     */
+    public void deleteFileDetail(List<Long> delFileDetailsId) {
+        for (Long fileDetailId : delFileDetailsId) {
+            filesDetailsRepository.findById(fileDetailId).ifPresent(FilesDetails::updateFileDeleted);
         }
     }
 }
