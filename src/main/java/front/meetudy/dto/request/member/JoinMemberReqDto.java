@@ -71,6 +71,8 @@ public class JoinMemberReqDto {
     @Schema(description = "소셜ID", example = "asdf")
     private String providerId;
 
+    private String recaptchaToken;
+
     public Member toEntity(PasswordEncoder passwordEncoder) {
         return Member.createMember(
                 profileImageId,
