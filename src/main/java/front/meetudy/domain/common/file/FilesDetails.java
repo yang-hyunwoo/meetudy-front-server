@@ -4,12 +4,14 @@ import front.meetudy.domain.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.Objects;
 
 @Entity
+@Getter
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "files_details", indexes = {
@@ -79,6 +81,11 @@ public class FilesDetails extends BaseEntity {
                 .publicId(publicId)
                 .deleted(deleted)
                 .build();
+    }
+
+    public void updateFileDeleted() {
+        this.deleted = true;
+        this.fileUrl = null;
     }
 
     @Override
