@@ -4,7 +4,6 @@ import front.meetudy.domain.contact.faq.FaqBoard;
 import front.meetudy.dto.PageDto;
 import front.meetudy.dto.request.contact.faq.FaqReqDto;
 import front.meetudy.dto.response.contact.faq.FaqResDto;
-import front.meetudy.dto.response.contact.notice.NoticePageResDto;
 import front.meetudy.repository.contact.faq.FaqQueryDslRepository;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,14 +23,7 @@ public class FaqService {
     @Transactional(readOnly = true)
     public PageDto<FaqResDto> findFaqListPage(Pageable pageable , FaqReqDto faqReqDto) {
         Page<FaqBoard> page = faqQueryDslRepository.findFaqListPage(pageable, faqReqDto);
-        return new PageDto<>(
-                page.getContent().stream().map(FaqResDto::from).toList(),
-                page.getNumber(),
-                page.getSize(),
-                page.getTotalElements(),
-                page.getTotalPages()
-        );
-
+        return PageDto.of(page, FaqResDto::from);
     }
 
 }

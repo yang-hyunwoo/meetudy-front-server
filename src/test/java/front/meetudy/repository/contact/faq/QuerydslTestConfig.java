@@ -1,6 +1,8 @@
 package front.meetudy.repository.contact.faq;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import front.meetudy.repository.board.FreeQueryDslRepository;
+import front.meetudy.repository.querydsl.board.FreeQueryDslRepositoryImpl;
 import front.meetudy.repository.querydsl.contact.FaqQueryDslRepositoryImpl;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -21,5 +23,10 @@ public class QuerydslTestConfig {
     @Bean
     public FaqQueryDslRepository faqQueryDslRepository(JPAQueryFactory queryFactory) {
         return new FaqQueryDslRepositoryImpl(queryFactory);
+    }
+
+    @Bean
+    public FreeQueryDslRepository freeQueryDslRepository(JPAQueryFactory queryFactory) {
+        return new FreeQueryDslRepositoryImpl(queryFactory);
     }
 }
