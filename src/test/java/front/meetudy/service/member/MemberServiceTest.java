@@ -7,13 +7,17 @@ import front.meetudy.dto.request.member.JoinMemberReqDto;
 import front.meetudy.dto.response.member.JoinMemberResDto;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.member.MemberRepository;
+import front.meetudy.service.common.RecaptchaService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Transactional
@@ -24,6 +28,9 @@ class MemberServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @MockBean
+    private RecaptchaService recaptchaService;   // ✅ Mock 처리
 
     @Test
     @DisplayName("회원가입 성공 테스트")
@@ -39,9 +46,10 @@ class MemberServiceTest {
                 "password123@",
                 true,
                 null,
-                null
+                null,
+                "test"
         );
-
+        when(recaptchaService.verify(anyString())).thenReturn(true);
         // when
         JoinMemberResDto result = memberService.join(dto);
 
@@ -64,8 +72,10 @@ class MemberServiceTest {
                 "dkahffk11@",
                 true,
                 null,
-                null
+                null,
+                "test"
         );
+        when(recaptchaService.verify(anyString())).thenReturn(true);
         memberService.join(dto);
 
         // when & then

@@ -18,8 +18,12 @@ public class FaqService {
 
     private final FaqQueryDslRepository faqQueryDslRepository;
 
-
-
+    /**
+     * FAQ 페이징 조회
+     * @param pageable
+     * @param faqReqDto
+     * @return
+     */
     @Transactional(readOnly = true)
     public PageDto<FaqResDto> findFaqListPage(Pageable pageable , FaqReqDto faqReqDto) {
         Page<FaqBoard> page = faqQueryDslRepository.findFaqListPage(pageable, faqReqDto);

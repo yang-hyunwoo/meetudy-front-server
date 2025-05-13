@@ -5,10 +5,12 @@ import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.PageDto;
 import front.meetudy.dto.request.board.FreePageReqDto;
+import front.meetudy.dto.request.board.FreeWriteReqDto;
 import front.meetudy.dto.response.board.FreePageResDto;
 import front.meetudy.repository.contact.faq.QuerydslTestConfig;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -37,10 +40,10 @@ class FreeServiceTest {
 
     @PersistenceContext
     private EntityManager em;
-
+    Member member;
     @BeforeEach
     void setUp() {
-        Member member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
+        member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
         em.persist(member);
         em.persist(FreeBoard.createFreeBoard(member,"1","1",false));
         em.persist(FreeBoard.createFreeBoard(member,"2","2",false));
@@ -77,6 +80,18 @@ class FreeServiceTest {
         // then
         assertNotNull(freePage);
         assertEquals(1,freePage.getTotalElements());
+    }
+
+    @Test
+    @DisplayName("자유게시판 저장")
+    void free_save() {
+        FreeWriteReqDto freeWriteReqDto = new FreeWriteReqDto("111", "2222");
+        Long id = freeService.freeSave(member.getId(), freeWriteReqDto);
+        assertNotNull(id);
+        FreeBoard saved = em.find(FreeBoard.class, id);
+        assertNotNull(saved);
+        assertEquals("111", saved.getTitle());
+        assertEquals("2222", saved.getContent());
     }
 
 }

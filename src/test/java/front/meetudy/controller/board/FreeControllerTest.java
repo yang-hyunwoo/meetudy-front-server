@@ -1,9 +1,15 @@
 package front.meetudy.controller.board;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import front.meetudy.auth.LoginUser;
 import front.meetudy.constant.contact.faq.FaqType;
 import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.contact.faq.FaqBoard;
 import front.meetudy.domain.member.Member;
+import front.meetudy.dto.request.board.FreeWriteReqDto;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,12 +17,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -31,11 +41,14 @@ class FreeControllerTest {
 
     @Autowired
     private EntityManager em;
-
+    Member member;
+    private  final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     @BeforeEach
     void setUp() {
-        Member member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
+         member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
         em.persist(member);
         em.persist(FreeBoard.createFreeBoard(member,"1","1",false));
         em.flush();
@@ -55,14 +68,36 @@ class FreeControllerTest {
 
     @Test
     @DisplayName("자유게시판 목록 타입[제목] 조회 - 성공")
-    void faqTypeList() throws Exception {
-        mockMvc.perform(get("/api/board/list")
+    void freeTypeList() throws Exception {
+        mockMvc.perform(get("/api/free-board/list")
                         .param("page", "0")
                         .param("size", "10")
                         .param("searchType","TITLE"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content.length()").value(1))
                 .andExpect(jsonPath("$.data.content[0].title").value("1"));
+    }
+
+    @Test
+    @DisplayName("자유게시판 저장 - 성공")
+    void freeSaveSucc() throws Exception {
+        FreeWriteReqDto reqDto = FreeWriteReqDto.builder()
+                .title("11")
+                .content("22")
+                .build();
+        Member savedMember = em.merge(member); // 또는 persist 이후 em.find
+        LoginUser loginUser = new LoginUser(savedMember);  // ✅ 영속 상태 member 사용
+
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        mockMvc.perform(post("/api/private/free-board/insert")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reqDto)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.message").value("자유 게시판 등록 성공"));
+
     }
 
 }

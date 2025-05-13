@@ -3,6 +3,7 @@ package front.meetudy.service.contact.notice;
 import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.domain.contact.notice.NoticeBoard;
 import front.meetudy.dto.PageDto;
+import front.meetudy.dto.response.contact.faq.FaqResDto;
 import front.meetudy.dto.response.contact.notice.NoticeDetailResDto;
 import front.meetudy.dto.response.contact.notice.NoticePageResDto;
 import front.meetudy.exception.CustomApiException;
@@ -26,18 +27,22 @@ public class NoticeService {
 
     private final NoticeRepository noticeRepository;
 
+    /**
+     * 공지사항 페이징 조회
+     * @param pageable
+     * @return
+     */
     @Transactional(readOnly = true)
     public PageDto<NoticePageResDto> noticeList(Pageable pageable) {
         Page<NoticeBoard> page = noticeRepository.findByPageNative(pageable);
-        return new PageDto<>(
-                page.getContent().stream().map(NoticePageResDto::from).toList(),
-                page.getNumber(),
-                page.getSize(),
-                page.getTotalElements(),
-                page.getTotalPages()
-        );
+        return PageDto.of(page, NoticePageResDto::from);
     }
 
+    /**
+     * 공지사항 상세 조회
+     * @param id
+     * @return
+     */
     @Transactional(readOnly = true)
     public NoticeDetailResDto noticeDetail(Long id) {
         NoticeBoard noticeBoard = noticeRepository.findNotice(id).orElseThrow(() -> new CustomApiException(HttpStatus.BAD_REQUEST, ERR_008, ERR_008.getValue()));

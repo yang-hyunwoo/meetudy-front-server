@@ -19,10 +19,21 @@ public class QnaService {
 
     private final QnaRepository qnaRepository;
 
+    /**
+     * qna 저장
+     * @param qnaWriteReqDto
+     * @param member
+     * @return
+     */
     public Long qnaSave(QnaWriteReqDto qnaWriteReqDto, Member member) {
         return qnaRepository.save(qnaWriteReqDto.toEntity(member)).getId();
     }
 
+    /**
+     * qna 리스트 조회
+     * @param member
+     * @return
+     */
     @Transactional(readOnly = true)
     public List<QnaListResDto> qnaList(Member member) {
         List<QnaBoard> byQuestionUserIdNative = qnaRepository.findByQuestionUserIdNative(member.getId());
