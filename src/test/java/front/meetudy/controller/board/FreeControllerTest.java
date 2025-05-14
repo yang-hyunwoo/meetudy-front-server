@@ -10,6 +10,7 @@ import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.contact.faq.FaqBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.board.FreeWriteReqDto;
+import front.meetudy.dto.response.board.FreeDetailResDto;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,6 +25,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.assertj.core.api.BDDAssumptions.given;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -98,6 +100,36 @@ class FreeControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.message").value("자유 게시판 등록 성공"));
 
+    }
+
+    @Test
+    @DisplayName("자유게시판 상세 조회 성공")
+    void freeDetail_success() throws Exception {
+        // given
+
+        Member savedMember = em.merge(member); // 또는 persist 이후 em.find
+        LoginUser loginUser = new LoginUser(savedMember);  // ✅ 영속 상태 member 사용
+
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // when & then
+        mockMvc.perform(get("/api/free-board/{id}", 1L)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("자유 게시판 상세 조회 성공"))
+                .andExpect(jsonPath("$.data.id").value(1L));
+    }
+
+    @Test
+    @DisplayName("자유게시판 상세 조회 실패 - 게시글 없음")
+    void freeDetail_fail() throws Exception {
+        // given
+        Long freeBoardId = 999L;
+        // when & then
+        mockMvc.perform(get("/free-board/{id}", freeBoardId))
+                .andExpect(status().isNotFound());
     }
 
 }

@@ -1,9 +1,11 @@
 package front.meetudy.repository.board;
 
+import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.constant.search.SearchType;
 import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.board.FreePageReqDto;
+import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.contact.faq.QuerydslTestConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,9 +17,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 
+import static front.meetudy.constant.error.ErrorEnum.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DataJpaTest
 @ActiveProfiles("test")
@@ -26,6 +31,9 @@ class FreeQueryDslRepositoryTest {
 
     @Autowired
     private FreeQueryDslRepository freeQueryDslRepository;
+
+    @Autowired
+    private FreeRepository freeRepository;
 
     @Autowired
     private TestEntityManager em;
@@ -43,7 +51,7 @@ class FreeQueryDslRepositoryTest {
 
     @Test
     @DisplayName("자유게시판 페이징 전체 조회")
-    void faq_paging_all_search() {
+    void free_paging_all_search() {
         Pageable pageable = PageRequest.of(0, 10);
         FreePageReqDto freePageReqDto = new FreePageReqDto();
 
@@ -55,7 +63,7 @@ class FreeQueryDslRepositoryTest {
 
     @Test
     @DisplayName("자유게시판 페이징 검색[타입 전체] 조회 - 데이터 있음")
-    void faq_paging_all_searchType_all_searchKeyword() {
+    void free_paging_all_searchType_all_searchKeyword() {
         Pageable pageable = PageRequest.of(0, 10);
         FreePageReqDto freePageReqDto = new FreePageReqDto();
         freePageReqDto.setSearchKeyword("1");
@@ -70,7 +78,7 @@ class FreeQueryDslRepositoryTest {
 
     @Test
     @DisplayName("자유게시판 페이징 검색[타입 타이틀] 조회 - 데이터 있음")
-    void faq_paging_all_searchType_title_searchKeyword() {
+    void free_paging_all_searchType_title_searchKeyword() {
         Pageable pageable = PageRequest.of(0, 10);
         FreePageReqDto freePageReqDto = new FreePageReqDto();
         freePageReqDto.setSearchKeyword("1");
@@ -85,7 +93,7 @@ class FreeQueryDslRepositoryTest {
 
     @Test
     @DisplayName("자유게시판 페이징 검색[타입 전체] 조회 - 데이터 없음")
-    void faq_paging_all_searchType_all_searchKeyword_none() {
+    void free_paging_all_searchType_all_searchKeyword_none() {
         Pageable pageable = PageRequest.of(0, 10);
         FreePageReqDto freePageReqDto = new FreePageReqDto();
         freePageReqDto.setSearchKeyword("111");
@@ -99,7 +107,7 @@ class FreeQueryDslRepositoryTest {
 
     @Test
     @DisplayName("자유게시판 페이징 검색[타입 제목] 조회 - 데이터 없음")
-    void faq_paging_all_searchType_title_searchKeyword_none() {
+    void free_paging_all_searchType_title_searchKeyword_none() {
         Pageable pageable = PageRequest.of(0, 10);
         FreePageReqDto freePageReqDto = new FreePageReqDto();
         freePageReqDto.setSearchKeyword("111");
@@ -109,6 +117,29 @@ class FreeQueryDslRepositoryTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(0);
+    }
+
+    @Test
+    @DisplayName("자유게시판 상세 조회 - 성공")
+    void free_details_success() {
+        FreeBoard freeBoard = freeRepository.findByIdAndDeleted(1L, false).orElseThrow(() -> new CustomApiException(HttpStatus.BAD_GATEWAY, ERR_012, ERR_012.getValue()));
+
+        assertThat(freeBoard).isNotNull();
+        assertThat(freeBoard.getId()).isEqualTo(1L);
+    }
+
+    @Test
+    @DisplayName("자유게시판 상세 조회 - 실패")
+    void free_details_fail() {
+        CustomApiException exception = assertThrows(CustomApiException.class, () -> {
+            freeRepository.findByIdAndDeleted(1L, true)
+                    .orElseThrow(() -> new CustomApiException(HttpStatus.NOT_FOUND, ERR_012, ERR_012.getValue()));
+        });
+        assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(exception.getErrorEnum()).isEqualTo(ERR_012);   // 예를 들어 errorEnum이 있다면
+
+
+
     }
 
 }
