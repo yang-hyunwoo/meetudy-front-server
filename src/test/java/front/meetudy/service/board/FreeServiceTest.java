@@ -6,7 +6,9 @@ import front.meetudy.domain.member.Member;
 import front.meetudy.dto.PageDto;
 import front.meetudy.dto.request.board.FreePageReqDto;
 import front.meetudy.dto.request.board.FreeWriteReqDto;
+import front.meetudy.dto.response.board.FreeDetailResDto;
 import front.meetudy.dto.response.board.FreePageResDto;
+import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.contact.faq.QuerydslTestConfig;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -21,10 +23,13 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import static front.meetudy.constant.error.ErrorEnum.ERR_012;
 import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -92,6 +97,24 @@ class FreeServiceTest {
         assertNotNull(saved);
         assertEquals("111", saved.getTitle());
         assertEquals("2222", saved.getContent());
+    }
+
+    @Test
+    @DisplayName("자유게시판 상세 조회 - 성공")
+    void free_detail_success() {
+        FreeDetailResDto freeDetailResDto = freeService.freeDetail(1L, member.getId());
+        assertThat(freeDetailResDto).isNotNull();
+        assertThat(freeDetailResDto.getId()).isEqualTo(1L);
+    }
+
+    @Test
+    @DisplayName("자유게시판 상세 조회 - 실패")
+    void free_detail_fail() {
+        CustomApiException customApiException = assertThrows(CustomApiException.class, () -> {
+            freeService.freeDetail(100L, member.getId());
+        });
+        assertThat(customApiException.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(customApiException.getErrorEnum()).isEqualTo(ERR_012);
     }
 
 }
