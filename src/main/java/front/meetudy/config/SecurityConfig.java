@@ -98,6 +98,8 @@ public class SecurityConfig {
                 .exceptionHandling(handler -> handler.accessDeniedHandler(new CustomAccessDeniedHandler()))
                 .logout(logout-> logout.logoutUrl("/api/logout").logoutSuccessHandler(new CustomLogOutHandler(jwtProcess,redisService)))
                 .authorizeHttpRequests(requests -> requests
+                        .requestMatchers("/api/private/**","/api/user/**").authenticated()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
@@ -105,10 +107,8 @@ public class SecurityConfig {
                                 "/webjars/**",
                                 "/api/login"
                         ).permitAll()
-                        .requestMatchers("/api/private/**","/api/user/**").authenticated()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/**").permitAll()
                         .anyRequest().permitAll()
-
                 );
             http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
         return http.build();

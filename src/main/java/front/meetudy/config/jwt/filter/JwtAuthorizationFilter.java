@@ -85,17 +85,17 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         String uri = request.getRequestURI();
 
         // 인증 대상이 아닌 경우 필터 통과
-        if (!isProtected(uri)) {
-            chain.doFilter(request, response);
-            return;
-        }
+//        if (!isProtected(uri)) {
+//            chain.doFilter(request, response);
+//            return;
+//        }
 
         if(jwtProperty.isUseCookie()) {
             cookieVerify(request, response);
         } else {
             headerVerify(request, response);
         }
-        if (response.isCommitted()) return;
+        //if (response.isCommitted()) return;
         /*inputStream은 한번만 가능 하기 때문에 실패 시 유저 정보를 가져올수 없어서
           inputStream을 한번 하고 다시 요청 할 때 cache를 이용
          */
