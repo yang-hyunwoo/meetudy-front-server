@@ -5,6 +5,7 @@ import front.meetudy.docs.join.JoinValidationErrorExample;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.PageDto;
 import front.meetudy.dto.request.board.FreePageReqDto;
+import front.meetudy.dto.request.board.FreeUpdateReqDto;
 import front.meetudy.dto.request.board.FreeWriteReqDto;
 import front.meetudy.dto.response.board.FreeDetailResDto;
 import front.meetudy.dto.response.board.FreePageResDto;
@@ -30,7 +31,6 @@ import java.util.Optional;
 public class FreeController{
 
     private final FreeService freeService;
-
 
     @Operation(summary = "자유게시판 조회" , description ="자유게시판 목록 조회")
     @GetMapping("/free-board/list")
@@ -58,11 +58,29 @@ public class FreeController{
             @PathVariable Long id,
             @AuthenticationPrincipal LoginUser loginUser
     ) {
-        Long memberId = Optional.ofNullable(loginUser)
+        return Response.ok("자유 게시판 상세 조회 성공", freeService.freeDetail(id, getMemberId(loginUser)));
+    }
+
+    @Operation(summary = "자유게시판 수정" , description = "자유게시판 수정")
+    @PutMapping("private/free-board/update")
+    public ResponseEntity<Response<Long>> freeUpdate(@RequestBody FreeUpdateReqDto freeUpdateReqDto,
+                                                     @AuthenticationPrincipal LoginUser loginUser) {
+        return Response.update("자유 게시판 수정 성공", freeService.freeUpdate(getMemberId(loginUser), freeUpdateReqDto));
+    }
+
+    @Operation(summary = "자유게시판 삭제" , description = "자유게시판 삭제")
+    @PutMapping("private/free-board/{id}/delete")
+    public ResponseEntity<Response<Void>> freeDelete(@PathVariable Long id,
+                                                     @AuthenticationPrincipal LoginUser loginUser) {
+        freeService.freeDelete(getMemberId(loginUser), id);
+        return Response.delete("자유 게시판 삭제 성공",null);
+    }
+
+    private static Long getMemberId(LoginUser loginUser) {
+        return Optional.ofNullable(loginUser)
                 .map(LoginUser::getMember)
                 .map(Member::getId)
                 .orElse(null);
-        return Response.ok("자유 게시판 상세 조회 성공", freeService.freeDetail(id, memberId));
     }
 
 }

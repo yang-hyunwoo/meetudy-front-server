@@ -26,6 +26,11 @@ public class FreeDetailResDto {
 
     private boolean modifyChk;
 
+    /* TODO : FreeBoard 에서 Lazy로 하니 freeBoard.getMember가 null 나옴
+       서비스 단에서 getMember호출 해도 다시 프록시에서 로딩을 시도하는 것
+        하지만 이 시점엔 트랜잭션이 닫혔거나, 세션이 detach됨
+        그래서 프록시 초기화 실패 → null
+     */
 
     public static FreeDetailResDto from(FreeBoard freeBoard, Long memberId) {
         return FreeDetailResDto.builder()

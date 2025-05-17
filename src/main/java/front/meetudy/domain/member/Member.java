@@ -67,7 +67,7 @@ public class Member extends BaseEntity {
     private int failLoginCount;
 
     @Column(nullable = false)
-    private boolean isDeleted;
+    private boolean deleted;
 
     private LocalDateTime deletedAt;
 
@@ -87,7 +87,7 @@ public class Member extends BaseEntity {
                      MemberProviderTypeEnum provider,
                      String providerId,
                      int failLoginCount,
-                     boolean  isDeleted,
+                     boolean  deleted,
                      LocalDateTime deletedAt,
                      LocalDateTime passwordChangeAt) {
         this.id = id;
@@ -103,7 +103,7 @@ public class Member extends BaseEntity {
         this.provider = provider;
         this.providerId = providerId;
         this.failLoginCount = failLoginCount;
-        this.isDeleted = isDeleted;
+        this.deleted = deleted;
         this.deletedAt = deletedAt;
         this.passwordChangeAt = passwordChangeAt;
     }
@@ -140,7 +140,7 @@ public class Member extends BaseEntity {
                 .role(MemberEnum.USER)
                 .provider(MemberProviderTypeEnum.NORMAL)
                 .failLoginCount(0)
-                .isDeleted(false)
+                .deleted(false)
                 .passwordChangeAt(LocalDateTime.now())
                 .build();
 
@@ -173,7 +173,7 @@ public class Member extends BaseEntity {
                 .provider(provider)
                 .providerId(providerId)
                 .failLoginCount(0)
-                .isDeleted(false)
+                .deleted(false)
                 .passwordChangeAt(LocalDateTime.now())
                 .build();
 

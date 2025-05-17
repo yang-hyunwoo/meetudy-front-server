@@ -5,6 +5,7 @@ import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.PageDto;
 import front.meetudy.dto.request.board.FreePageReqDto;
+import front.meetudy.dto.request.board.FreeUpdateReqDto;
 import front.meetudy.dto.request.board.FreeWriteReqDto;
 import front.meetudy.dto.response.board.FreeDetailResDto;
 import front.meetudy.dto.response.board.FreePageResDto;
@@ -27,7 +28,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import static front.meetudy.constant.error.ErrorEnum.ERR_012;
+import static front.meetudy.constant.error.ErrorEnum.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -46,10 +47,13 @@ class FreeServiceTest {
     @PersistenceContext
     private EntityManager em;
     Member member;
+    Member member2;
     @BeforeEach
     void setUp() {
         member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
+        member2 = Member.createMember(null, "tes2t@naver.com", "테스트2", "테스트2", "19950120", "01011112222", "test", false);
         em.persist(member);
+        em.persist(member2);
         em.persist(FreeBoard.createFreeBoard(member,"1","1",false));
         em.persist(FreeBoard.createFreeBoard(member,"2","2",false));
         em.persist(FreeBoard.createFreeBoard(member,"3","3",false));
@@ -117,4 +121,51 @@ class FreeServiceTest {
         assertThat(customApiException.getErrorEnum()).isEqualTo(ERR_012);
     }
 
+    @Test
+    @DisplayName("자유게시판 수정")
+    void free_update() {
+        // given
+        FreeUpdateReqDto freeUpdateReqDto = new FreeUpdateReqDto(1L,"aaa","bbb");
+        // when
+        Long l = freeService.freeUpdate(member.getId(), freeUpdateReqDto);
+        FreeDetailResDto freeDetailResDto = freeService.freeDetail(l, null);
+        // then
+        assertThat(l).isEqualTo(1L);
+        assertThat("aaa").isEqualTo(freeDetailResDto.getTitle());
+    }
+
+    @Test
+    @DisplayName("자유게시판 수정 - 실패 -계정 없을 경우")
+    void free_update_fail_login() {
+        // given
+        FreeUpdateReqDto freeUpdateReqDto = new FreeUpdateReqDto(1L,"aaa","bbb");
+        CustomApiException customApiException = assertThrows(CustomApiException.class, () -> {
+            freeService.freeUpdate(100L,freeUpdateReqDto);
+        });
+        assertThat(customApiException.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(customApiException.getErrorEnum()).isEqualTo(ERR_013);
+    }
+
+    @Test
+    @DisplayName("자유게시판 수정 - 실패 -수정 권한이 없을 경우")
+    void free_update_fail_auth() {
+        FreeUpdateReqDto freeUpdateReqDto = new FreeUpdateReqDto(1L,"aaa","bbb");
+        CustomApiException customApiException = assertThrows(CustomApiException.class, () -> {
+            freeService.freeUpdate(2L,freeUpdateReqDto);
+        });
+        assertThat(customApiException.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(customApiException.getErrorEnum()).isEqualTo(ERR_014);
+    }
+
+    @Test
+    @DisplayName("자유게시판 삭제 후 EXCEPTION 반환")
+    void free_delete() {
+        // when
+        freeService.freeDelete(member.getId(), 1L);
+        CustomApiException customApiException = assertThrows(CustomApiException.class, () -> {
+            freeService.freeDetail(1L,null);
+        });
+        assertThat(customApiException.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(customApiException.getErrorEnum()).isEqualTo(ERR_012);
+    }
 }

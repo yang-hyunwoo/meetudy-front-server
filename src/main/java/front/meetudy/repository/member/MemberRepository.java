@@ -10,6 +10,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByEmail(String email);
 
+    Optional<Member> findByIdAndDeleted(Long id, boolean deleted);
+
     Optional<Member> findByEmailAndProvider(String email, MemberProviderTypeEnum providerType);
 
 
