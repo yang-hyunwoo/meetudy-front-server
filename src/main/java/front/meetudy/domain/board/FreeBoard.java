@@ -97,4 +97,14 @@ public class FreeBoard extends BaseEntity {
                 ", deleted=" + deleted +
                 '}';
     }
+
+    public Long updateFreeBoard(String title, String content) {
+        this.title = title;
+        this.content = content;
+        return this.id;
+    }
+
+    public void freeBoardDelete() {
+        this.deleted = true;
+    }
 }

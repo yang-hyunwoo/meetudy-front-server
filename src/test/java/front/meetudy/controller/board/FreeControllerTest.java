@@ -9,6 +9,7 @@ import front.meetudy.constant.contact.faq.FaqType;
 import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.contact.faq.FaqBoard;
 import front.meetudy.domain.member.Member;
+import front.meetudy.dto.request.board.FreeUpdateReqDto;
 import front.meetudy.dto.request.board.FreeWriteReqDto;
 import front.meetudy.dto.response.board.FreeDetailResDto;
 import jakarta.persistence.EntityManager;
@@ -27,8 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.BDDAssumptions.given;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -44,14 +44,17 @@ class FreeControllerTest {
     @Autowired
     private EntityManager em;
     Member member;
+    Member member2;
     private  final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     @BeforeEach
     void setUp() {
-         member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
+        member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
+        member2 = Member.createMember(null, "test2@naver.com", "테스트2", "테스트2", "19950120", "01011112222", "test", false);
         em.persist(member);
+        em.persist(member2);
         em.persist(FreeBoard.createFreeBoard(member,"1","1",false));
         em.flush();
         em.clear();
@@ -131,5 +134,60 @@ class FreeControllerTest {
         mockMvc.perform(get("/free-board/{id}", freeBoardId))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @DisplayName("자유게시판 수정 성공")
+    void free_update() throws Exception {
+        FreeUpdateReqDto freeUpdateReqDto = new FreeUpdateReqDto(1L, "aaa", "bbb");
+
+        Member savedMember = em.merge(member); // 또는 persist 이후 em.find
+        LoginUser loginUser = new LoginUser(savedMember);  // ✅ 영속 상태 member 사용
+
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        mockMvc.perform(put("/api/private/free-board/update")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(freeUpdateReqDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("자유 게시판 수정 성공"));
+    }
+
+    @Test
+    @DisplayName("자유게시판 수정 실패 - 권한 실패")
+    void free_update_fail_auth() throws Exception{
+        FreeUpdateReqDto freeUpdateReqDto = new FreeUpdateReqDto(1L, "aaa", "bbb");
+
+        Member savedMember = em.merge(member2); // 또는 persist 이후 em.find
+        LoginUser loginUser = new LoginUser(savedMember);  // ✅ 영속 상태 member 사용
+
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        mockMvc.perform(put("/api/private/free-board/update")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(freeUpdateReqDto)))
+                .andExpect(status().isUnauthorized());
+
+    }
+
+    @Test
+    @DisplayName("자유게시판 삭제 성공")
+    void free_delete() throws Exception {
+
+        Member savedMember = em.merge(member); // 또는 persist 이후 em.find
+        LoginUser loginUser = new LoginUser(savedMember);  // ✅ 영속 상태 member 사용
+
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        mockMvc.perform(put("/api/private/free-board/1/delete"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("자유 게시판 삭제 성공"));
+    }
+
 
 }
