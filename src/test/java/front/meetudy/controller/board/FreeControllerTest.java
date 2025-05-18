@@ -1,17 +1,13 @@
 package front.meetudy.controller.board;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import front.meetudy.auth.LoginUser;
-import front.meetudy.constant.contact.faq.FaqType;
 import front.meetudy.domain.board.FreeBoard;
-import front.meetudy.domain.contact.faq.FaqBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.board.FreeUpdateReqDto;
 import front.meetudy.dto.request.board.FreeWriteReqDto;
-import front.meetudy.dto.response.board.FreeDetailResDto;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,8 +22,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.assertj.core.api.BDDAssumptions.given;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -63,7 +57,7 @@ class FreeControllerTest {
     @Test
     @DisplayName("자유게시판 목록 조회 - 성공")
     void freeList() throws Exception {
-        mockMvc.perform(get("/api/board/list")
+        mockMvc.perform(get("/api/free-board/list")
                         .param("page", "0")
                         .param("size", "10"))
                 .andExpect(status().isOk())
@@ -138,7 +132,13 @@ class FreeControllerTest {
     @Test
     @DisplayName("자유게시판 수정 성공")
     void free_update() throws Exception {
-        FreeUpdateReqDto freeUpdateReqDto = new FreeUpdateReqDto(1L, "aaa", "bbb");
+        Member author = em.merge(member);      // 게시글 작성자
+        FreeBoard board = FreeBoard.createFreeBoard(author, "title", "content", false);
+        em.persist(board);
+        em.flush();
+        em.clear();
+
+        FreeUpdateReqDto freeUpdateReqDto = new FreeUpdateReqDto(board.getId(), "aaa", "bbb");
 
         Member savedMember = em.merge(member); // 또는 persist 이후 em.find
         LoginUser loginUser = new LoginUser(savedMember);  // ✅ 영속 상태 member 사용
@@ -157,34 +157,44 @@ class FreeControllerTest {
     @Test
     @DisplayName("자유게시판 수정 실패 - 권한 실패")
     void free_update_fail_auth() throws Exception{
-        FreeUpdateReqDto freeUpdateReqDto = new FreeUpdateReqDto(1L, "aaa", "bbb");
+        Member author = em.merge(member);      // 게시글 작성자
+        Member other = em.merge(member2);      // 수정 시도자
 
-        Member savedMember = em.merge(member2); // 또는 persist 이후 em.find
-        LoginUser loginUser = new LoginUser(savedMember);  // ✅ 영속 상태 member 사용
+        FreeBoard board = FreeBoard.createFreeBoard(author, "title", "content", false);
+        em.persist(board);
+        em.flush();
+        em.clear();
 
+        LoginUser loginUser = new LoginUser(other);
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
+        FreeUpdateReqDto freeUpdateReqDto = new FreeUpdateReqDto(board.getId(), "aaa", "bbb");
+
         mockMvc.perform(put("/api/private/free-board/update")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(freeUpdateReqDto)))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errCode").value("ERR_014"));
 
     }
 
     @Test
     @DisplayName("자유게시판 삭제 성공")
     void free_delete() throws Exception {
-
+        Member author = em.merge(member);      // 게시글 작성자
+        FreeBoard board = FreeBoard.createFreeBoard(author, "title", "content", false);
+        em.persist(board);
+        em.flush();
+        em.clear();
         Member savedMember = em.merge(member); // 또는 persist 이후 em.find
         LoginUser loginUser = new LoginUser(savedMember);  // ✅ 영속 상태 member 사용
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        mockMvc.perform(put("/api/private/free-board/1/delete"))
+        mockMvc.perform(put("/api/private/free-board/" + board.getId() + "/delete"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("자유 게시판 삭제 성공"));
     }

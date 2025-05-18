@@ -96,7 +96,7 @@ public class JwtAuthorizationFilterTest {
     }
 
     @Test
-    @DisplayName("❌ access token 만료 + refresh token 없음 → 401")
+    @DisplayName("access token 만료 + refresh token 없음 → 401")
     void expiredAccessToken_noRefresh_returns401() throws Exception {
         when(jwtProperty.isUseCookie()).thenReturn(false);
         when(jwtProperty.getHeader()).thenReturn("Authorization");

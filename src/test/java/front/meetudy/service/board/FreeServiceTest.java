@@ -106,9 +106,11 @@ class FreeServiceTest {
     @Test
     @DisplayName("자유게시판 상세 조회 - 성공")
     void free_detail_success() {
-        FreeDetailResDto freeDetailResDto = freeService.freeDetail(1L, member.getId());
+        FreeBoard freeBoard = FreeBoard.createFreeBoard(member, "5", "5", false);
+        em.persist(freeBoard);
+        FreeDetailResDto freeDetailResDto = freeService.freeDetail(freeBoard.getId(), member.getId());
         assertThat(freeDetailResDto).isNotNull();
-        assertThat(freeDetailResDto.getId()).isEqualTo(1L);
+        assertThat(freeDetailResDto.getTitle()).isEqualTo("5");
     }
 
     @Test
@@ -125,12 +127,13 @@ class FreeServiceTest {
     @DisplayName("자유게시판 수정")
     void free_update() {
         // given
-        FreeUpdateReqDto freeUpdateReqDto = new FreeUpdateReqDto(1L,"aaa","bbb");
+        FreeBoard freeBoard = FreeBoard.createFreeBoard(member, "5", "5", false);
+        em.persist(freeBoard);
+        FreeUpdateReqDto freeUpdateReqDto = new FreeUpdateReqDto(freeBoard.getId(),"aaa","bbb");
         // when
         Long l = freeService.freeUpdate(member.getId(), freeUpdateReqDto);
         FreeDetailResDto freeDetailResDto = freeService.freeDetail(l, null);
         // then
-        assertThat(l).isEqualTo(1L);
         assertThat("aaa").isEqualTo(freeDetailResDto.getTitle());
     }
 
@@ -149,9 +152,11 @@ class FreeServiceTest {
     @Test
     @DisplayName("자유게시판 수정 - 실패 -수정 권한이 없을 경우")
     void free_update_fail_auth() {
-        FreeUpdateReqDto freeUpdateReqDto = new FreeUpdateReqDto(1L,"aaa","bbb");
+        FreeBoard freeBoard = FreeBoard.createFreeBoard(member2, "5", "5", false);
+        em.persist(freeBoard);
+        FreeUpdateReqDto freeUpdateReqDto = new FreeUpdateReqDto(freeBoard.getId(),"aaa","bbb");
         CustomApiException customApiException = assertThrows(CustomApiException.class, () -> {
-            freeService.freeUpdate(2L,freeUpdateReqDto);
+            freeService.freeUpdate(member.getId(),freeUpdateReqDto);
         });
         assertThat(customApiException.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(customApiException.getErrorEnum()).isEqualTo(ERR_014);
@@ -161,9 +166,11 @@ class FreeServiceTest {
     @DisplayName("자유게시판 삭제 후 EXCEPTION 반환")
     void free_delete() {
         // when
-        freeService.freeDelete(member.getId(), 1L);
+        FreeBoard freeBoard = FreeBoard.createFreeBoard(member, "5", "5", false);
+        em.persist(freeBoard);
+        freeService.freeDelete(member.getId(), freeBoard.getId());
         CustomApiException customApiException = assertThrows(CustomApiException.class, () -> {
-            freeService.freeDetail(1L,null);
+            freeService.freeDetail(freeBoard.getId(),null);
         });
         assertThat(customApiException.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(customApiException.getErrorEnum()).isEqualTo(ERR_012);
