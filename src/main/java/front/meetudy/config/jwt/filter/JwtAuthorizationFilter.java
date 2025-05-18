@@ -34,6 +34,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +42,7 @@ import static front.meetudy.constant.error.ErrorEnum.*;
 import static front.meetudy.constant.security.CookieEnum.*;
 import static front.meetudy.constant.security.TokenErrorCodeEnum.*;
 import static front.meetudy.constant.login.LoginErrorCode.*;
+import static front.meetudy.util.cookie.CustomCookie.deleteCookie;
 
 /*
  모든 주소에서 동작 (토큰 검증)
@@ -95,7 +97,10 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         } else {
             headerVerify(request, response);
         }
-        //if (response.isCommitted()) return;
+        if (response.isCommitted()) {
+            // 이미 응답이 커밋된 경우 더 이상 작성하지 않음
+            return;
+        }
         /*inputStream은 한번만 가능 하기 때문에 실패 시 유저 정보를 가져올수 없어서
           inputStream을 한번 하고 다시 요청 할 때 cache를 이용
          */
@@ -141,7 +146,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             setAuthentication(loginUser);
         } catch (TokenExpiredException e) {
             if(!Boolean.parseBoolean(getCookieValue(request, isAutoLogin))&&autoChkVerifyExpired(e.getExpiredOn())) {
-                sendError(response, SC_ACCESS_TOKEN_EXPIRED.getValue());
+                sendError(response, SC_ACCESS_TOKEN_EXPIRED.getValue(),SC_ACCESS_TOKEN_EXPIRED.getCode());
                 return;
             }
             //accessToken이 만료가 되었다면 client에서 refreshToken을 받아와
@@ -149,7 +154,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             String refreshUuid = jwtProcess.extractRefreshUuid(refreshToken);
             String value = redisService.getRefreshToken(refreshUuid); // null이면 만료 or 조작
             if (value == null) {
-                sendError(response, SC_REFRESH_TOKEN_EXPIRED.getValue());
+                sendError(response, SC_REFRESH_TOKEN_EXPIRED.getValue(),SC_ACCESS_TOKEN_EXPIRED.getCode());
                 return;
             }
             String[] parts = value.split("\\|");
@@ -159,24 +164,31 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 if (redisMemberId.equals(memberId.toString())) {
                     handleRefreshToken(request,response, refreshToken); // 재발급
                 } else {
-                    sendError(response, SC_REFRESH_TOKEN_EXPIRED.getValue());
+                    sendError(response, SC_REFRESH_TOKEN_EXPIRED.getValue(),SC_REFRESH_TOKEN_EXPIRED.getCode());
+
                 }
             } else {
-                sendError(response, SC_REFRESH_TOKEN_EXPIRED.getValue());
+                sendError(response, SC_REFRESH_TOKEN_EXPIRED.getValue(),SC_REFRESH_TOKEN_EXPIRED.getCode());
             }
         } catch (JWTDecodeException e){
             e.printStackTrace();
-            sendError(response, SC_TOKEN_DECODE_ERROR.getValue());
+            sendError(response, SC_TOKEN_DECODE_ERROR.getValue(),SC_TOKEN_DECODE_ERROR.getCode());
             return;
         } catch (SignatureVerificationException e) {
             e.printStackTrace();
-            sendError(response, SC_ALGORITHM_ERROR.getValue());
+            sendError(response, SC_ALGORITHM_ERROR.getValue(),SC_ALGORITHM_ERROR.getCode());
             return;
         } catch (CustomApiException e) {
             e.printStackTrace();
-            sendError(response, e.getMessage());
+            sendError(response, e.getMessage(),"400");
             return;
         }
+    }
+
+    private static void tokeDelete(HttpServletResponse response) {
+        response.addHeader("Set-Cookie", deleteCookie(CookieEnum.accessToken.getValue()).toString());
+        response.addHeader("Set-Cookie", deleteCookie(CookieEnum.refreshToken.getValue()).toString());
+        response.addHeader("Set-Cookie", deleteCookie(CookieEnum.isAutoLogin.getValue()).toString());
     }
 
     /**
@@ -263,7 +275,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
      */
     private void handleRefreshToken(HttpServletRequest request,HttpServletResponse response, String refreshToken) {
         if(refreshToken==null) {
-            sendError(response, SC_REFRESH_TOKEN_MISSING.getValue());
+            sendError(response, SC_REFRESH_TOKEN_MISSING.getValue(), SC_REFRESH_TOKEN_MISSING.getCode());
         } else {
             try {
                 log.info("사용자 토큰 만료 -> 리프래시 토큰 인증 후 토큰 재 생성");
@@ -277,18 +289,18 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 }
             } catch (TokenExpiredException e2) {
                 // 로그아웃 시키기
-                sendError(response, SC_REFRESH_TOKEN_EXPIRED.getValue());
+                sendError(response, SC_REFRESH_TOKEN_EXPIRED.getValue(),SC_REFRESH_TOKEN_EXPIRED.getCode());
             } catch (JWTDecodeException e2) {
                 //doesn't have a valid JSON format
                 //JwtDecode 시 exception
                 e2.printStackTrace();
-                sendError(response, SC_TOKEN_DECODE_ERROR.getValue());
+                sendError(response, SC_TOKEN_DECODE_ERROR.getValue(),SC_REFRESH_TOKEN_EXPIRED.getCode());
             } catch (SignatureVerificationException e2) {
                 e2.printStackTrace();
-                sendError(response, SC_ALGORITHM_ERROR.getValue());
+                sendError(response, SC_ALGORITHM_ERROR.getValue(),SC_REFRESH_TOKEN_EXPIRED.getCode());
             }catch (CustomApiException e3) {
                 e3.printStackTrace();
-                sendError(response, e3.getMessage());
+                sendError(response, e3.getMessage(),SC_REFRESH_TOKEN_EXPIRED.getCode());
             }
         }
     }
@@ -298,13 +310,22 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
      * @param response
      * @param message
      */
-    private void sendError(HttpServletResponse response, String message)  {
+    private void sendError(HttpServletResponse response, String message, String code)  {
+        if (response.isCommitted()) {
+            // 이미 응답이 커밋된 경우 더 이상 작성하지 않음
+            return;
+        }
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json;charset=UTF-8");
         try {
-            response.getWriter().write(objectMapper.writeValueAsString(Map.of("error", message)));
+            Map<String, Object> errorBody = new HashMap<>();
+            errorBody.put("error", "Unauthorized");
+            errorBody.put("message", message);
+            errorBody.put("code", code);
+            response.getWriter().write(objectMapper.writeValueAsString(errorBody));
             response.getWriter().flush();
             response.getWriter().close();
+            tokeDelete(response);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

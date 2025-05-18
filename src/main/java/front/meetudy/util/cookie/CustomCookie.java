@@ -13,4 +13,11 @@ public abstract class CustomCookie {
                 .path("/")
                 .build();
     }
+
+    public static ResponseCookie deleteCookie(String name) {
+        return ResponseCookie.from(name, "")
+                .path("/")
+                .maxAge(0)
+                .build();
+    }
 }

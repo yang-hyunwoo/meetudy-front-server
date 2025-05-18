@@ -61,6 +61,15 @@ public class FreeController{
         return Response.ok("자유 게시판 상세 조회 성공", freeService.freeDetail(id, getMemberId(loginUser)));
     }
 
+    @Operation(summary = "자유게시판 수정 상세 조회" , description = "자유게시판 수정 상세 조회")
+    @GetMapping("private/free-board/{id}")
+    public ResponseEntity<Response<FreeDetailResDto>> freeUpdateDetail(
+            @PathVariable Long id,
+            @AuthenticationPrincipal LoginUser loginUser
+    ) {
+        return Response.ok("자유 게시판 상세 조회 성공", freeService.freeUpdateDetail(id, getMemberId(loginUser)));
+    }
+
     @Operation(summary = "자유게시판 수정" , description = "자유게시판 수정")
     @PutMapping("private/free-board/update")
     public ResponseEntity<Response<Long>> freeUpdate(@RequestBody FreeUpdateReqDto freeUpdateReqDto,

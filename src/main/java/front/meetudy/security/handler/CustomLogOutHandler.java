@@ -17,6 +17,8 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 
 import java.io.IOException;
 
+import static front.meetudy.util.cookie.CustomCookie.deleteCookie;
+
 @RequiredArgsConstructor
 @Slf4j
 public class CustomLogOutHandler implements LogoutSuccessHandler {
@@ -58,12 +60,5 @@ public class CustomLogOutHandler implements LogoutSuccessHandler {
             }
         }
         return null;
-    }
-
-    private ResponseCookie deleteCookie(String name) {
-        return ResponseCookie.from(name, "")
-                .path("/")
-                .maxAge(0)
-                .build();
     }
 }
