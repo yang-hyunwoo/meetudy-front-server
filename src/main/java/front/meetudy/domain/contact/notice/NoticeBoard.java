@@ -34,7 +34,7 @@ public class NoticeBoard extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member memberId;
+    private Member member;
 
     @Column(length = 100)
     private String title;
@@ -58,7 +58,7 @@ public class NoticeBoard extends BaseEntity {
 
     @Builder
     protected NoticeBoard(Long id,
-                          Member memberId,
+                          Member member,
                           String title,
                           String content,
                           NoticeType noticeType,
@@ -68,7 +68,7 @@ public class NoticeBoard extends BaseEntity {
 
     ) {
         this.id = id;
-        this.memberId = memberId;
+        this.member = member;
         this.title = title;
         this.content = content;
         this.noticeType = noticeType;
@@ -79,7 +79,7 @@ public class NoticeBoard extends BaseEntity {
 
 
     public static NoticeBoard createNoticeBoard(
-                          Member memberId,
+                          Member member,
                           String title,
                           String content,
                           NoticeType noticeType,
@@ -88,7 +88,7 @@ public class NoticeBoard extends BaseEntity {
                           boolean deleted
                           ) {
         return NoticeBoard.builder()
-                .memberId(memberId)
+                .member(member)
                 .title(title)
                 .content(content)
                 .noticeType(noticeType)
@@ -114,7 +114,7 @@ public class NoticeBoard extends BaseEntity {
     public String toString() {
         return "NoticeBoard{" +
                 "id=" + id +
-                ", memberId=" + memberId +
+                ", member=" + member +
                 ", title='" + title + '\'' +
                 ", content='" + content + '\'' +
                 ", noticeType=" + noticeType +
