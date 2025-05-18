@@ -1,13 +1,16 @@
-package front.meetudy.controller.board;
+package front.meetudy.controller.comment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import front.meetudy.auth.LoginUser;
 import front.meetudy.domain.board.FreeBoard;
+import front.meetudy.domain.comment.Comment;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.board.FreeUpdateReqDto;
-import front.meetudy.dto.request.board.FreeWriteReqDto;
+import front.meetudy.dto.request.comment.CommentUpdateReqDto;
+import front.meetudy.dto.request.comment.CommentWriteReqDto;
+import front.meetudy.dto.response.board.FreeDetailResDto;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +25,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -30,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 @ActiveProfiles("test")
-class FreeControllerTest {
+class CommentControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -49,119 +54,68 @@ class FreeControllerTest {
         member2 = Member.createMember(null, "test2@naver.com", "테스트2", "테스트2", "19950120", "01011112222", "test", false);
         em.persist(member);
         em.persist(member2);
-        em.persist(FreeBoard.createFreeBoard(member,"1","1",false));
+        em.persist(Comment.createComments(member, "freeboard", 1L, "test", false));
         em.flush();
         em.clear();
     }
 
     @Test
-    @DisplayName("자유게시판 목록 조회 - 성공")
-    void freeList() throws Exception {
-        mockMvc.perform(get("/api/free-board/list")
-                        .param("page", "0")
-                        .param("size", "10"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content.length()").value(1))
-                .andExpect(jsonPath("$.data.content[0].title").value("1"));
+    @DisplayName("댓글 조회 - 성공")
+    void commentList() throws Exception {
+        mockMvc.perform(get("/api/comment/list")
+                        .param("targetType","freeboard"))
+                .andExpect(status().isOk());
     }
 
     @Test
-    @DisplayName("자유게시판 목록 타입[제목] 조회 - 성공")
-    void freeTypeList() throws Exception {
-        mockMvc.perform(get("/api/free-board/list")
-                        .param("page", "0")
-                        .param("size", "10")
-                        .param("searchType","TITLE"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content.length()").value(1))
-                .andExpect(jsonPath("$.data.content[0].title").value("1"));
-    }
-
-    @Test
-    @DisplayName("자유게시판 저장 - 성공")
-    void freeSaveSucc() throws Exception {
-        FreeWriteReqDto reqDto = FreeWriteReqDto.builder()
-                .title("11")
-                .content("22")
-                .build();
+    @DisplayName("댓글 저장 - 성공")
+    void commentSave() throws Exception{
+        CommentWriteReqDto commentWriteReqDto = new CommentWriteReqDto("freeboard", 1L, "댓글");
         Member savedMember = em.merge(member); // 또는 persist 이후 em.find
         LoginUser loginUser = new LoginUser(savedMember);  // 영속 상태 member 사용
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        mockMvc.perform(post("/api/private/free-board/insert")
+        mockMvc.perform(post("/api/private/comment/insert")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(reqDto)))
+                        .content(objectMapper.writeValueAsString(commentWriteReqDto)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.message").value("자유 게시판 등록 성공"));
-
+                .andExpect(jsonPath("$.message").value("댓글 등록 성공"));
     }
 
     @Test
-    @DisplayName("자유게시판 상세 조회 성공")
-    void freeDetail_success() throws Exception {
-        // given
-
-        Member savedMember = em.merge(member); // 또는 persist 이후 em.find
-        LoginUser loginUser = new LoginUser(savedMember);  // ✅ 영속 상태 member 사용
-
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        // when & then
-        mockMvc.perform(get("/api/free-board/{id}", 1L)
-                )
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("자유 게시판 상세 조회 성공"))
-                .andExpect(jsonPath("$.data.id").value(1L));
-    }
-
-    @Test
-    @DisplayName("자유게시판 상세 조회 실패 - 게시글 없음")
-    void freeDetail_fail() throws Exception {
-        // given
-        Long freeBoardId = 999L;
-        // when & then
-        mockMvc.perform(get("/free-board/{id}", freeBoardId))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    @DisplayName("자유게시판 수정 성공")
-    void free_update() throws Exception {
+    @DisplayName("댓글 수정")
+    void comment_update() throws Exception{
         Member author = em.merge(member);      // 게시글 작성자
-        FreeBoard board = FreeBoard.createFreeBoard(author, "title", "content", false);
-        em.persist(board);
+        Comment comments = Comment.createComments(author, "freeboard", 1L, "댓글11", false);
+        em.persist(comments);
         em.flush();
         em.clear();
 
-        FreeUpdateReqDto freeUpdateReqDto = new FreeUpdateReqDto(board.getId(), "aaa", "bbb");
-
+        CommentUpdateReqDto commentUpdateReqDto = new CommentUpdateReqDto(comments.getId(), comments.getTargetType(), comments.getTargetId(), "댓글11수정");
         Member savedMember = em.merge(member); // 또는 persist 이후 em.find
         LoginUser loginUser = new LoginUser(savedMember);  // ✅ 영속 상태 member 사용
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        mockMvc.perform(put("/api/private/free-board/update")
+        mockMvc.perform(put("/api/private/comment/update")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(freeUpdateReqDto)))
+                        .content(objectMapper.writeValueAsString(commentUpdateReqDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("자유 게시판 수정 성공"));
+                .andExpect(jsonPath("$.message").value("댓글 수정 성공"));
+
     }
 
     @Test
-    @DisplayName("자유게시판 수정 실패 - 권한 실패")
-    void free_update_fail_auth() throws Exception{
+    @DisplayName("댓글 수정 실패 - 권한 실패")
+    void commet_update_fail_auth() throws Exception{
         Member author = em.merge(member);      // 게시글 작성자
         Member other = em.merge(member2);      // 수정 시도자
 
-        FreeBoard board = FreeBoard.createFreeBoard(author, "title", "content", false);
-        em.persist(board);
+        Comment comments = Comment.createComments(author, "freeboard", 1L, "댓글11", false);
+        em.persist(comments);
         em.flush();
         em.clear();
 
@@ -170,22 +124,22 @@ class FreeControllerTest {
                 new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        FreeUpdateReqDto freeUpdateReqDto = new FreeUpdateReqDto(board.getId(), "aaa", "bbb");
+        CommentUpdateReqDto commentUpdateReqDto = new CommentUpdateReqDto(comments.getId(), comments.getTargetType(), comments.getTargetId(), "댓글11수정");
 
-        mockMvc.perform(put("/api/private/free-board/update")
+        mockMvc.perform(put("/api/private/comment/update")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(freeUpdateReqDto)))
+                        .content(objectMapper.writeValueAsString(commentUpdateReqDto)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.errCode").value("ERR_014"));
-
     }
 
+
     @Test
-    @DisplayName("자유게시판 삭제 성공")
-    void free_delete() throws Exception {
+    @DisplayName("댓글 삭제 성공")
+    void comment_delete() throws Exception {
         Member author = em.merge(member);      // 게시글 작성자
-        FreeBoard board = FreeBoard.createFreeBoard(author, "title", "content", false);
-        em.persist(board);
+        Comment comments = Comment.createComments(author, "freeboard", 1L, "댓글11", false);
+        em.persist(comments);
         em.flush();
         em.clear();
         Member savedMember = em.merge(member); // 또는 persist 이후 em.find
@@ -194,10 +148,8 @@ class FreeControllerTest {
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        mockMvc.perform(put("/api/private/free-board/" + board.getId() + "/delete"))
+        mockMvc.perform(put("/api/private/comment/" + comments.getId() + "/delete"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("자유 게시판 삭제 성공"));
+                .andExpect(jsonPath("$.message").value("댓글 삭제 성공"));
     }
-
-
 }

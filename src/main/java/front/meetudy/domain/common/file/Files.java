@@ -20,7 +20,7 @@ import java.util.Objects;
 @Table(name = "files",
         indexes = {
                 @Index(name = "idx_files_member_id", columnList = "member_id")
-        })
+})
 public class Files extends BaseEntity {
 
     @Id
