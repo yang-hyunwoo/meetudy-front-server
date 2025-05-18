@@ -37,10 +37,10 @@ class FreeQueryDslRepositoryTest {
 
     @Autowired
     private TestEntityManager em;
-
+    Member member;
     @BeforeEach
     void setUp() {
-        Member member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
+        member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
         Member persist = em.persist(member);
         em.persist(FreeBoard.createFreeBoard(persist,"1","1",false));
         em.persist(FreeBoard.createFreeBoard(persist,"2","2",false));
@@ -122,10 +122,12 @@ class FreeQueryDslRepositoryTest {
     @Test
     @DisplayName("자유게시판 상세 조회 - 성공")
     void free_details_success() {
-        FreeBoard freeBoard = freeRepository.findByIdAndDeleted(1L, false).orElseThrow(() -> new CustomApiException(HttpStatus.BAD_GATEWAY, ERR_012, ERR_012.getValue()));
+        FreeBoard freeBoard1 = FreeBoard.createFreeBoard(member, "5", "5", false);
+        em.persist(freeBoard1);
+        FreeBoard freeBoard = freeRepository.findByIdAndDeleted(freeBoard1.getId(), false).orElseThrow(() -> new CustomApiException(HttpStatus.BAD_GATEWAY, ERR_012, ERR_012.getValue()));
 
         assertThat(freeBoard).isNotNull();
-        assertThat(freeBoard.getId()).isEqualTo(1L);
+        assertThat(freeBoard.getTitle()).isEqualTo("5");
     }
 
     @Test

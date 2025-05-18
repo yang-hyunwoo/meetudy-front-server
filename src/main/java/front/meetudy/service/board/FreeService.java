@@ -1,7 +1,5 @@
 package front.meetudy.service.board;
 
-import front.meetudy.constant.error.ErrorEnum;
-import front.meetudy.constant.login.LoginErrorCode;
 import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.PageDto;
@@ -17,14 +15,11 @@ import front.meetudy.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 import static front.meetudy.constant.error.ErrorEnum.*;
-import static front.meetudy.constant.login.LoginErrorCode.*;
+import static org.springframework.http.HttpStatus.*;
 
 @Service
 @RequiredArgsConstructor
@@ -51,33 +46,39 @@ public class FreeService {
     }
 
     public Long freeSave(Long memberId, FreeWriteReqDto freeWriteReqDto) {
-        Member memberDb = memberRepository.findByIdAndDeleted(memberId,false).orElseThrow(() -> new CustomApiException(HttpStatus.UNAUTHORIZED, ERR_013, ERR_013.getValue()));
+        Member memberDb = memberRepository.findByIdAndDeleted(memberId,false).orElseThrow(() -> new CustomApiException(UNAUTHORIZED, ERR_013, ERR_013.getValue()));
         return freeRepository.save(freeWriteReqDto.toEntity(memberDb)).getId();
     }
 
     @Transactional(readOnly = true)
     public FreeDetailResDto freeDetail(Long id,Long memberId) {
         FreeBoard freeBoard = freeRepository.findByIdAndDeleted(id, false)
-                .orElseThrow(() -> new CustomApiException(HttpStatus.NOT_FOUND, ERR_012, ERR_012.getValue()));
+                .orElseThrow(() -> new CustomApiException(NOT_FOUND, ERR_012, ERR_012.getValue()));
 
         return FreeDetailResDto.from(freeBoard, memberId);
     }
 
+    @Transactional(readOnly = true)
+    public FreeDetailResDto freeUpdateDetail(Long id , Long memberId) {
+        FreeBoard freeBoard = freeRepository.findUpdateAuth(id, memberId).orElseThrow(() -> new CustomApiException(UNAUTHORIZED, ERR_015, ERR_015.getValue()));
+        return FreeDetailResDto.from(freeBoard, memberId);
+    }
+
     public Long freeUpdate(Long memberId , FreeUpdateReqDto freeUpdateReqDto) {
-        Member memberDb = memberRepository.findByIdAndDeleted(memberId,false).orElseThrow(() -> new CustomApiException(HttpStatus.UNAUTHORIZED, ERR_013, ERR_013.getValue()));
-        FreeBoard freeBoard = freeRepository.findByIdAndDeleted(freeUpdateReqDto.getId(), false).orElseThrow(() -> new CustomApiException(HttpStatus.NOT_FOUND, ERR_012, ERR_012.getValue()));
+        Member memberDb = memberRepository.findByIdAndDeleted(memberId,false).orElseThrow(() -> new CustomApiException(UNAUTHORIZED, ERR_013, ERR_013.getValue()));
+        FreeBoard freeBoard = freeRepository.findByIdAndDeleted(freeUpdateReqDto.getId(), false).orElseThrow(() -> new CustomApiException(NOT_FOUND, ERR_012, ERR_012.getValue()));
         if (memberNotEquals(freeBoard.getMember().getId(), memberDb.getId())) {
-            throw new CustomApiException(HttpStatus.UNAUTHORIZED, ERR_014, ERR_014.getValue());
+            throw new CustomApiException(UNAUTHORIZED, ERR_014, ERR_014.getValue());
         }
         freeBoard.updateFreeBoard(freeUpdateReqDto.getTitle(), freeUpdateReqDto.getContent());
         return freeBoard.getId();
     }
 
     public void freeDelete(Long memberId , Long id) {
-        Member memberDb = memberRepository.findByIdAndDeleted(memberId,false).orElseThrow(() -> new CustomApiException(HttpStatus.UNAUTHORIZED, ERR_013, ERR_013.getValue()));
-        FreeBoard freeBoard = freeRepository.findByIdAndDeleted(id, false).orElseThrow(() -> new CustomApiException(HttpStatus.NOT_FOUND, ERR_012, ERR_012.getValue()));
+        Member memberDb = memberRepository.findByIdAndDeleted(memberId,false).orElseThrow(() -> new CustomApiException(UNAUTHORIZED, ERR_013, ERR_013.getValue()));
+        FreeBoard freeBoard = freeRepository.findByIdAndDeleted(id, false).orElseThrow(() -> new CustomApiException(NOT_FOUND, ERR_012, ERR_012.getValue()));
         if (memberNotEquals(freeBoard.getMember().getId(), memberDb.getId())) {
-            throw new CustomApiException(HttpStatus.UNAUTHORIZED, ERR_014, ERR_014.getValue());
+            throw new CustomApiException(UNAUTHORIZED, ERR_014, ERR_014.getValue());
         }
         freeBoard.freeBoardDelete();
     }
