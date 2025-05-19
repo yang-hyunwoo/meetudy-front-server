@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Getter
@@ -27,6 +28,9 @@ public class CommentResDto {
     @Schema(description = "수정권한",example = "1")
     private boolean modifyChk;
 
+    @Schema(description = "등록일" , example = "2025-01-01 11:11:111")
+    private LocalDateTime createdAt;
+
     public static CommentResDto from(Comment comment, Member member) {
         return CommentResDto.builder()
                 .id(comment.getId())
@@ -34,6 +38,8 @@ public class CommentResDto {
                 .writeNickname(comment.getWriteNickname())
                 .memberId(comment.getMember().getId())
                 .modifyChk(member != null && Objects.equals(comment.getMember().getId(), member.getId()))
+                .createdAt(comment.getCreatedAt())
                 .build();
     }
+
 }

@@ -35,7 +35,7 @@ public class CommentController {
             CommentReqDto commentReqDto,
             @CurrentMember(required = false) Member member
             ) {
-        return Response.ok("댓글 조회 성공",commentService.findCommentList(member,commentReqDto.getTargetType()));
+        return Response.ok("댓글 조회 성공",commentService.findCommentList(member,commentReqDto));
 
     }
 
