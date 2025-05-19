@@ -8,6 +8,7 @@ import front.meetudy.dto.request.member.JoinMemberReqDto;
 import front.meetudy.dto.response.member.JoinMemberResDto;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.exception.CustomExceptionHandler;
+import front.meetudy.repository.member.MemberRepository;
 import front.meetudy.service.member.MemberService;
 import front.meetudy.util.aop.ValidationGroupAspect;
 import org.junit.jupiter.api.DisplayName;
@@ -47,7 +48,8 @@ class MemberControllerTest {
 
     @MockBean
     private MemberService memberService;
-
+    @MockBean
+    private MemberRepository memberRepository;
 
     private  final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())

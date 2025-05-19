@@ -1,8 +1,10 @@
 package front.meetudy.controller.common;
 
 import com.cloudinary.Cloudinary;
+import front.meetudy.annotation.customannotation.CurrentMember;
 import front.meetudy.auth.LoginUser;
 import front.meetudy.domain.common.file.Files;
+import front.meetudy.domain.member.Member;
 import front.meetudy.dto.response.file.FileResDto;
 import front.meetudy.service.common.CloudinaryService;
 import front.meetudy.service.common.file.FilesService;
@@ -31,13 +33,13 @@ public class FilesController {
 
 
     @PostMapping("/file-upload")
-    public ResponseEntity<Response<FileResDto>> fileUpload(@AuthenticationPrincipal LoginUser loginUser,
+    public ResponseEntity<Response<FileResDto>> fileUpload(@CurrentMember Member member,
                                                            @RequestParam("files") List<MultipartFile> files,
                                                            @RequestParam(required = false) Long fileId,
                                                            @RequestParam(required = false) List<Long> delFileDetailsId) {
 
         //files 생성
-        Files filesGroup = filesService.createFilesGroup(loginUser.getMember(),fileId);
+        Files filesGroup = filesService.createFilesGroup(member,fileId);
 
         for (MultipartFile file : files) {
             String contentType = file.getContentType();

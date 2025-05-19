@@ -59,7 +59,7 @@ class CommentServiceTest {
     @DisplayName("댓글 조회")
     void commentList() {
         // given / when
-        List<CommentResDto> freeboard = commentService.findCommentList(member.getId(), "freeboard");
+        List<CommentResDto> freeboard = commentService.findCommentList(member, "freeboard");
         //then
         assertThat(freeboard.size()).isEqualTo(3);
     }
@@ -68,7 +68,7 @@ class CommentServiceTest {
     @DisplayName("댓글 저장")
     void commentSave() {
         CommentWriteReqDto commentWriteReqDto = new CommentWriteReqDto("freeboard", 1L, "댓글1");
-        CommentResDto commentResDto = commentService.commentSave(member.getId(), commentWriteReqDto);
+        CommentResDto commentResDto = commentService.commentSave(member, commentWriteReqDto);
         assertThat(commentResDto.getContent()).isEqualTo("댓글1");
 
     }
@@ -81,7 +81,7 @@ class CommentServiceTest {
         em.persist(comments);
         CommentUpdateReqDto commentUpdateReqDto = new CommentUpdateReqDto(comments.getId(), comments.getTargetType(), comments.getTargetId(), "댓글-수정");
         // when
-        CommentResDto commentResDto = commentService.commentUpdate(member.getId(), commentUpdateReqDto);
+        CommentResDto commentResDto = commentService.commentUpdate(member, commentUpdateReqDto);
         // then
         assertThat(commentResDto.getContent()).isEqualTo("댓글-수정");
     }
@@ -91,7 +91,7 @@ class CommentServiceTest {
     void comment_delete() {
         Comment comments = Comment.createComments(member, "freeboard", 2L, "댓글2", false);
         em.persist(comments);
-        commentService.commentDelete(member.getId(), comments.getId());
+        commentService.commentDelete(member, comments.getId());
 
     }
 

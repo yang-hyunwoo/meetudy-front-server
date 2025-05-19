@@ -7,9 +7,12 @@ import front.meetudy.dto.request.member.JoinMemberReqDto;
 import front.meetudy.dto.response.member.JoinMemberResDto;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.member.MemberRepository;
+import front.meetudy.service.common.CloudinaryService;
 import front.meetudy.service.common.RecaptchaService;
+import front.meetudy.service.common.file.FilesService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -31,6 +34,14 @@ class MemberServiceTest {
 
     @MockBean
     private RecaptchaService recaptchaService;   // ✅ Mock 처리
+
+    @MockBean
+    private CloudinaryService cloudinaryService;
+
+    @MockBean
+    private FilesService filesService;
+
+
 
     @Test
     @DisplayName("회원가입 성공 테스트")

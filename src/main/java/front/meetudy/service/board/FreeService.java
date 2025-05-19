@@ -45,39 +45,36 @@ public class FreeService {
         return PageDto.of(page, FreePageResDto::from);
     }
 
-    public Long freeSave(Long memberId, FreeWriteReqDto freeWriteReqDto) {
-        Member memberDb = memberRepository.findByIdAndDeleted(memberId,false).orElseThrow(() -> new CustomApiException(UNAUTHORIZED, ERR_013, ERR_013.getValue()));
-        return freeRepository.save(freeWriteReqDto.toEntity(memberDb)).getId();
+    public Long freeSave(Member member, FreeWriteReqDto freeWriteReqDto) {
+        return freeRepository.save(freeWriteReqDto.toEntity(member)).getId();
     }
 
     @Transactional(readOnly = true)
-    public FreeDetailResDto freeDetail(Long id,Long memberId) {
+    public FreeDetailResDto freeDetail(Long id, Member member) {
         FreeBoard freeBoard = freeRepository.findByIdAndDeleted(id, false)
                 .orElseThrow(() -> new CustomApiException(NOT_FOUND, ERR_012, ERR_012.getValue()));
 
-        return FreeDetailResDto.from(freeBoard, memberId);
+        return FreeDetailResDto.from(freeBoard, member);
     }
 
     @Transactional(readOnly = true)
-    public FreeDetailResDto freeUpdateDetail(Long id , Long memberId) {
-        FreeBoard freeBoard = freeRepository.findUpdateAuth(id, memberId).orElseThrow(() -> new CustomApiException(UNAUTHORIZED, ERR_015, ERR_015.getValue()));
-        return FreeDetailResDto.from(freeBoard, memberId);
+    public FreeDetailResDto freeUpdateDetail(Long id , Member member) {
+        FreeBoard freeBoard = freeRepository.findUpdateAuth(id, member.getId()).orElseThrow(() -> new CustomApiException(UNAUTHORIZED, ERR_015, ERR_015.getValue()));
+        return FreeDetailResDto.from(freeBoard, member);
     }
 
-    public Long freeUpdate(Long memberId , FreeUpdateReqDto freeUpdateReqDto) {
-        Member memberDb = memberRepository.findByIdAndDeleted(memberId,false).orElseThrow(() -> new CustomApiException(UNAUTHORIZED, ERR_013, ERR_013.getValue()));
+    public Long freeUpdate(Member member , FreeUpdateReqDto freeUpdateReqDto) {
         FreeBoard freeBoard = freeRepository.findByIdAndDeleted(freeUpdateReqDto.getId(), false).orElseThrow(() -> new CustomApiException(NOT_FOUND, ERR_012, ERR_012.getValue()));
-        if (memberNotEquals(freeBoard.getMember().getId(), memberDb.getId())) {
+        if (memberNotEquals(freeBoard.getMember().getId(), member.getId())) {
             throw new CustomApiException(UNAUTHORIZED, ERR_014, ERR_014.getValue());
         }
         freeBoard.updateFreeBoard(freeUpdateReqDto.getTitle(), freeUpdateReqDto.getContent());
         return freeBoard.getId();
     }
 
-    public void freeDelete(Long memberId , Long id) {
-        Member memberDb = memberRepository.findByIdAndDeleted(memberId,false).orElseThrow(() -> new CustomApiException(UNAUTHORIZED, ERR_013, ERR_013.getValue()));
+    public void freeDelete(Member member , Long id) {
         FreeBoard freeBoard = freeRepository.findByIdAndDeleted(id, false).orElseThrow(() -> new CustomApiException(NOT_FOUND, ERR_012, ERR_012.getValue()));
-        if (memberNotEquals(freeBoard.getMember().getId(), memberDb.getId())) {
+        if (memberNotEquals(freeBoard.getMember().getId(), member.getId())) {
             throw new CustomApiException(UNAUTHORIZED, ERR_014, ERR_014.getValue());
         }
         freeBoard.freeBoardDelete();

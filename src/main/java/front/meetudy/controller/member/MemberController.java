@@ -1,9 +1,11 @@
 package front.meetudy.controller.member;
 
+import front.meetudy.annotation.customannotation.CurrentMember;
 import front.meetudy.auth.LoginUser;
 import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.constant.security.CookieEnum;
 import front.meetudy.docs.join.JoinValidationErrorExample;
+import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.member.JoinMemberReqDto;
 import front.meetudy.dto.response.member.JoinMemberResDto;
 import front.meetudy.dto.response.member.LoginResDto;
@@ -46,11 +48,11 @@ public class MemberController {
 
     @Operation(summary = "로그인 여부 체크", description = "로그인 여부 체크")
     @GetMapping("/user/me")
-    public ResponseEntity<Response<LoginResDto>> getUser(@AuthenticationPrincipal LoginUser loginUser) {
-        if(loginUser == null) {
+    public ResponseEntity<Response<LoginResDto>> getUser(@CurrentMember Member member) {
+        if(member == null) {
             return Response.ok("AnonymousUser", null);
         }
-        return Response.ok("LoginOk",new LoginResDto(loginUser.getMember()));
+        return Response.ok("LoginOk",new LoginResDto(member));
     }
 
 
