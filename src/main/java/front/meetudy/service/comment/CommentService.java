@@ -29,33 +29,30 @@ public class CommentService {
 
     private final MemberRepository memberRepository;
 
-    public List<CommentResDto> findCommentList(Long memberId,String targetType ) {
+    public List<CommentResDto> findCommentList(Member member,String targetType ) {
         List<Comment> commentList = commentRepository.findCommentList(targetType);
         return commentList.stream()
-                .map(comment -> CommentResDto.from(comment, memberId))
+                .map(comment -> CommentResDto.from(comment, member))
                 .toList();
     }
 
-    public CommentResDto commentSave(Long memberId, CommentWriteReqDto commentWriteReqDto) {
-        Member memberDb = memberRepository.findByIdAndDeleted(memberId, false).orElseThrow(() -> new CustomApiException(UNAUTHORIZED, ERR_013, ERR_013.getValue()));
-        Comment saveComment = commentRepository.save(commentWriteReqDto.toEntity(memberDb));
-        return CommentResDto.from(saveComment, memberId);
+    public CommentResDto commentSave(Member member, CommentWriteReqDto commentWriteReqDto) {
+        Comment saveComment = commentRepository.save(commentWriteReqDto.toEntity(member));
+        return CommentResDto.from(saveComment, member);
     }
 
-    public CommentResDto commentUpdate(Long memberId, CommentUpdateReqDto commentUpdateReqDto) {
-        Member memberDb = memberRepository.findByIdAndDeleted(memberId, false).orElseThrow(() -> new CustomApiException(UNAUTHORIZED, ERR_013, ERR_013.getValue()));
+    public CommentResDto commentUpdate(Member member, CommentUpdateReqDto commentUpdateReqDto) {
         Comment comment = commentRepository.findByIdAndDeleted(commentUpdateReqDto.getId(), false).orElseThrow(() -> new CustomApiException(NOT_FOUND, ERR_012, ERR_012.getValue()));
-        if (memberNotEquals(comment.getMember().getId(), memberDb.getId())) {
+        if (memberNotEquals(comment.getMember().getId(), member.getId())) {
             throw new CustomApiException(UNAUTHORIZED, ERR_014, ERR_014.getValue());
         }
         comment.commentUpdate(commentUpdateReqDto.getContent());
-        return CommentResDto.from(comment,memberDb.getId());
+        return CommentResDto.from(comment,member);
     }
 
-    public Long commentDelete(Long memberId , Long id) {
-        Member memberDb = memberRepository.findByIdAndDeleted(memberId, false).orElseThrow(() -> new CustomApiException(UNAUTHORIZED, ERR_013, ERR_013.getValue()));
+    public Long commentDelete(Member member , Long id) {
         Comment comment = commentRepository.findByIdAndDeleted(id, false).orElseThrow(() -> new CustomApiException(NOT_FOUND, ERR_012, ERR_012.getValue()));
-        if (memberNotEquals(comment.getMember().getId(), memberDb.getId())) {
+        if (memberNotEquals(comment.getMember().getId(), member.getId())) {
             throw new CustomApiException(UNAUTHORIZED, ERR_014, ERR_014.getValue());
         }
         return comment.commentDelete();

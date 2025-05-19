@@ -10,6 +10,7 @@ import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.contact.qna.QnaWriteReqDto;
 import front.meetudy.exception.CustomApiFieldException;
 import front.meetudy.exception.CustomExceptionHandler;
+import front.meetudy.repository.member.MemberRepository;
 import front.meetudy.service.contact.qna.QnaService;
 import front.meetudy.util.aop.ValidationGroupAspect;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +26,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,6 +53,9 @@ class QnaControllerTest {
     @MockBean
     private QnaService qnaService;
 
+    @MockBean
+    private MemberRepository memberRepository;
+
     private  final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -62,12 +68,14 @@ class QnaControllerTest {
                 .questionContent("22")
                 .questionTitle("11")
                 .build();
+        Member member2 = Member.createMember(1L, "test@naver.com", "닉네임", "이름", "19950101", "01012345678", "test", false);
 
         LoginUser loginUser = new LoginUser(Member.createMember(1L, "test@naver.com", "닉네임", "이름", "19950101", "01012345678", "test", false));
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
+        given(memberRepository.findByIdAndDeleted(member2.getId(), false))
+                .willReturn(Optional.of(member2));
         mockMvc.perform(post("/api/private/contact/qna/insert")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(qnaWriteReqDto)))
@@ -84,11 +92,13 @@ class QnaControllerTest {
                 .questionTitle("11")
                 .build();
 
-        LoginUser loginUser = new LoginUser(Member.createMember(1L, "test@naver.com", "닉네임", "이름", "19950101", "01012345678", "test", false));
+        Member member2 = Member.createMember(1L, "test@naver.com", "닉네임", "이름", "19950101", "01012345678", "test", false);
+        LoginUser loginUser = new LoginUser(member2);
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
+        given(memberRepository.findByIdAndDeleted(member2.getId(), false))
+                .willReturn(Optional.of(member2));
         mockMvc.perform(post("/api/private/contact/qna/insert")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(qnaWriteReqDto)))
@@ -108,13 +118,15 @@ class QnaControllerTest {
                 .questionContent("22")
                 .questionTitle("11")
                 .build();
+        Member member2 = Member.createMember(1L, "test@naver.com", "닉네임", "이름", "19950101", "01012345678", "test", false);
 
         LoginUser loginUser = new LoginUser(Member.createMember(1L, "test@naver.com", "닉네임", "이름", "19950101", "01012345678", "test", false));
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
         qnaService.qnaSave(qnaWriteReqDto, loginUser.getMember());
-
+        given(memberRepository.findByIdAndDeleted(member2.getId(), false))
+                .willReturn(Optional.of(member2));
         mockMvc.perform(get("/api/private/contact/qna/list"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Qna 목록 조회 완료"));

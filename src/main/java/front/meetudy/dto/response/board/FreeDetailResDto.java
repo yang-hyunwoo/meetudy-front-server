@@ -40,7 +40,7 @@ public class FreeDetailResDto {
         그래서 프록시 초기화 실패 → null
      */
 
-    public static FreeDetailResDto from(FreeBoard freeBoard, Long memberId) {
+    public static FreeDetailResDto from(FreeBoard freeBoard, Member member) {
         return FreeDetailResDto.builder()
                 .id(freeBoard.getId())
                 .title(freeBoard.getTitle())
@@ -48,7 +48,7 @@ public class FreeDetailResDto {
                 .writeNickname(freeBoard.getWriteNickname())
                 .createdAt(freeBoard.getCreatedAt())
                 .memberId(freeBoard.getMember().getId())
-                .modifyChk(Objects.equals(freeBoard.getMember().getId(), memberId))
+                .modifyChk(member != null && Objects.equals(freeBoard.getMember().getId(), member.getId()))
                 .build();
     }
 }

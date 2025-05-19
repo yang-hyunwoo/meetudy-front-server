@@ -95,7 +95,7 @@ class FreeServiceTest {
     @DisplayName("자유게시판 저장")
     void free_save() {
         FreeWriteReqDto freeWriteReqDto = new FreeWriteReqDto("111", "2222");
-        Long id = freeService.freeSave(member.getId(), freeWriteReqDto);
+        Long id = freeService.freeSave(member, freeWriteReqDto);
         assertNotNull(id);
         FreeBoard saved = em.find(FreeBoard.class, id);
         assertNotNull(saved);
@@ -108,7 +108,7 @@ class FreeServiceTest {
     void free_detail_success() {
         FreeBoard freeBoard = FreeBoard.createFreeBoard(member, "5", "5", false);
         em.persist(freeBoard);
-        FreeDetailResDto freeDetailResDto = freeService.freeDetail(freeBoard.getId(), member.getId());
+        FreeDetailResDto freeDetailResDto = freeService.freeDetail(freeBoard.getId(), member);
         assertThat(freeDetailResDto).isNotNull();
         assertThat(freeDetailResDto.getTitle()).isEqualTo("5");
     }
@@ -117,7 +117,7 @@ class FreeServiceTest {
     @DisplayName("자유게시판 상세 조회 - 실패")
     void free_detail_fail() {
         CustomApiException customApiException = assertThrows(CustomApiException.class, () -> {
-            freeService.freeDetail(100L, member.getId());
+            freeService.freeDetail(100L, member);
         });
         assertThat(customApiException.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(customApiException.getErrorEnum()).isEqualTo(ERR_012);
@@ -131,7 +131,7 @@ class FreeServiceTest {
         em.persist(freeBoard);
         FreeUpdateReqDto freeUpdateReqDto = new FreeUpdateReqDto(freeBoard.getId(),"aaa","bbb");
         // when
-        Long l = freeService.freeUpdate(member.getId(), freeUpdateReqDto);
+        Long l = freeService.freeUpdate(member, freeUpdateReqDto);
         FreeDetailResDto freeDetailResDto = freeService.freeDetail(l, null);
         // then
         assertThat("aaa").isEqualTo(freeDetailResDto.getTitle());
@@ -141,12 +141,14 @@ class FreeServiceTest {
     @DisplayName("자유게시판 수정 - 실패 -계정 없을 경우")
     void free_update_fail_login() {
         // given
+        Member member4 = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
+
         FreeUpdateReqDto freeUpdateReqDto = new FreeUpdateReqDto(1L,"aaa","bbb");
         CustomApiException customApiException = assertThrows(CustomApiException.class, () -> {
-            freeService.freeUpdate(100L,freeUpdateReqDto);
+            freeService.freeUpdate(member4,freeUpdateReqDto);
         });
-        assertThat(customApiException.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED);
-        assertThat(customApiException.getErrorEnum()).isEqualTo(ERR_013);
+        assertThat(customApiException.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(customApiException.getErrorEnum()).isEqualTo(ERR_012);
     }
 
     @Test
@@ -156,7 +158,7 @@ class FreeServiceTest {
         em.persist(freeBoard);
         FreeUpdateReqDto freeUpdateReqDto = new FreeUpdateReqDto(freeBoard.getId(),"aaa","bbb");
         CustomApiException customApiException = assertThrows(CustomApiException.class, () -> {
-            freeService.freeUpdate(member.getId(),freeUpdateReqDto);
+            freeService.freeUpdate(member,freeUpdateReqDto);
         });
         assertThat(customApiException.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(customApiException.getErrorEnum()).isEqualTo(ERR_014);
@@ -168,7 +170,7 @@ class FreeServiceTest {
         // when
         FreeBoard freeBoard = FreeBoard.createFreeBoard(member, "5", "5", false);
         em.persist(freeBoard);
-        freeService.freeDelete(member.getId(), freeBoard.getId());
+        freeService.freeDelete(member, freeBoard.getId());
         CustomApiException customApiException = assertThrows(CustomApiException.class, () -> {
             freeService.freeDetail(freeBoard.getId(),null);
         });

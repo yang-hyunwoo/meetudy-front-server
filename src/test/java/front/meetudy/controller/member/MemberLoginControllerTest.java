@@ -13,6 +13,7 @@ import front.meetudy.dto.request.member.LoginReqDto;
 import front.meetudy.dto.response.member.LoginResDto;
 import front.meetudy.exception.CustomExceptionHandler;
 import front.meetudy.property.JwtProperty;
+import front.meetudy.repository.member.MemberRepository;
 import front.meetudy.service.member.MemberService;
 import front.meetudy.service.redis.RedisService;
 import front.meetudy.util.aop.ValidationGroupAspect;
@@ -74,6 +75,9 @@ class MemberLoginControllerTest {
 
     @MockBean
     private RedisService redisService;
+
+    @MockBean
+    private MemberRepository memberRepository;
 
     private LoginReqDto sampleDto(boolean auto) {
         return new LoginReqDto("test@example.com", "password", auto);

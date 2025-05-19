@@ -1,6 +1,7 @@
 package front.meetudy.dto.response.comment;
 
 import front.meetudy.domain.comment.Comment;
+import front.meetudy.domain.member.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,13 +27,13 @@ public class CommentResDto {
     @Schema(description = "수정권한",example = "1")
     private boolean modifyChk;
 
-    public static CommentResDto from(Comment comment, Long memberId) {
+    public static CommentResDto from(Comment comment, Member member) {
         return CommentResDto.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
                 .writeNickname(comment.getWriteNickname())
                 .memberId(comment.getMember().getId())
-                .modifyChk(Objects.equals(comment.getMember().getId(), memberId))
+                .modifyChk(member != null && Objects.equals(comment.getMember().getId(), member.getId()))
                 .build();
     }
 }

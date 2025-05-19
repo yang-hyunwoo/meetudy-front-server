@@ -1,5 +1,6 @@
 package front.meetudy.controller.board;
 
+import front.meetudy.annotation.customannotation.CurrentMember;
 import front.meetudy.auth.LoginUser;
 import front.meetudy.docs.join.JoinValidationErrorExample;
 import front.meetudy.domain.member.Member;
@@ -46,42 +47,42 @@ public class FreeController{
     @JoinValidationErrorExample
     public ResponseEntity<Response<Long>> freeSave(
             @RequestBody FreeWriteReqDto freeWriteReqDto,
-            @AuthenticationPrincipal LoginUser loginUser
+            @CurrentMember Member member
 
     ) {
-        return Response.create("자유 게시판 등록 성공", freeService.freeSave(loginUser.getMember().getId(), freeWriteReqDto));
+        return Response.create("자유 게시판 등록 성공", freeService.freeSave(member, freeWriteReqDto));
     }
 
     @Operation(summary = "자유게시판 상세 조회" , description = "자유게시판 상세 조회")
     @GetMapping("/free-board/{id}")
     public ResponseEntity<Response<FreeDetailResDto>> freeDetail(
             @PathVariable Long id,
-            @AuthenticationPrincipal LoginUser loginUser
+            @CurrentMember(required = false) Member member
     ) {
-        return Response.ok("자유 게시판 상세 조회 성공", freeService.freeDetail(id, getMemberId(loginUser)));
+        return Response.ok("자유 게시판 상세 조회 성공", freeService.freeDetail(id,member));
     }
 
     @Operation(summary = "자유게시판 수정 상세 조회" , description = "자유게시판 수정 상세 조회")
-    @GetMapping("private/free-board/{id}")
+    @GetMapping("/private/free-board/{id}")
     public ResponseEntity<Response<FreeDetailResDto>> freeUpdateDetail(
             @PathVariable Long id,
-            @AuthenticationPrincipal LoginUser loginUser
+            @CurrentMember Member member
     ) {
-        return Response.ok("자유 게시판 상세 조회 성공", freeService.freeUpdateDetail(id, getMemberId(loginUser)));
+        return Response.ok("자유 게시판 상세 조회 성공", freeService.freeUpdateDetail(id, member));
     }
 
     @Operation(summary = "자유게시판 수정" , description = "자유게시판 수정")
-    @PutMapping("private/free-board/update")
+    @PutMapping("/private/free-board/update")
     public ResponseEntity<Response<Long>> freeUpdate(@RequestBody FreeUpdateReqDto freeUpdateReqDto,
-                                                     @AuthenticationPrincipal LoginUser loginUser) {
-        return Response.update("자유 게시판 수정 성공", freeService.freeUpdate(getMemberId(loginUser), freeUpdateReqDto));
+                                                     @CurrentMember Member member) {
+        return Response.update("자유 게시판 수정 성공", freeService.freeUpdate(member, freeUpdateReqDto));
     }
 
     @Operation(summary = "자유게시판 삭제" , description = "자유게시판 삭제")
-    @PutMapping("private/free-board/{id}/delete")
+    @PutMapping("/private/free-board/{id}/delete")
     public ResponseEntity<Response<Void>> freeDelete(@PathVariable Long id,
-                                                     @AuthenticationPrincipal LoginUser loginUser) {
-        freeService.freeDelete(getMemberId(loginUser), id);
+                                                     @CurrentMember Member member) {
+        freeService.freeDelete(member, id);
         return Response.delete("자유 게시판 삭제 성공",null);
     }
 
