@@ -3,6 +3,7 @@ package front.meetudy.service.comment;
 import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.comment.Comment;
 import front.meetudy.domain.member.Member;
+import front.meetudy.dto.request.comment.CommentReqDto;
 import front.meetudy.dto.request.comment.CommentUpdateReqDto;
 import front.meetudy.dto.request.comment.CommentWriteReqDto;
 import front.meetudy.dto.response.comment.CommentResDto;
@@ -59,7 +60,8 @@ class CommentServiceTest {
     @DisplayName("댓글 조회")
     void commentList() {
         // given / when
-        List<CommentResDto> freeboard = commentService.findCommentList(member, "freeboard");
+        CommentReqDto freeboard1 = new CommentReqDto("freeboard", 1L);
+        List<CommentResDto> freeboard = commentService.findCommentList(member, freeboard1);
         //then
         assertThat(freeboard.size()).isEqualTo(3);
     }

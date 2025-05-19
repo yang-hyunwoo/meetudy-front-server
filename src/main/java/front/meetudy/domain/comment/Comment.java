@@ -15,7 +15,7 @@ import java.util.Objects;
 @Getter
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "comments",
+@Table(name = "comment",
         indexes = {
                 @Index(name = "idx_comments_targetType", columnList = "targetType"),
                 @Index(name = "idx_comments_targetId", columnList = "targetId"),

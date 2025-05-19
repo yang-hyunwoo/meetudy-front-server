@@ -17,6 +17,14 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
             "ORDER BY c.id desc")
     List<Comment> findCommentList(String targetType);
 
+    @EntityGraph(attributePaths = {"member"})
+    @Query("SELECT c FROM Comment c " +
+            "WHERE c.targetType =:targetType " +
+            "AND c.targetId =:targetId " +
+            "AND c.deleted = false " +
+            "ORDER BY c.id desc")
+    List<Comment> findCommentBoardList(String targetType , Long targetId);
+
     Optional<Comment> findByIdAndDeleted(Long id, boolean deleted);
 
 }
