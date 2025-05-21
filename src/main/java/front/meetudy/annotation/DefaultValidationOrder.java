@@ -19,5 +19,15 @@ public final class DefaultValidationOrder {
             Step8.class,
             Step9.class,
             Step10.class,
+            Step11.class,
+            Step12.class,
+            Step13.class,
+            Step14.class,
+            Step15.class,
+            Step16.class,
+            Step17.class,
+            Step18.class,
+            Step19.class,
+            Step20.class,
     };
 }

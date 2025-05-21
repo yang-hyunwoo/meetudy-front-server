@@ -5,6 +5,7 @@ import front.meetudy.annotation.ValidationMode;
 import front.meetudy.constant.error.ValidationType;
 import front.meetudy.annotation.customannotation.*;
 import front.meetudy.constant.member.MemberProviderTypeEnum;
+import front.meetudy.constant.study.RegionEnum;
 import front.meetudy.domain.member.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -66,7 +67,8 @@ public class JoinMemberReqDto {
     private boolean isEmailAgreed;
 
     @Schema(description = "소셜타입", example = "NORMAL")
-    private MemberProviderTypeEnum provider;
+    @EnumValidation(enumClass = MemberProviderTypeEnum.class,groups = Step7.class)
+    private String provider;
 
     @Schema(description = "소셜ID", example = "asdf")
     private String providerId;

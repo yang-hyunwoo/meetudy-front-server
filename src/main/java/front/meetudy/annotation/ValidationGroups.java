@@ -14,5 +14,15 @@ public final class ValidationGroups {
     public interface Step8 {}
     public interface Step9 {}
     public interface Step10 {}
+    public interface Step11 {}
+    public interface Step12 {}
+    public interface Step13 {}
+    public interface Step14 {}
+    public interface Step15 {}
+    public interface Step16 {}
+    public interface Step17 {}
+    public interface Step18 {}
+    public interface Step19 {}
+    public interface Step20 {}
 
 }

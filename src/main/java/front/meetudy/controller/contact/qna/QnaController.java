@@ -27,14 +27,6 @@ public class QnaController {
 
     private final QnaService qnaService;
 
-    @Operation(summary = "Qna 저장", description = "Qna 저장")
-    @PostMapping("/contact/qna/insert")
-    @JoinValidationErrorExample
-    public ResponseEntity<Response<Object>> qnaInsert(@RequestBody QnaWriteReqDto qnaWriteReqDto, @CurrentMember Member member) {
-        qnaService.qnaSave(qnaWriteReqDto, member);
-        return Response.create("정상적으로 문의 등록이 되었습니다.", null);
-    }
-
     @Operation(summary = "Qna 조회", description = "Qna 조회")
     @GetMapping("/contact/qna/list")
     public ResponseEntity<Response<List<QnaListResDto>>> qnaList(@CurrentMember Member member) {
@@ -42,4 +34,11 @@ public class QnaController {
         return Response.ok("Qna 목록 조회 완료", qnaListResDtos);
     }
 
+    @Operation(summary = "Qna 저장", description = "Qna 저장")
+    @PostMapping("/contact/qna/insert")
+    @JoinValidationErrorExample
+    public ResponseEntity<Response<Object>> qnaInsert(@RequestBody QnaWriteReqDto qnaWriteReqDto, @CurrentMember Member member) {
+        qnaService.qnaSave(qnaWriteReqDto, member);
+        return Response.create("정상적으로 문의 등록이 되었습니다.", null);
+    }
 }

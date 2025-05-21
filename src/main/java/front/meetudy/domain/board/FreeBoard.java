@@ -21,7 +21,7 @@ import java.util.Objects;
                 @Index(name = "idx_free_board_title", columnList = "title"),
                 @Index(name = "idx_free_board_writeNickname", columnList = "writeNickname"),
                 @Index(name = "idx_free_board_deleted", columnList = "deleted")
-        })
+})
 public class FreeBoard extends BaseEntity {
 
     @Id
