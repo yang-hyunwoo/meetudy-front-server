@@ -2,9 +2,11 @@ package front.meetudy.dto.request.contact.qna;
 
 import front.meetudy.annotation.ValidationGroups;
 import front.meetudy.annotation.ValidationMode;
+import front.meetudy.annotation.customannotation.EnumValidation;
 import front.meetudy.annotation.customannotation.Sanitize;
 import front.meetudy.constant.contact.faq.FaqType;
 import front.meetudy.constant.error.ValidationType;
+import front.meetudy.constant.study.RegionEnum;
 import front.meetudy.domain.contact.Qna.QnaBoard;
 import front.meetudy.domain.member.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -27,7 +29,8 @@ public class QnaWriteReqDto {
 
     @Schema(description = "문의 유형", example = "SERVICE")
     @NotNull(message = "{qna.type}",groups = Step1.class)
-    private FaqType qnaType;
+    @EnumValidation(enumClass = FaqType.class, message = "{qna.type}", groups = Step1.class)
+    private String qnaType;
 
     @Schema(description = "문의 제목", example = "문의 제목 입니다.")
     @NotBlank(message = "{qna.title}", groups = Step2.class)
@@ -47,7 +50,7 @@ public class QnaWriteReqDto {
                 questionContent,
                 null,
                 null,
-                qnaType,
+                FaqType.valueOf(qnaType),
                 null
         );
     }

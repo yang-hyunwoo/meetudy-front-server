@@ -1,7 +1,9 @@
 package front.meetudy.dto.request.contact.faq;
 
+import front.meetudy.annotation.customannotation.EnumValidation;
 import front.meetudy.annotation.customannotation.Sanitize;
 import front.meetudy.constant.contact.faq.FaqType;
+import front.meetudy.constant.study.RegionEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,7 +23,8 @@ public class FaqReqDto {
     private String question;
 
     @Schema(description = "FAQ 타입" , example = "ALL")
-    private FaqType faqType;
+    @EnumValidation(enumClass = FaqType.class, message = "{qna.type}", groups = Step2.class)
+    private String faqType;
 
 
     @Override

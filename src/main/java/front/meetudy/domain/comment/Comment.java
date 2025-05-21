@@ -17,11 +17,11 @@ import java.util.Objects;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "comment",
         indexes = {
-                @Index(name = "idx_comments_targetType", columnList = "targetType"),
-                @Index(name = "idx_comments_targetId", columnList = "targetId"),
-                @Index(name = "idx_comments_memberId", columnList = "memberId"),
-                @Index(name = "idx_comments_writeNickname", columnList = "writeNickname"),
-                @Index(name = "idx_comments_deleted", columnList = "deleted"),
+                @Index(name = "idx_comment_targetType", columnList = "targetType"),
+                @Index(name = "idx_comment_targetId", columnList = "targetId"),
+                @Index(name = "idx_comment_memberId", columnList = "memberId"),
+                @Index(name = "idx_comment_writeNickname", columnList = "writeNickname"),
+                @Index(name = "idx_comment_deleted", columnList = "deleted"),
 
 })
 public class Comment extends BaseEntity {

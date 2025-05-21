@@ -46,10 +46,10 @@ public class FreeQueryDslRepositoryImpl implements FreeQueryDslRepository {
         String searchKeyword = freePageReqDto.getSearchKeyword();
         if(freePageReqDto.getSearchKeyword() != null) {
             switch (freePageReqDto.getSearchType()) {
-                case ALL ->
+                case "ALL" ->
                         builder.and(f.writeNickname.containsIgnoreCase(searchKeyword).or(f.title.containsIgnoreCase(searchKeyword)));
-                case TITLE -> builder.and(f.title.containsIgnoreCase(searchKeyword));
-                case NICKNAME -> builder.and(f.writeNickname.containsIgnoreCase(searchKeyword));
+                case "TITLE" -> builder.and(f.title.containsIgnoreCase(searchKeyword));
+                case "NICKNAME" -> builder.and(f.writeNickname.containsIgnoreCase(searchKeyword));
             }
         }
 
