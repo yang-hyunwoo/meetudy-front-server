@@ -12,6 +12,7 @@ import front.meetudy.dto.request.study.StudyGroupCreateReqDto;
 import front.meetudy.dto.request.study.StudyGroupJoinReqDto;
 import front.meetudy.dto.request.study.StudyGroupOtpReqDto;
 import front.meetudy.dto.request.study.StudyGroupPageReqDto;
+import front.meetudy.dto.response.study.StudyGroupJoinResDto;
 import front.meetudy.dto.response.study.StudyGroupPageResDto;
 import front.meetudy.dto.response.study.StudyGroupStatusResDto;
 import front.meetudy.exception.CustomApiException;
@@ -69,7 +70,7 @@ public class StudyGroupService {
         return entity.getId();
     }
 
-    public void joinStudyGroup(StudyGroupJoinReqDto studyGroupJoinReqDto, Member member) {
+    public StudyGroupJoinResDto joinStudyGroup(StudyGroupJoinReqDto studyGroupJoinReqDto, Member member) {
 
         //1.studygroup 존재 여부 확인
         StudyGroup studyGroup = studyGroupRepository.findValidStudyGroupById(studyGroupJoinReqDto.getStudyGroupId()).orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
@@ -79,7 +80,9 @@ public class StudyGroupService {
                 throw new CustomApiException(BAD_REQUEST, ERR_003, ERR_003.getValue());
         });
         //3.저장
-        studyGroupMemberRepository.save(studyGroupJoinReqDto.toEntity(member, studyGroup));
+        StudyGroupMember studyGroupMember = studyGroupMemberRepository.save(studyGroupJoinReqDto.toEntity(member, studyGroup));
+        return StudyGroupJoinResDto.from(studyGroupMember);
+
     }
 
 
@@ -93,7 +96,7 @@ public class StudyGroupService {
     }
 
     public boolean existsByGroupIdAndOtp(StudyGroupOtpReqDto studyGroupOtpReqDto) {
-        int count = studyGroupDetailRepository.existsByGroupIdAndOtp(studyGroupOtpReqDto.getStudyGroupId(), studyGroupOtpReqDto.getOptNumber());
+        int count = studyGroupDetailRepository.existsByGroupIdAndOtp(studyGroupOtpReqDto.getStudyGroupId(), studyGroupOtpReqDto.getOtpNumber());
         return count != 0;
     }
 

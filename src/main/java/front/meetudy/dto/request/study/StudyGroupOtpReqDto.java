@@ -21,6 +21,6 @@ public class StudyGroupOtpReqDto {
 
     @Schema(description ="otp 인증번호" , example = "123456")
     @NotBlank(groups = Step2.class)
-    private String optNumber;
+    private String otpNumber;
 
 }

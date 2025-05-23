@@ -197,7 +197,7 @@ class StudyGroupControllerTest {
         mockMvc.perform(post("/api/private/study-group/join")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(studyGroupJoinReqDto)))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
 }
