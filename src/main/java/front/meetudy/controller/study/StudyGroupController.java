@@ -7,6 +7,7 @@ import front.meetudy.dto.request.study.StudyGroupCreateReqDto;
 import front.meetudy.dto.request.study.StudyGroupJoinReqDto;
 import front.meetudy.dto.request.study.StudyGroupOtpReqDto;
 import front.meetudy.dto.request.study.StudyGroupPageReqDto;
+import front.meetudy.dto.response.study.StudyGroupJoinResDto;
 import front.meetudy.dto.response.study.StudyGroupPageResDto;
 import front.meetudy.dto.response.study.StudyGroupStatusResDto;
 import front.meetudy.service.study.StudyGroupService;
@@ -74,12 +75,11 @@ public class StudyGroupController {
 
     @Operation(summary = "스터디 그룹 멤버 가입" , description = "스터디 그룹 멤버 가입")
     @PostMapping("/private/study-group/join")
-    public ResponseEntity<Response<Void>> joinStudyGroup(
+    public ResponseEntity<Response<StudyGroupJoinResDto>> joinStudyGroup(
             @RequestBody StudyGroupJoinReqDto studyGroupJoinReqDto,
             @CurrentMember Member member
             ) {
-        studyGroupService.joinStudyGroup(studyGroupJoinReqDto, member);
-        return Response.ok("스터디 그룹 멤버 가입 성공", null);
+        return Response.create("스터디 그룹 멤버 가입 성공", studyGroupService.joinStudyGroup(studyGroupJoinReqDto, member));
     }
 
 }
