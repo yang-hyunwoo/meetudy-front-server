@@ -20,6 +20,7 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import static front.meetudy.annotation.ValidationGroups.*;
@@ -138,7 +139,7 @@ public class StudyGroupCreateReqDto extends BaseEntity {
         );
     }
 
-    public StudyGroupMember toMemberEntity(Member member , StudyGroup studyGroup) {
+    public StudyGroupMember toLeaderEntity(Member member , StudyGroup studyGroup) {
         return StudyGroupMember.createStudyGroupMember(
                 studyGroup,
                 member,
@@ -150,4 +151,6 @@ public class StudyGroupCreateReqDto extends BaseEntity {
                 null
         );
     }
+
+
 }

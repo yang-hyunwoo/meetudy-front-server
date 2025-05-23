@@ -7,6 +7,8 @@ import lombok.Getter;
 @Getter
 public enum JoinStatusEnum {
     PENDING("신청중"),
-    APPROVED("참여중");
+    APPROVED("참여중"),
+    REJECTED("거절"),
+    ;
     private final String value;
 }

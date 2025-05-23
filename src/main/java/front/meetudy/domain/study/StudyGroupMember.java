@@ -2,6 +2,7 @@ package front.meetudy.domain.study;
 
 import front.meetudy.constant.study.JoinStatusEnum;
 import front.meetudy.constant.study.MemberRole;
+import front.meetudy.domain.common.BaseEntity;
 import front.meetudy.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -23,7 +24,7 @@ import java.util.Objects;
                 @Index(name = "idx_study_group_member_member_id", columnList = "member_id"),
                 @Index(name = "idx_study_group_member_join_status", columnList = "join_status"),
 })
-public class StudyGroupMember {
+public class StudyGroupMember extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +36,7 @@ public class StudyGroupMember {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member member ;
+    private Member member;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.List;
 
+import static front.meetudy.constant.error.ErrorEnum.*;
 import static org.springframework.http.HttpStatus.*;
 
 @RestControllerAdvice
@@ -29,6 +30,13 @@ public class CustomExceptionHandler {
         return Response.error(e.getStatus(), e.getMessage(), e.getErrorEnum(), null);
     }
 
+    //TODO 어떤 방식으로 내려줄지 고민
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Response<ValidationErrorResponse>> handleIllegalArgumentException(IllegalArgumentException e) {
+        log.error("IllegalArgumentException: {}" , e.getMessage());
+        return Response.error(BAD_REQUEST, e.getMessage(), ERR_002, null);
+    }
+
     /**
      * 변수 단일 유효성 에러 리턴
      * @param e
@@ -43,7 +51,7 @@ public class CustomExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Response<ValidationErrorResponse>> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
        log.error("DataIntegrityViolationException: {}" , e.getMessage());
-        return Response.error(BAD_REQUEST, "데이터 타입이 올바르지 않습니다.", ErrorEnum.ERR_018, null);
+        return Response.error(BAD_REQUEST, "데이터 타입이 올바르지 않습니다.", ERR_018, null);
     }
 
     /**

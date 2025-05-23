@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static front.meetudy.constant.error.ErrorEnum.*;
-import static front.meetudy.exception.join.JoinErrorCode.*;
+import static front.meetudy.constant.join.JoinErrorCode.*;
 import static front.meetudy.constant.login.LoginErrorCode.*;
 
 @Service

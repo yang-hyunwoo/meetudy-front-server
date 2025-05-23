@@ -1,4 +1,4 @@
-package front.meetudy.exception.crypto;
+package front.meetudy.constant.crypto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

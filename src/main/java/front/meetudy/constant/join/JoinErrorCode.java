@@ -1,4 +1,4 @@
-package front.meetudy.exception.join;
+package front.meetudy.constant.join;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

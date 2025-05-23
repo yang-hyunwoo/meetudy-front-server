@@ -64,7 +64,7 @@ class QnaControllerTest {
     @DisplayName("QNA 저장")
     void qnaInsertSuccess() throws Exception {
         QnaWriteReqDto qnaWriteReqDto = QnaWriteReqDto.builder()
-                .qnaType(FaqType.SERVICE)
+                .qnaType("SERVICE")
                 .questionContent("22")
                 .questionTitle("11")
                 .build();
@@ -87,7 +87,7 @@ class QnaControllerTest {
     @DisplayName("QNA 저장 실패 - 필수값 / 및 유효성 실패")
     void qnaInsertFail() throws Exception {
         QnaWriteReqDto qnaWriteReqDto = QnaWriteReqDto.builder()
-                .qnaType(FaqType.SERVICE)
+                .qnaType(FaqType.SERVICE.getValue())
                 .questionContent("")
                 .questionTitle("11")
                 .build();
@@ -114,7 +114,7 @@ class QnaControllerTest {
     @DisplayName("QNA 조회")
     void qnaListSuccess() throws Exception {
         QnaWriteReqDto qnaWriteReqDto = QnaWriteReqDto.builder()
-                .qnaType(FaqType.SERVICE)
+                .qnaType(FaqType.SERVICE.getValue())
                 .questionContent("22")
                 .questionTitle("11")
                 .build();
