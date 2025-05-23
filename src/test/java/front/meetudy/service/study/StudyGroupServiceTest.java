@@ -4,7 +4,13 @@ import front.meetudy.constant.study.RegionEnum;
 import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.StudyGroup;
+import front.meetudy.dto.PageDto;
 import front.meetudy.dto.request.study.StudyGroupCreateReqDto;
+import front.meetudy.dto.request.study.StudyGroupJoinReqDto;
+import front.meetudy.dto.request.study.StudyGroupOtpReqDto;
+import front.meetudy.dto.request.study.StudyGroupPageReqDto;
+import front.meetudy.dto.response.study.StudyGroupPageResDto;
+import front.meetudy.dto.response.study.StudyGroupStatusResDto;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.contact.faq.QuerydslTestConfig;
 import front.meetudy.repository.study.StudyGroupRepository;
@@ -20,12 +26,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static front.meetudy.constant.error.ErrorEnum.*;
@@ -49,11 +59,14 @@ class StudyGroupServiceTest {
     @PersistenceContext
     private EntityManager em;
     Member member;
+    Member member2;
 
     @BeforeEach
     void setUp() {
         member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
+        member2 = Member.createMember(null, "test2@naver.com", "테스트2", "테스트", "19950120", "01011112222", "test", false);
         em.persist(member);
+        em.persist(member2);
         em.flush();
         em.clear();
     }
@@ -64,19 +77,19 @@ class StudyGroupServiceTest {
         // given
         StudyGroupCreateReqDto studyGroupCreateReqDto = new StudyGroupCreateReqDto(
                 null,
+                "SEOUL",
                 "스터디 그룹1",
                 "스터디 그룹 요약",
-                RegionEnum.SEOUL,
                 false,
-                10,
                 "리액트,구글",
                 "내용입니다.",
-                LocalDate.now(),
-                LocalDate.now().plusDays(1L),
+                LocalDate.now().toString(),
+                LocalDate.now().plusDays(1L).toString(),
+                10,
                 "매주",
                 "월",
-                LocalTime.now(),
-                LocalTime.now().plusHours(1L),
+                LocalTime.now().toString(),
+                LocalTime.now().plusHours(1L).toString(),
                 null,
                 false,
                 false,
@@ -99,19 +112,19 @@ class StudyGroupServiceTest {
         // given
         StudyGroupCreateReqDto studyGroupCreateReqDto = new StudyGroupCreateReqDto(
                 null,
+                "SEOUL",
                 "스터디 그룹1",
                 "스터디 그룹 요약",
-                RegionEnum.SEOUL,
                 false,
-                10,
                 "리액트,구글",
                 "내용입니다.",
-                LocalDate.now().plusDays(1),
-                LocalDate.now(),
+                LocalDate.now().plusDays(1L).toString(),
+                LocalDate.now().toString(),
+                10,
                 "매주",
                 "월",
-                LocalTime.of(16,0),
-                LocalTime.of(18,0),
+                LocalTime.now().toString(),
+                LocalTime.now().plusHours(1L).toString(),
                 null,
                 false,
                 false,
@@ -131,19 +144,19 @@ class StudyGroupServiceTest {
         // given
         StudyGroupCreateReqDto studyGroupCreateReqDto = new StudyGroupCreateReqDto(
                 null,
+                "SEOUL",
                 "스터디 그룹1",
                 "스터디 그룹 요약",
-                RegionEnum.SEOUL,
                 false,
-                10,
                 "리액트,구글",
                 "내용입니다.",
-                LocalDate.now(),
-                LocalDate.now(),
+                LocalDate.now().toString(),
+                LocalDate.now().plusDays(1L).toString(),
+                10,
                 "매주",
                 "월",
-                LocalTime.of(20,0),
-                LocalTime.of(18,0),
+                LocalTime.of(20,0).toString(),
+                LocalTime.of(18,0).toString(),
                 null,
                 false,
                 false,
@@ -155,6 +168,144 @@ class StudyGroupServiceTest {
 
         assertThat(customApiException.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(customApiException.getErrorEnum()).isEqualTo(ERR_017);
+    }
+
+
+    @Test
+    @DisplayName("스터디 그룹 저장 - 성공")
+    void studyGroup_search() {
+        // given
+        StudyGroupCreateReqDto studyGroupCreateReqDto = new StudyGroupCreateReqDto(
+                null,
+                "SEOUL",
+                "스터디 그룹1",
+                "스터디 그룹 요약",
+                false,
+                "리액트,구글",
+                "내용입니다.",
+                LocalDate.now().toString(),
+                LocalDate.now().plusDays(1L).toString(),
+                10,
+                "매주",
+                "월",
+                LocalTime.now().toString(),
+                LocalTime.now().plusHours(1L).toString(),
+                null,
+                false,
+                false,
+                false
+        );
+
+        Long l = studyGroupService.studySave(member, studyGroupCreateReqDto);
+        Pageable pageable = PageRequest.of(0, 10);
+        StudyGroupPageReqDto studyGroupPageReqDto = new StudyGroupPageReqDto("SEOUL",null);
+        PageDto<StudyGroupPageResDto> result = studyGroupService.findStudyGroupListPage(pageable, studyGroupPageReqDto, null);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent().get(0).getTitle()).isEqualTo("스터디 그룹1");
+        assertThat(result.getContent().get(0).getTag()).isEqualTo("리액트,구글");
+
+    }
+
+
+    @Test
+    @DisplayName("스터디 그룹 사용자 상태 조회")
+    void studyGroup_status() {
+        // given
+        StudyGroupCreateReqDto studyGroupCreateReqDto = new StudyGroupCreateReqDto(
+                null,
+                "SEOUL",
+                "스터디 그룹1",
+                "스터디 그룹 요약",
+                false,
+                "리액트,구글",
+                "내용입니다.",
+                LocalDate.now().toString(),
+                LocalDate.now().plusDays(1L).toString(),
+                10,
+                "매주",
+                "월",
+                LocalTime.now().toString(),
+                LocalTime.now().plusHours(1L).toString(),
+                null,
+                false,
+                false,
+                false
+        );
+
+        Long l = studyGroupService.studySave(member, studyGroupCreateReqDto);
+        Pageable pageable = PageRequest.of(0, 10);
+        StudyGroupPageReqDto studyGroupPageReqDto = new StudyGroupPageReqDto("SEOUL",null);
+        PageDto<StudyGroupPageResDto> studyGroupListPage = studyGroupService.findStudyGroupListPage(pageable, studyGroupPageReqDto, null);
+        List<Long> groupId = new ArrayList<>();
+        groupId.add(studyGroupListPage.getContent().get(0).getId());
+        List<StudyGroupStatusResDto> studyGroupStatus = studyGroupService.findStudyGroupStatus(groupId, member);
+
+        assertThat(studyGroupStatus).isNotNull();
+        assertThat(studyGroupStatus.size()).isEqualTo(1);
+
+    }
+
+    @Test
+    @DisplayName("스터디 그룹 OTP 인증 조회")
+    void studyGroup_OTP() {
+        // given
+        StudyGroupCreateReqDto studyGroupCreateReqDto = new StudyGroupCreateReqDto(
+                null,
+                "SEOUL",
+                "스터디 그룹1",
+                "스터디 그룹 요약",
+                false,
+                "리액트,구글",
+                "내용입니다.",
+                LocalDate.now().toString(),
+                LocalDate.now().plusDays(1L).toString(),
+                10,
+                "매주",
+                "월",
+                LocalTime.now().toString(),
+                LocalTime.now().plusHours(1L).toString(),
+                "123456",
+                true,
+                false,
+                false
+        );
+
+        Long l = studyGroupService.studySave(member, studyGroupCreateReqDto);
+        StudyGroupOtpReqDto studyGroupOtpReqDto = new StudyGroupOtpReqDto(l,"123456");
+        boolean b = studyGroupService.existsByGroupIdAndOtp(studyGroupOtpReqDto);
+        assertThat(b).isEqualTo(true);
+    }
+
+
+    @Test
+    @DisplayName("스터디 그룹 인원 등록")
+    void joinStudyGroup() {
+        // given
+        StudyGroupCreateReqDto studyGroupCreateReqDto = new StudyGroupCreateReqDto(
+                null,
+                "SEOUL",
+                "스터디 그룹1",
+                "스터디 그룹 요약",
+                false,
+                "리액트,구글",
+                "내용입니다.",
+                LocalDate.now().toString(),
+                LocalDate.now().plusDays(1L).toString(),
+                10,
+                "매주",
+                "월",
+                LocalTime.now().toString(),
+                LocalTime.now().plusHours(1L).toString(),
+                null,
+                false,
+                false,
+                false
+        );
+
+        Long l = studyGroupService.studySave(member, studyGroupCreateReqDto);
+        StudyGroupJoinReqDto studyGroupJoinReqDto = new StudyGroupJoinReqDto(l);
+        studyGroupService.joinStudyGroup(studyGroupJoinReqDto,member2);
     }
 
 }

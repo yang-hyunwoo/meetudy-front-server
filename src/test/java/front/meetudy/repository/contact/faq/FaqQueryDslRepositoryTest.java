@@ -59,7 +59,7 @@ class FaqQueryDslRepositoryTest {
     void faq_paging_type_search_exists() {
         Pageable pageable = PageRequest.of(0, 10);
         FaqReqDto dto = new FaqReqDto(); // 기본값: 전체
-        dto.setFaqType(FaqType.ASSIGNMENT);
+        dto.setFaqType("ASSIGNMENT");
         Page<FaqBoard> result = faqQueryDslRepository.findFaqListPage(pageable, dto);
 
 
@@ -73,7 +73,7 @@ class FaqQueryDslRepositoryTest {
     void faq_paging_type_search_not_exists() {
         Pageable pageable = PageRequest.of(0, 10);
         FaqReqDto dto = new FaqReqDto(); // 기본값: 전체
-        dto.setFaqType(FaqType.SERVICE);
+        dto.setFaqType("SERVICE");
         Page<FaqBoard> result = faqQueryDslRepository.findFaqListPage(pageable, dto);
 
 
@@ -114,7 +114,7 @@ class FaqQueryDslRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
         FaqReqDto dto = new FaqReqDto();
         dto.setQuestion("질문");
-        dto.setFaqType(FaqType.ASSIGNMENT);
+        dto.setFaqType("ASSIGNMENT");
         Page<FaqBoard> result = faqQueryDslRepository.findFaqListPage(pageable, dto);
 
         assertThat(result).isNotNull();
@@ -128,7 +128,7 @@ class FaqQueryDslRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
         FaqReqDto dto = new FaqReqDto();
         dto.setQuestion("질문");
-        dto.setFaqType(FaqType.SERVICE);
+        dto.setFaqType("SERVICE");
         Page<FaqBoard> result = faqQueryDslRepository.findFaqListPage(pageable, dto);
 
         assertThat(result).isNotNull();

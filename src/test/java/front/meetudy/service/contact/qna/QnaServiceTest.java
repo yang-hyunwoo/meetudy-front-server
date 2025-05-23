@@ -60,7 +60,7 @@ class QnaServiceTest {
         QnaWriteReqDto qnaWriteReqDto = QnaWriteReqDto.builder()
                 .questionTitle("제목")
                 .questionContent("내용")
-                .qnaType(FaqType.SERVICE)
+                .qnaType("SERVICE")
                 .build();
 
         // when
@@ -71,7 +71,7 @@ class QnaServiceTest {
         QnaBoard qnaBoard = qnaRepository.findById(qnaId).orElseThrow();
         assertThat(qnaBoard.getQuestionTitle()).isEqualTo(qnaWriteReqDto.getQuestionTitle());
         assertThat(qnaBoard.getQuestionContent()).isEqualTo(qnaWriteReqDto.getQuestionContent());
-        assertThat(qnaBoard.getQnaType()).isEqualTo(qnaWriteReqDto.getQnaType());
+        assertThat(qnaBoard.getQnaType().toString()).isEqualTo(qnaWriteReqDto.getQnaType());
         assertThat(qnaBoard.getQuestionUserId()).isEqualTo(member);
     }
 
@@ -83,7 +83,7 @@ class QnaServiceTest {
         QnaWriteReqDto qnaWriteReqDto = QnaWriteReqDto.builder()
                 .questionTitle("제목")
                 .questionContent("내용")
-                .qnaType(FaqType.SERVICE)
+                .qnaType("SERVICE")
                 .build();
         qnaService.qnaSave(qnaWriteReqDto, member);
 

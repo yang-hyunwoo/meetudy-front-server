@@ -45,7 +45,8 @@ class FaqControllerTest {
     void faqList() throws Exception {
         mockMvc.perform(get("/api/contact/faq")
                         .param("page", "0")
-                        .param("size", "10"))
+                        .param("size", "10")
+                        .param("faqType","ALL"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content.length()").value(1))
                 .andExpect(jsonPath("$.data.content[0].question").value("질문"));
@@ -69,6 +70,7 @@ class FaqControllerTest {
         mockMvc.perform(get("/api/contact/faq")
                         .param("page", "0")
                         .param("size", "10")
+                        .param("faqType","ALL")
                         .param("question","질문"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content.length()").value(1))

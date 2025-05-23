@@ -11,7 +11,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 
 import static front.meetudy.constant.error.ErrorEnum.*;
-import static front.meetudy.exception.crypto.CryptoErrorCode.*;
+import static front.meetudy.constant.crypto.CryptoErrorCode.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Component

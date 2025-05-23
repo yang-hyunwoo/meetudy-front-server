@@ -67,7 +67,7 @@ class FreeQueryDslRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
         FreePageReqDto freePageReqDto = new FreePageReqDto();
         freePageReqDto.setSearchKeyword("1");
-        freePageReqDto.setSearchType(SearchType.ALL);
+        freePageReqDto.setSearchType("ALL");
 
         Page<FreeBoard> result = freeQueryDslRepository.findFreePage(pageable, freePageReqDto);
 
@@ -82,7 +82,7 @@ class FreeQueryDslRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
         FreePageReqDto freePageReqDto = new FreePageReqDto();
         freePageReqDto.setSearchKeyword("1");
-        freePageReqDto.setSearchType(SearchType.TITLE);
+        freePageReqDto.setSearchType("TITLE");
 
         Page<FreeBoard> result = freeQueryDslRepository.findFreePage(pageable, freePageReqDto);
 
@@ -97,7 +97,7 @@ class FreeQueryDslRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
         FreePageReqDto freePageReqDto = new FreePageReqDto();
         freePageReqDto.setSearchKeyword("111");
-        freePageReqDto.setSearchType(SearchType.ALL);
+        freePageReqDto.setSearchType("ALL");
 
         Page<FreeBoard> result = freeQueryDslRepository.findFreePage(pageable, freePageReqDto);
 
@@ -111,7 +111,7 @@ class FreeQueryDslRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
         FreePageReqDto freePageReqDto = new FreePageReqDto();
         freePageReqDto.setSearchKeyword("111");
-        freePageReqDto.setSearchType(SearchType.TITLE);
+        freePageReqDto.setSearchType("TITLE");
 
         Page<FreeBoard> result = freeQueryDslRepository.findFreePage(pageable, freePageReqDto);
 

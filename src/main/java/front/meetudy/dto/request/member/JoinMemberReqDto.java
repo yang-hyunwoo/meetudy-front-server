@@ -68,7 +68,8 @@ public class JoinMemberReqDto {
 
     @Schema(description = "소셜타입", example = "NORMAL")
     @EnumValidation(enumClass = MemberProviderTypeEnum.class,groups = Step7.class)
-    private String provider;
+    @Builder.Default
+    private String provider = "NORMAL";
 
     @Schema(description = "소셜ID", example = "asdf")
     private String providerId;

@@ -25,7 +25,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static front.meetudy.constant.error.ErrorEnum.ERR_003;
-import static front.meetudy.exception.join.JoinErrorCode.JI_DUPLICATION_EMAIL;
+import static front.meetudy.constant.join.JoinErrorCode.JI_DUPLICATION_EMAIL;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;

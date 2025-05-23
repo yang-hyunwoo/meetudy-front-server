@@ -80,7 +80,7 @@ class FreeServiceTest {
     @DisplayName("자유게시판 타입-제목 조회")
     void free_all_type_all_search() {
         // given
-        FreePageReqDto freePageReqDto = new FreePageReqDto(SearchType.TITLE,"1");
+        FreePageReqDto freePageReqDto = new FreePageReqDto("TITLE","1");
         Pageable pageable = PageRequest.of(0, 10);
 
         // when

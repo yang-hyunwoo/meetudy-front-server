@@ -59,7 +59,8 @@ class FreeControllerTest {
     void freeList() throws Exception {
         mockMvc.perform(get("/api/free-board/list")
                         .param("page", "0")
-                        .param("size", "10"))
+                        .param("size", "10")
+                        .param("searchType","ALL"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content.length()").value(1))
                 .andExpect(jsonPath("$.data.content[0].title").value("1"));

@@ -72,7 +72,7 @@ class FaqServiceTest {
     @DisplayName("faq 타입 조회")
     void faq_type_search() {
         // given
-        FaqReqDto faqReqDto = new FaqReqDto(null, FaqType.ASSIGNMENT);
+        FaqReqDto faqReqDto = new FaqReqDto(null, "ASSIGNMENT");
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
@@ -87,7 +87,7 @@ class FaqServiceTest {
     @DisplayName("faq 질문 조회")
     void faq_question_search() {
         // given
-        FaqReqDto faqReqDto = new FaqReqDto("질문", null);
+        FaqReqDto faqReqDto = new FaqReqDto("질문", "ALL");
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
@@ -102,7 +102,7 @@ class FaqServiceTest {
     @DisplayName("faq 질문 타입 조회")
     void faq_question_type_search() {
         // given
-        FaqReqDto faqReqDto = new FaqReqDto("질문", FaqType.ASSIGNMENT);
+        FaqReqDto faqReqDto = new FaqReqDto("질문", "ASSIGNMENT");
         Pageable pageable = PageRequest.of(0, 10);
 
         // when

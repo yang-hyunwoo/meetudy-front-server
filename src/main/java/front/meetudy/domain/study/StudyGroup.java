@@ -53,7 +53,8 @@ public class StudyGroup extends BaseEntity {
     @Column(nullable = false)
     private int maxMemberCount;
 
-
+    @OneToOne(mappedBy = "studyGroup", fetch = FetchType.LAZY)
+    private StudyGroupDetail studyGroupDetail;
     @Builder
     protected StudyGroup(Long id,
                         Files thumbnailFile,

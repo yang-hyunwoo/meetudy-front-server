@@ -26,7 +26,7 @@ public class StudyGroupDetail extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "study_group_id", nullable = false)
     private StudyGroup studyGroup;
 
@@ -66,6 +66,11 @@ public class StudyGroupDetail extends BaseEntity {
     @Column(nullable = false)
     private boolean latePay;
 
+    @Column(nullable = false)
+    private boolean deleted;
+
+
+
     @Builder
     protected StudyGroupDetail(Long id,
                                StudyGroup studyGroup,
@@ -80,7 +85,8 @@ public class StudyGroupDetail extends BaseEntity {
                                String secretPassword,
                                boolean secret,
                                boolean allowComment,
-                               boolean latePay) {
+                               boolean latePay,
+                               boolean deleted) {
         this.id = id;
         this.studyGroup = studyGroup;
         this.tag = tag;
@@ -95,6 +101,7 @@ public class StudyGroupDetail extends BaseEntity {
         this.secret = secret;
         this.allowComment = allowComment;
         this.latePay = latePay;
+        this.deleted = deleted;
     }
 
     public static StudyGroupDetail createStudyGroupDetail(StudyGroup StudyGroup,
@@ -124,6 +131,7 @@ public class StudyGroupDetail extends BaseEntity {
                 .secret(secret)
                 .allowComment(allowComment)
                 .latePay(latePay)
+                .deleted(false)
                 .build();
     }
 
