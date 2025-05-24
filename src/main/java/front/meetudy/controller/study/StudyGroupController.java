@@ -4,6 +4,7 @@ import front.meetudy.annotation.customannotation.CurrentMember;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.PageDto;
 import front.meetudy.dto.request.study.*;
+import front.meetudy.dto.response.study.StudyGroupDetailResDto;
 import front.meetudy.dto.response.study.StudyGroupJoinResDto;
 import front.meetudy.dto.response.study.StudyGroupPageResDto;
 import front.meetudy.dto.response.study.StudyGroupStatusResDto;
@@ -87,6 +88,13 @@ public class StudyGroupController {
             ){
         studyGroupService.joinGroupMemberCancel(studyGroupCancelReqDto, member);
         return Response.delete("스터디 그룹 요청 취소", null);
+    }
+
+    @Operation(summary = "스터디 그룹 상세 조회" , description = "스터디 그룹 상세 조회")
+    @GetMapping("/study-group/detail/{studyGroupId}")
+    public ResponseEntity<Response<StudyGroupDetailResDto>> studyGroupDetail(
+            @PathVariable Long studyGroupId) {
+        return Response.ok("스터디 그룹 상세 조회 성공", studyGroupService.studyGroupDetail(studyGroupId));
     }
 
 }

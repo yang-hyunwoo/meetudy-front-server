@@ -220,4 +220,20 @@ class StudyGroupControllerTest {
                 .content(objectMapper.writeValueAsString(studyGroupCancelReqDto)));
     }
 
+    @Test
+    @DisplayName("스터디 그룹 상세 조회")
+    void studyGroupDetailSucc() throws Exception {
+        Member savedMember = em.merge(member);
+        LoginUser loginUser = new LoginUser(savedMember);
+
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+
+
+        mockMvc.perform(get("/api/study-group/detail/"+studyGroup.getId()))
+                .andExpect(status().isOk());
+    }
+
 }

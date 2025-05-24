@@ -11,6 +11,7 @@ import front.meetudy.domain.study.StudyGroupMember;
 import front.meetudy.domain.study.StudyGroupSchedule;
 import front.meetudy.dto.PageDto;
 import front.meetudy.dto.request.study.*;
+import front.meetudy.dto.response.study.StudyGroupDetailResDto;
 import front.meetudy.dto.response.study.StudyGroupJoinResDto;
 import front.meetudy.dto.response.study.StudyGroupPageResDto;
 import front.meetudy.dto.response.study.StudyGroupStatusResDto;
@@ -57,6 +58,12 @@ public class StudyGroupService {
     private final StudyGroupScheduleRepository studyGroupScheduleRepository;
 
 
+    /**
+     * 그룹 생성
+     * @param member
+     * @param studyGroupCreateReqDto
+     * @return
+     */
     public Long studySave(Member member, StudyGroupCreateReqDto studyGroupCreateReqDto) {
         studyGroupCreateCount(member);
         studyGroupCreatValidation(studyGroupCreateReqDto);
@@ -80,8 +87,12 @@ public class StudyGroupService {
         return entity.getId();
     }
 
-
-
+    /**
+     * 그룹 가입
+     * @param studyGroupJoinReqDto
+     * @param member
+     * @return
+     */
     public StudyGroupJoinResDto joinStudyGroup(StudyGroupJoinReqDto studyGroupJoinReqDto, Member member) {
 
         //1.studygroup 존재 여부 확인
@@ -93,31 +104,58 @@ public class StudyGroupService {
         });
         //3.저장
         StudyGroupMember studyGroupMember = studyGroupMemberRepository.save(studyGroupJoinReqDto.toEntity(member, studyGroup));
+        studyGroup.memberCountIncrease();
         return StudyGroupJoinResDto.from(studyGroupMember);
 
     }
 
-
+    /**
+     * 그룹 리스트 조회
+     * @param pageable
+     * @param studyGroupPageReqDto
+     * @param member
+     * @return
+     */
     public PageDto<StudyGroupPageResDto> findStudyGroupListPage(Pageable pageable, StudyGroupPageReqDto studyGroupPageReqDto, Member member) {
         Page<StudyGroupPageResDto> studyGroupListPage = studyGroupQueryDslRepository.findStudyGroupListPage(pageable, studyGroupPageReqDto, member);
         return PageDto.of(studyGroupListPage, Function.identity());
     }
 
+    /**
+     * 그룹 사용자 상태 조회
+     * @param studyGroupId
+     * @param member
+     * @return
+     */
     public List<StudyGroupStatusResDto> findStudyGroupStatus(List<Long> studyGroupId, Member member) {
         return studyGroupQueryDslRepository.findStudyGroupStatus(studyGroupId, member);
     }
 
+    /**
+     * 비밀번호 인증
+     * @param studyGroupOtpReqDto
+     * @return
+     */
     public boolean existsByGroupIdAndOtp(StudyGroupOtpReqDto studyGroupOtpReqDto) {
         int count = studyGroupDetailRepository.existsByGroupIdAndOtp(studyGroupOtpReqDto.getStudyGroupId(), studyGroupOtpReqDto.getOtpNumber());
         return count != 0;
     }
 
+    /**
+     * 사용자 요청 취소
+     * @param studyGroupCancelReqDto
+     * @param member
+     */
     public void joinGroupMemberCancel(StudyGroupCancelReqDto studyGroupCancelReqDto, Member member) {
 
         StudyGroupMember studyGroupMember = studyGroupMemberRepository.findStudyGroupMember(studyGroupCancelReqDto.getStudyGroupId(), member.getId()).orElseThrow(
                 () -> new CustomApiException(BAD_GATEWAY, ERR_012, ERR_012.getValue()));
 
         studyGroupMemberRepository.delete(studyGroupMember);
+    }
+
+    public StudyGroupDetailResDto studyGroupDetail(Long studyGroupId) {
+        return studyGroupQueryDslRepository.findStudyGroupDetail(studyGroupId).orElseThrow(() -> new CustomApiException(BAD_GATEWAY, ERR_012, ERR_012.getValue()));
     }
 
 
