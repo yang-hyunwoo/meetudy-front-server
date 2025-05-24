@@ -55,6 +55,8 @@ public class StudyGroup extends BaseEntity {
 
     @OneToOne(mappedBy = "studyGroup", fetch = FetchType.LAZY)
     private StudyGroupDetail studyGroupDetail;
+
+
     @Builder
     protected StudyGroup(Long id,
                         Files thumbnailFile,
@@ -121,5 +123,11 @@ public class StudyGroup extends BaseEntity {
                 ", currentMemberCount=" + currentMemberCount +
                 ", maxMemberCount=" + maxMemberCount +
                 '}';
+    }
+
+    public void memberCountIncrease() {
+        if(!this.joinType) {
+            this.currentMemberCount++;
+        }
     }
 }

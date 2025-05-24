@@ -15,9 +15,7 @@ import front.meetudy.domain.study.QStudyGroup;
 import front.meetudy.domain.study.QStudyGroupDetail;
 import front.meetudy.domain.study.QStudyGroupMember;
 import front.meetudy.dto.request.study.StudyGroupPageReqDto;
-import front.meetudy.dto.response.study.QStudyGroupPageResDto;
-import front.meetudy.dto.response.study.StudyGroupPageResDto;
-import front.meetudy.dto.response.study.StudyGroupStatusResDto;
+import front.meetudy.dto.response.study.*;
 import front.meetudy.repository.study.StudyGroupQueryDslRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,6 +25,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
@@ -77,8 +76,35 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .where(builder)
                 .fetchOne();
         return new PageImpl<>(studyGroupList, pageable, count);
+    }
+    @Override
+    public Optional<StudyGroupDetailResDto> findStudyGroupDetail(Long studyGroupId) {
+
+        StudyGroupDetailResDto studyGroupDetailResDto = queryFactory.select(new QStudyGroupDetailResDto(
+                        studyGroup.id,
+                        filesDetails.fileUrl,
+                        studyGroup.title,
+                        studyGroupDetail.content,
+                        studyGroup.region,
+                        studyGroup.joinType,
+                        studyGroup.currentMemberCount,
+                        studyGroup.maxMemberCount,
+                        studyGroupDetail.secret,
+                        studyGroupDetail.tag,
+                        studyGroupDetail.allowComment
+                ))
+                .from(studyGroup)
+                .leftJoin(filesDetails)
+                .on(studyGroup.thumbnailFile.id.eq(filesDetails.id).and(filesDetails.deleted.eq(false)))
+                .innerJoin(studyGroupDetail)
+                .on(studyGroup.id.eq(studyGroupDetail.studyGroup.id)).where(studyGroup.id.eq(studyGroupId))
+                .fetchOne();
+
+
+        return Optional.ofNullable(studyGroupDetailResDto);
 
     }
+
 
     @Override
     public List<StudyGroupStatusResDto> findStudyGroupStatus(List<Long> groupIds, Member member) {

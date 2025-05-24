@@ -7,6 +7,7 @@ import front.meetudy.domain.study.StudyGroup;
 import front.meetudy.domain.study.StudyGroupMember;
 import front.meetudy.dto.PageDto;
 import front.meetudy.dto.request.study.*;
+import front.meetudy.dto.response.study.StudyGroupDetailResDto;
 import front.meetudy.dto.response.study.StudyGroupJoinResDto;
 import front.meetudy.dto.response.study.StudyGroupPageResDto;
 import front.meetudy.dto.response.study.StudyGroupStatusResDto;
@@ -344,4 +345,35 @@ class StudyGroupServiceTest {
         assertThat(byId).isEmpty();
     }
 
+    @Test
+    @DisplayName("스터디 그룹 상세 조회")
+    void studyGroup_detail() {
+        // given
+        StudyGroupCreateReqDto studyGroupCreateReqDto = new StudyGroupCreateReqDto(
+                null,
+                "SEOUL",
+                "스터디 그룹1",
+                "스터디 그룹 요약",
+                false,
+                "리액트,구글",
+                "내용입니다.",
+                LocalDate.now().toString(),
+                LocalDate.now().plusDays(1L).toString(),
+                10,
+                "매주",
+                "월",
+                LocalTime.now().toString(),
+                LocalTime.now().plusHours(1L).toString(),
+                null,
+                false,
+                false,
+                false
+        );
+
+        Long l = studyGroupService.studySave(member, studyGroupCreateReqDto);
+        StudyGroupDetailResDto studyGroupDetailResDto = studyGroupService.studyGroupDetail(l);
+        assertThat(studyGroupDetailResDto.getTag()).isEqualTo("리액트,구글");
+        assertThat(studyGroupDetailResDto.getTitle()).isEqualTo("스터디 그룹1");
+
+    }
 }
