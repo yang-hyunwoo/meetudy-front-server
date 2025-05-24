@@ -4,15 +4,15 @@ import front.meetudy.constant.study.RegionEnum;
 import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.StudyGroup;
+import front.meetudy.domain.study.StudyGroupMember;
 import front.meetudy.dto.PageDto;
-import front.meetudy.dto.request.study.StudyGroupCreateReqDto;
-import front.meetudy.dto.request.study.StudyGroupJoinReqDto;
-import front.meetudy.dto.request.study.StudyGroupOtpReqDto;
-import front.meetudy.dto.request.study.StudyGroupPageReqDto;
+import front.meetudy.dto.request.study.*;
+import front.meetudy.dto.response.study.StudyGroupJoinResDto;
 import front.meetudy.dto.response.study.StudyGroupPageResDto;
 import front.meetudy.dto.response.study.StudyGroupStatusResDto;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.contact.faq.QuerydslTestConfig;
+import front.meetudy.repository.study.StudyGroupMemberRepository;
 import front.meetudy.repository.study.StudyGroupRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -60,6 +60,8 @@ class StudyGroupServiceTest {
     private EntityManager em;
     Member member;
     Member member2;
+    @Autowired
+    private StudyGroupMemberRepository studyGroupMemberRepository;
 
     @BeforeEach
     void setUp() {
@@ -306,6 +308,40 @@ class StudyGroupServiceTest {
         Long l = studyGroupService.studySave(member, studyGroupCreateReqDto);
         StudyGroupJoinReqDto studyGroupJoinReqDto = new StudyGroupJoinReqDto(l);
         studyGroupService.joinStudyGroup(studyGroupJoinReqDto,member2);
+    }
+
+    @Test
+    @DisplayName("스터디 그룹 요청 취소")
+    void joinStudyGroupCancel() {
+        StudyGroupCreateReqDto studyGroupCreateReqDto = new StudyGroupCreateReqDto(
+                null,
+                "SEOUL",
+                "스터디 그룹1",
+                "스터디 그룹 요약",
+                true,
+                "리액트,구글",
+                "내용입니다.",
+                LocalDate.now().toString(),
+                LocalDate.now().plusDays(1L).toString(),
+                10,
+                "매주",
+                "월",
+                LocalTime.now().toString(),
+                LocalTime.now().plusHours(1L).toString(),
+                null,
+                false,
+                false,
+                false
+        );
+
+        Long l = studyGroupService.studySave(member, studyGroupCreateReqDto);
+        StudyGroupJoinReqDto studyGroupJoinReqDto = new StudyGroupJoinReqDto(l);
+        StudyGroupJoinResDto studyGroupJoinResDto = studyGroupService.joinStudyGroup(studyGroupJoinReqDto, member2);
+        StudyGroupCancelReqDto studyGroupCancelReqDto = new StudyGroupCancelReqDto(studyGroupJoinResDto.getStudyGroupId());
+        studyGroupService.joinGroupMemberCancel(studyGroupCancelReqDto, member2);
+
+        Optional<StudyGroupMember> byId = studyGroupMemberRepository.findByStudyGroupIdAndMemberId(studyGroupJoinResDto.getStudyGroupId(),member2.getId());
+        assertThat(byId).isEmpty();
     }
 
 }

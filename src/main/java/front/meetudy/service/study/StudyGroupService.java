@@ -6,21 +6,19 @@ import front.meetudy.constant.study.MemberRole;
 import front.meetudy.domain.common.file.Files;
 import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.StudyGroup;
+import front.meetudy.domain.study.StudyGroupDetail;
 import front.meetudy.domain.study.StudyGroupMember;
+import front.meetudy.domain.study.StudyGroupSchedule;
 import front.meetudy.dto.PageDto;
-import front.meetudy.dto.request.study.StudyGroupCreateReqDto;
-import front.meetudy.dto.request.study.StudyGroupJoinReqDto;
-import front.meetudy.dto.request.study.StudyGroupOtpReqDto;
-import front.meetudy.dto.request.study.StudyGroupPageReqDto;
+import front.meetudy.dto.request.study.*;
 import front.meetudy.dto.response.study.StudyGroupJoinResDto;
 import front.meetudy.dto.response.study.StudyGroupPageResDto;
 import front.meetudy.dto.response.study.StudyGroupStatusResDto;
+import front.meetudy.dto.study.StudyGroupScheduleDto;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.common.file.FilesRepository;
-import front.meetudy.repository.study.StudyGroupDetailRepository;
-import front.meetudy.repository.study.StudyGroupMemberRepository;
-import front.meetudy.repository.study.StudyGroupQueryDslRepository;
-import front.meetudy.repository.study.StudyGroupRepository;
+import front.meetudy.repository.study.*;
+import front.meetudy.util.date.CustomDateUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,10 +26,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 
 import static front.meetudy.constant.error.ErrorEnum.*;
@@ -52,6 +54,8 @@ public class StudyGroupService {
 
     private final StudyGroupQueryDslRepository studyGroupQueryDslRepository;
 
+    private final StudyGroupScheduleRepository studyGroupScheduleRepository;
+
 
     public Long studySave(Member member, StudyGroupCreateReqDto studyGroupCreateReqDto) {
         studyGroupCreateCount(member);
@@ -64,11 +68,19 @@ public class StudyGroupService {
 
         StudyGroup entity = studyGroupCreateReqDto.toStudyGroupEntity(files);
         studyGroupRepository.save(entity);
-        studyGroupDetailRepository.save(studyGroupCreateReqDto.toDetailEntity(entity));
+        StudyGroupDetail studyGroupDetailEntity = studyGroupDetailRepository.save(studyGroupCreateReqDto.toDetailEntity(entity));
         studyGroupMemberRepository.save(studyGroupCreateReqDto.toLeaderEntity(member, entity));
+        List<StudyGroupSchedule> studyGroupScheduleList = createGroupSchedule(studyGroupDetailEntity)
+                                        .stream()
+                                        .map(StudyGroupScheduleDto::toEntity)
+                                        .toList();
+        studyGroupScheduleRepository.saveAll(studyGroupScheduleList);
+
 
         return entity.getId();
     }
+
+
 
     public StudyGroupJoinResDto joinStudyGroup(StudyGroupJoinReqDto studyGroupJoinReqDto, Member member) {
 
@@ -98,6 +110,14 @@ public class StudyGroupService {
     public boolean existsByGroupIdAndOtp(StudyGroupOtpReqDto studyGroupOtpReqDto) {
         int count = studyGroupDetailRepository.existsByGroupIdAndOtp(studyGroupOtpReqDto.getStudyGroupId(), studyGroupOtpReqDto.getOtpNumber());
         return count != 0;
+    }
+
+    public void joinGroupMemberCancel(StudyGroupCancelReqDto studyGroupCancelReqDto, Member member) {
+
+        StudyGroupMember studyGroupMember = studyGroupMemberRepository.findStudyGroupMember(studyGroupCancelReqDto.getStudyGroupId(), member.getId()).orElseThrow(
+                () -> new CustomApiException(BAD_GATEWAY, ERR_012, ERR_012.getValue()));
+
+        studyGroupMemberRepository.delete(studyGroupMember);
     }
 
 
@@ -131,7 +151,6 @@ public class StudyGroupService {
         }
     }
 
-
     /**
      * 썸네일 파일 체크
      * @param studyGroupCreateReqDto
@@ -139,6 +158,58 @@ public class StudyGroupService {
      */
     private static boolean getThumbnailFileChk(StudyGroupCreateReqDto studyGroupCreateReqDto) {
         return studyGroupCreateReqDto.getThumbnailFileId() != null;
+    }
+
+    /**
+     * 스케줄 생성
+     * @param studyGroupDetail
+     */
+    private List<StudyGroupScheduleDto> createGroupSchedule(StudyGroupDetail studyGroupDetail) {
+        if(studyGroupDetail.getMeetingFrequency().equals("매일")) {
+            return generateDailySchedule(studyGroupDetail);
+        } else {
+            return generateWeekSchedule(studyGroupDetail);
+        }
+    }
+
+    private List<StudyGroupScheduleDto> generateWeekSchedule(StudyGroupDetail studyGroupDetail) {
+        String dayString = studyGroupDetail.getMeetingDay();
+        List<String> meetingDaysKor = Arrays.stream(dayString.split(","))
+                .map(String::trim)
+                .toList();
+        Set<DayOfWeek> meetingDays = CustomDateUtil.fromKoreanList(meetingDaysKor);
+        List<StudyGroupScheduleDto> schedules = new ArrayList<>();
+        LocalDate baseDate = LocalDate.now();
+        LocalDate current = studyGroupDetail.getStartDate().isBefore(baseDate) ? baseDate : studyGroupDetail.getStartDate();
+
+        while (!current.isAfter(studyGroupDetail.getEndDate())) {
+            if (meetingDays.contains(current.getDayOfWeek())) {
+                schedules.add(StudyGroupScheduleDto.builder()
+                        .studyGroup(studyGroupDetail.getStudyGroup())
+                        .meetingDate(current)
+                        .meetingStartTime(studyGroupDetail.getMeetingStartTime())
+                        .meetingEndTime(studyGroupDetail.getMeetingEndTime())
+                        .build());
+            }
+            current = current.plusDays(1);
+        }
+        return schedules;
+    }
+
+    private List<StudyGroupScheduleDto> generateDailySchedule(StudyGroupDetail studyGroupDetail) {
+        List<StudyGroupScheduleDto> schedules = new ArrayList<>();
+        LocalDate baseDate = LocalDate.now();
+        LocalDate current = studyGroupDetail.getStartDate().isBefore(baseDate) ? baseDate : studyGroupDetail.getStartDate();
+        while(!current.isAfter(studyGroupDetail.getEndDate())) {
+            schedules.add(StudyGroupScheduleDto.builder()
+                    .studyGroup(studyGroupDetail.getStudyGroup())
+                    .meetingDate(current)
+                    .meetingStartTime(studyGroupDetail.getMeetingStartTime())
+                    .meetingEndTime(studyGroupDetail.getMeetingEndTime())
+                    .build());
+            current = current.plusDays(1);
+        }
+        return schedules;
     }
 
 }
