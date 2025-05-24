@@ -1,9 +1,12 @@
 package front.meetudy.repository.study;
 
+import front.meetudy.constant.study.JoinStatusEnum;
+import front.meetudy.constant.study.MemberRole;
 import front.meetudy.constant.study.RegionEnum;
 import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.StudyGroup;
+import front.meetudy.domain.study.StudyGroupMember;
 import front.meetudy.dto.request.board.FreePageReqDto;
 import front.meetudy.dto.request.study.StudyGroupCreateReqDto;
 import front.meetudy.dto.request.study.StudyGroupPageReqDto;
@@ -28,6 +31,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,11 +58,14 @@ class StudyGroupQueryDslRepositoryTest {
     private TestEntityManager em;
 
     Member member;
+    Member member2;
 
     @BeforeEach
     void setUp() {
         member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
+        member2 = Member.createMember(null, "test2@naver.com", "테스트2", "테스트2", "19950120", "01011112222", "test", false);
         Member persist = em.persist(member);
+        Member persist2 = em.persist(member2);
         em.flush();
         em.clear();
     }
@@ -181,6 +188,51 @@ class StudyGroupQueryDslRepositoryTest {
         int i2 = studyGroupDetailRepository.existsByGroupIdAndOtp(save.getId(), "123457");
         assertThat(i).isEqualTo(1); //성공
         assertThat(i2).isEqualTo(0); //실패
+    }
+
+
+    @Test
+    @DisplayName("스터디 그룹 요청 취소")
+    void JoinStudyMemberCancel() {
+        StudyGroupCreateReqDto studyGroupCreateReqDto = new StudyGroupCreateReqDto(
+                null,
+                "BUSAN",
+                "스터디 그룹1",
+                "스터디 그룹 요약",
+                false,
+                "리액트,구글",
+                "내용입니다.",
+                LocalDate.now().minusDays(3).toString(),
+                LocalDate.now().plusDays(3).toString(),
+                10,
+                "매주",
+                "월",
+                LocalTime.of(10,0).toString(),
+                LocalTime.of(18,0).toString(),
+                "123456",
+                true,
+                false,
+                false
+        );
+
+        StudyGroup entity = studyGroupCreateReqDto.toStudyGroupEntity(null);
+        StudyGroup save = studyGroupRepository.save(entity);
+        studyGroupDetailRepository.save(studyGroupCreateReqDto.toDetailEntity(entity));
+        studyGroupMemberRepository.save(studyGroupCreateReqDto.toLeaderEntity(member, entity));
+        StudyGroupMember studyGroupMember = StudyGroupMember.createStudyGroupMember(
+                save,
+                member2,
+                JoinStatusEnum.PENDING,
+                MemberRole.MEMBER,
+                null,
+                null,
+                null,
+                null
+        );
+        StudyGroupMember save1 = studyGroupMemberRepository.save(studyGroupMember);
+        studyGroupMemberRepository.delete(save1);
+        Optional<StudyGroupMember> deletedId = studyGroupMemberRepository.findById(save1.getId());
+        assertThat(deletedId).isEmpty();
 
 
     }

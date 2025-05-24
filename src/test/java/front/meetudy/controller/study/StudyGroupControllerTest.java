@@ -10,6 +10,7 @@ import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.StudyGroup;
 import front.meetudy.domain.study.StudyGroupDetail;
 import front.meetudy.dto.request.board.FreeWriteReqDto;
+import front.meetudy.dto.request.study.StudyGroupCancelReqDto;
 import front.meetudy.dto.request.study.StudyGroupCreateReqDto;
 import front.meetudy.dto.request.study.StudyGroupJoinReqDto;
 import front.meetudy.dto.request.study.StudyGroupOtpReqDto;
@@ -35,8 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -75,7 +75,7 @@ class StudyGroupControllerTest {
         em.persist(studyGroup);
         em.persist(studyGroupDetail);
 
-        studyGroup2 = StudyGroup.createStudyGroup(null, "title2", "dd2", RegionEnum.SEOUL, false, 11);
+        studyGroup2 = StudyGroup.createStudyGroup(null, "title2", "dd2", RegionEnum.SEOUL, true, 11);
         studyGroupDetail2 = StudyGroupDetail.createStudyGroupDetail(studyGroup2, null, "asdf", LocalDate.now().minusDays(3), LocalDate.now().plusDays(3), "매주", "월",
                 LocalTime.of(14, 0), LocalTime.of(20, 0), "123456", true, false, false);
         em.persist(studyGroup2);
@@ -198,6 +198,26 @@ class StudyGroupControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(studyGroupJoinReqDto)))
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    @DisplayName("스터디 그룹 멤버 요청 취소")
+    void joinStudyGroupCancel() throws Exception {
+        Member savedMember2 = em.merge(member2);
+        LoginUser loginUser2 = new LoginUser(savedMember2);
+
+        UsernamePasswordAuthenticationToken authentication2 =
+                new UsernamePasswordAuthenticationToken(loginUser2, null, loginUser2.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication2);
+        StudyGroupJoinReqDto studyGroupJoinReqDto = new StudyGroupJoinReqDto(studyGroup2.getId());
+        StudyGroupCancelReqDto studyGroupCancelReqDto = new StudyGroupCancelReqDto(studyGroup2.getId());
+        mockMvc.perform(post("/api/private/study-group/join")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(studyGroupJoinReqDto)));
+
+        mockMvc.perform(put("/api/private/study-group/cancel")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(studyGroupCancelReqDto)));
     }
 
 }
