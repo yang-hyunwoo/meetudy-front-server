@@ -1,6 +1,5 @@
-package front.meetudy.dto.request.study;
+package front.meetudy.dto.request.study.group;
 
-import front.meetudy.annotation.ValidationGroups;
 import front.meetudy.annotation.ValidationMode;
 import front.meetudy.annotation.customannotation.EnumValidation;
 import front.meetudy.annotation.customannotation.Sanitize;
@@ -20,7 +19,6 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import static front.meetudy.annotation.ValidationGroups.*;

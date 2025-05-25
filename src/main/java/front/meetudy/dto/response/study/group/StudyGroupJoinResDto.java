@@ -1,4 +1,4 @@
-package front.meetudy.dto.response.study;
+package front.meetudy.dto.response.study.group;
 
 import front.meetudy.constant.study.JoinStatusEnum;
 import front.meetudy.domain.study.StudyGroupMember;

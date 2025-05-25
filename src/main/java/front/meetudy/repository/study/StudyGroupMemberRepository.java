@@ -4,6 +4,7 @@ import front.meetudy.domain.study.StudyGroupMember;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMember, Long> {
@@ -19,6 +20,6 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
                    """, nativeQuery = true)
     Optional<StudyGroupMember> findStudyGroupMember(Long studyGroupId , Long memberId);
 
-
+    List<StudyGroupMember> findStudyGroupMemberList(Long studyGroupId, Long memberId);
 
 }

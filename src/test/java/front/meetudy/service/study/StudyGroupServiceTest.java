@@ -1,30 +1,26 @@
 package front.meetudy.service.study;
 
-import front.meetudy.constant.study.RegionEnum;
-import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.StudyGroup;
 import front.meetudy.domain.study.StudyGroupMember;
 import front.meetudy.dto.PageDto;
-import front.meetudy.dto.request.study.*;
-import front.meetudy.dto.response.study.StudyGroupDetailResDto;
-import front.meetudy.dto.response.study.StudyGroupJoinResDto;
-import front.meetudy.dto.response.study.StudyGroupPageResDto;
-import front.meetudy.dto.response.study.StudyGroupStatusResDto;
+import front.meetudy.dto.request.study.group.*;
+import front.meetudy.dto.response.study.group.StudyGroupJoinResDto;
+import front.meetudy.dto.response.study.group.StudyGroupStatusResDto;
+import front.meetudy.dto.response.study.group.StudyGroupDetailResDto;
+import front.meetudy.dto.response.study.group.StudyGroupPageResDto;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.contact.faq.QuerydslTestConfig;
 import front.meetudy.repository.study.StudyGroupMemberRepository;
 import front.meetudy.repository.study.StudyGroupRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
@@ -374,6 +370,7 @@ class StudyGroupServiceTest {
         StudyGroupDetailResDto studyGroupDetailResDto = studyGroupService.studyGroupDetail(l);
         assertThat(studyGroupDetailResDto.getTag()).isEqualTo("리액트,구글");
         assertThat(studyGroupDetailResDto.getTitle()).isEqualTo("스터디 그룹1");
-
     }
+
+
 }

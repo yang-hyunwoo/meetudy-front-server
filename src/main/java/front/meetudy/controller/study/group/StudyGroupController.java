@@ -1,13 +1,13 @@
-package front.meetudy.controller.study;
+package front.meetudy.controller.study.group;
 
 import front.meetudy.annotation.customannotation.CurrentMember;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.PageDto;
-import front.meetudy.dto.request.study.*;
-import front.meetudy.dto.response.study.StudyGroupDetailResDto;
-import front.meetudy.dto.response.study.StudyGroupJoinResDto;
-import front.meetudy.dto.response.study.StudyGroupPageResDto;
-import front.meetudy.dto.response.study.StudyGroupStatusResDto;
+import front.meetudy.dto.request.study.group.*;
+import front.meetudy.dto.response.study.group.StudyGroupJoinResDto;
+import front.meetudy.dto.response.study.group.StudyGroupStatusResDto;
+import front.meetudy.dto.response.study.group.StudyGroupDetailResDto;
+import front.meetudy.dto.response.study.group.StudyGroupPageResDto;
 import front.meetudy.service.study.StudyGroupService;
 import front.meetudy.util.response.Response;
 import io.swagger.v3.oas.annotations.Operation;

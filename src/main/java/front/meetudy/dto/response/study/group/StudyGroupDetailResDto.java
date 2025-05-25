@@ -1,8 +1,7 @@
-package front.meetudy.dto.response.study;
+package front.meetudy.dto.response.study.group;
 
 import com.querydsl.core.annotations.QueryProjection;
 import front.meetudy.constant.study.RegionEnum;
-import front.meetudy.domain.study.StudyGroup;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,12 +9,16 @@ import lombok.Getter;
 @Getter
 @Builder
 public class StudyGroupDetailResDto {
+
     @Schema(description = "스터디그룹 pk", example = "1")
     private Long id;
+
     @Schema(description = "스터디 그룹 썸네일", example = "https://~~")
     private String thumbnailFileUrl;
+
     @Schema(description = "스터디 그룹 제목", example = "asd")
     private String title;
+
     @Schema(description = "스터디 그룹 내용", example = "ffgg")
     private String content;
 
@@ -24,6 +27,7 @@ public class StudyGroupDetailResDto {
 
     @Schema(description = "스터디 그룹 가입조건", example = "true")
     private boolean joinType;
+
     @Schema(description = "스터디 그룹 현재 인원 수", example = "1")
     private int currentMemberCount;
 
@@ -38,8 +42,6 @@ public class StudyGroupDetailResDto {
 
     @Schema(description = "스터디 댓글 사용 여부" , example = "true")
     private boolean allowComment;
-
-
 
     @QueryProjection
     public StudyGroupDetailResDto(Long id ,

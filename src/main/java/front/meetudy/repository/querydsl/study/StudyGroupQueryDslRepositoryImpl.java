@@ -3,19 +3,20 @@ package front.meetudy.repository.querydsl.study;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.TimePath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import front.meetudy.constant.study.MemberRole;
 import front.meetudy.constant.study.RegionEnum;
 import front.meetudy.domain.common.file.QFilesDetails;
-import front.meetudy.domain.contact.faq.QFaqBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.QStudyGroup;
 import front.meetudy.domain.study.QStudyGroupDetail;
 import front.meetudy.domain.study.QStudyGroupMember;
-import front.meetudy.dto.request.study.StudyGroupPageReqDto;
-import front.meetudy.dto.response.study.*;
+import front.meetudy.dto.request.study.group.StudyGroupPageReqDto;
+import front.meetudy.dto.response.study.group.*;
+import front.meetudy.dto.response.study.operate.GroupOperateResDto;
+import front.meetudy.dto.response.study.operate.QGroupOperateResDto;
 import front.meetudy.repository.study.StudyGroupQueryDslRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,6 +25,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,6 +40,13 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
     QStudyGroupDetail studyGroupDetail = QStudyGroupDetail.studyGroupDetail;
     QStudyGroupMember studyGroupMember = QStudyGroupMember.studyGroupMember;
 
+    /**
+     * 그룹 리스트 조회
+     * @param pageable
+     * @param studyGroupPageReqDto
+     * @param member
+     * @return
+     */
     @Override
     public Page<StudyGroupPageResDto> findStudyGroupListPage(Pageable pageable, StudyGroupPageReqDto studyGroupPageReqDto, Member member) {
 
@@ -77,6 +87,12 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .fetchOne();
         return new PageImpl<>(studyGroupList, pageable, count);
     }
+
+    /**
+     * 그룹 상세 조회
+     * @param studyGroupId
+     * @return
+     */
     @Override
     public Optional<StudyGroupDetailResDto> findStudyGroupDetail(Long studyGroupId) {
 
@@ -99,7 +115,6 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .innerJoin(studyGroupDetail)
                 .on(studyGroup.id.eq(studyGroupDetail.studyGroup.id)).where(studyGroup.id.eq(studyGroupId))
                 .fetchOne();
-
 
         return Optional.ofNullable(studyGroupDetailResDto);
 
@@ -133,6 +148,39 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
         return count != null ? count.intValue() : 0;
     }
 
+    @Override
+    public List<GroupOperateResDto> findOperateList(Member member) {
+        BooleanBuilder builder = new BooleanBuilder();
+        groupOperateCondition(member,builder);
+        return queryFactory.select(new QGroupOperateResDto(
+                        studyGroup.id,
+                        filesDetails.fileUrl,
+                        studyGroup.title,
+                        studyGroup.region,
+                        studyGroup.currentMemberCount,
+                        studyGroup.maxMemberCount,
+                        studyGroup.status,
+                        studyGroupDetail.endDate,
+                        studyGroupDetail.meetingEndTime
+                ))
+                .from(studyGroup)
+                .leftJoin(filesDetails)
+                .on(studyGroup.thumbnailFile.id.eq(filesDetails.id).and(filesDetails.deleted.eq(false)))
+                .innerJoin(studyGroupDetail)
+                .on(studyGroup.id.eq(studyGroupDetail.studyGroup.id))
+                .innerJoin(studyGroupMember)
+                .on(studyGroup.id.eq(studyGroupMember.studyGroup.id))
+                .where(builder)
+                .orderBy(studyGroup.id.asc())
+                .fetch();
+    }
+
+    private void groupOperateCondition(Member member, BooleanBuilder builder) {
+        builder.and(studyGroupMember.member.id.eq(member.getId()));
+        builder.and(studyGroupMember.role.eq(MemberRole.LEADER));
+        builder.and(studyGroupDetail.deleted.eq(false));
+    }
+
     private void groupCondition(StudyGroupPageReqDto studyGroupPageReqDto, BooleanBuilder builder) {
         builder.and(studyGroup.region.eq(RegionEnum.valueOf(studyGroupPageReqDto.getRegion())));
         builder.and(studyGroupDetail.deleted.eq(false));
@@ -142,10 +190,16 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
     }
 
     private void groupCountCondition(Member member,BooleanBuilder builder) {
+        LocalDate nowDate = LocalDate.now();
+        LocalTime nowTime = LocalTime.now();
+
         builder.and(studyGroupMember.member.id.eq(member.getId()));
         builder.and(studyGroupMember.role.eq(MemberRole.LEADER));
         builder.and(studyGroupDetail.deleted.eq(false));
-        //builder.and(studyGroupDetail.de)
+        builder.and(studyGroupDetail.endDate.gt(nowDate)
+                        .or(studyGroupDetail.endDate.eq(nowDate)
+                            .and(studyGroupDetail.meetingEndTime.goe(nowTime)))
+                    );
 
     }
 

@@ -20,4 +20,8 @@ public interface StudyGroupRepository extends JpaRepository<StudyGroup, Long> {
     Optional<StudyGroup> findValidStudyGroupById(@Param("id") Long id);
 
 
+
+
+
+
 }

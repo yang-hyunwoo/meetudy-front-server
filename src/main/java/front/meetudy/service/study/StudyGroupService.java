@@ -1,8 +1,5 @@
 package front.meetudy.service.study;
 
-import front.meetudy.constant.error.ErrorEnum;
-import front.meetudy.constant.study.JoinStatusEnum;
-import front.meetudy.constant.study.MemberRole;
 import front.meetudy.domain.common.file.Files;
 import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.StudyGroup;
@@ -10,11 +7,13 @@ import front.meetudy.domain.study.StudyGroupDetail;
 import front.meetudy.domain.study.StudyGroupMember;
 import front.meetudy.domain.study.StudyGroupSchedule;
 import front.meetudy.dto.PageDto;
-import front.meetudy.dto.request.study.*;
-import front.meetudy.dto.response.study.StudyGroupDetailResDto;
-import front.meetudy.dto.response.study.StudyGroupJoinResDto;
-import front.meetudy.dto.response.study.StudyGroupPageResDto;
-import front.meetudy.dto.response.study.StudyGroupStatusResDto;
+import front.meetudy.dto.request.study.group.*;
+import front.meetudy.dto.response.study.group.StudyGroupJoinResDto;
+import front.meetudy.dto.response.study.group.StudyGroupStatusResDto;
+import front.meetudy.dto.response.study.group.StudyGroupDetailResDto;
+import front.meetudy.dto.response.study.group.StudyGroupPageResDto;
+import front.meetudy.dto.response.study.operate.GroupOperateListResDto;
+import front.meetudy.dto.response.study.operate.GroupOperateResDto;
 import front.meetudy.dto.study.StudyGroupScheduleDto;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.common.file.FilesRepository;
@@ -23,7 +22,6 @@ import front.meetudy.util.date.CustomDateUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static front.meetudy.constant.error.ErrorEnum.*;
 import static org.springframework.http.HttpStatus.*;
@@ -154,8 +153,47 @@ public class StudyGroupService {
         studyGroupMemberRepository.delete(studyGroupMember);
     }
 
+    /**
+     * 그룹 상세 조회
+     * @param studyGroupId
+     * @return
+     */
     public StudyGroupDetailResDto studyGroupDetail(Long studyGroupId) {
         return studyGroupQueryDslRepository.findStudyGroupDetail(studyGroupId).orElseThrow(() -> new CustomApiException(BAD_GATEWAY, ERR_012, ERR_012.getValue()));
+    }
+
+    /**
+     * 운영 / 종료 스터디 그룹 조회
+     * @param member
+     * @return
+     */
+    public GroupOperateListResDto groupOperateList(Member member) {
+        LocalDateTime now = LocalDateTime.now();
+        List<GroupOperateResDto> operateList = studyGroupQueryDslRepository.findOperateList(member);
+
+        List<GroupOperateResDto> ongoing = operateList.stream()
+                .filter(dto -> {
+                    LocalDateTime endDateTime = LocalDateTime.of(dto.getEndDate(), dto.getMeetingEndTime());
+                    return endDateTime.isAfter(now) || endDateTime.isEqual(now);
+                })
+        .toList();
+
+        List<GroupOperateResDto> ended = operateList.stream()
+                .filter(dto -> {
+                    LocalDateTime endDateTime = LocalDateTime.of(dto.getEndDate(), dto.getMeetingEndTime());
+                    return endDateTime.isBefore(now);
+                })
+        .toList();
+
+        return GroupOperateListResDto.builder()
+                .ongoingGroup(ongoing)
+                .endGroup(ended)
+                .build();
+    }
+
+    public void GroupMemberList(Long studyGroupId , Member member) {
+        List<StudyGroupMember> studyGroupMemberList = studyGroupMemberRepository.findStudyGroupMemberList(studyGroupId, member.getId());
+
     }
 
 

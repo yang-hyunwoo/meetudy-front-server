@@ -2,19 +2,14 @@ package front.meetudy.repository.study;
 
 import front.meetudy.constant.study.JoinStatusEnum;
 import front.meetudy.constant.study.MemberRole;
-import front.meetudy.constant.study.RegionEnum;
-import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.StudyGroup;
 import front.meetudy.domain.study.StudyGroupMember;
-import front.meetudy.dto.request.board.FreePageReqDto;
-import front.meetudy.dto.request.study.StudyGroupCreateReqDto;
-import front.meetudy.dto.request.study.StudyGroupPageReqDto;
-import front.meetudy.dto.response.study.StudyGroupPageResDto;
-import front.meetudy.dto.response.study.StudyGroupStatusResDto;
+import front.meetudy.dto.request.study.group.StudyGroupCreateReqDto;
+import front.meetudy.dto.request.study.group.StudyGroupPageReqDto;
+import front.meetudy.dto.response.study.group.StudyGroupStatusResDto;
+import front.meetudy.dto.response.study.group.StudyGroupPageResDto;
 import front.meetudy.repository.contact.faq.QuerydslTestConfig;
-import front.meetudy.service.study.StudyGroupService;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,9 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+
 @DataJpaTest
 @ActiveProfiles("test")
 @Import(QuerydslTestConfig.class)

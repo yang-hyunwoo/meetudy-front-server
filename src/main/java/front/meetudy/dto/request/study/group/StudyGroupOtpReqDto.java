@@ -1,6 +1,5 @@
-package front.meetudy.dto.request.study;
+package front.meetudy.dto.request.study.group;
 
-import front.meetudy.annotation.ValidationGroups;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
