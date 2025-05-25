@@ -1,10 +1,11 @@
 package front.meetudy.repository.study;
 
 import front.meetudy.domain.member.Member;
-import front.meetudy.dto.request.study.StudyGroupPageReqDto;
-import front.meetudy.dto.response.study.StudyGroupDetailResDto;
-import front.meetudy.dto.response.study.StudyGroupPageResDto;
-import front.meetudy.dto.response.study.StudyGroupStatusResDto;
+import front.meetudy.dto.request.study.group.StudyGroupPageReqDto;
+import front.meetudy.dto.response.study.group.StudyGroupStatusResDto;
+import front.meetudy.dto.response.study.group.StudyGroupDetailResDto;
+import front.meetudy.dto.response.study.group.StudyGroupPageResDto;
+import front.meetudy.dto.response.study.operate.GroupOperateResDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -20,4 +21,6 @@ public interface StudyGroupQueryDslRepository {
     List<StudyGroupStatusResDto> findStudyGroupStatus(List<Long> studyGroupId, Member member);
 
     int findStudyGroupCreateCount(Member member);
+
+    List<GroupOperateResDto> findOperateList(Member member);
 }

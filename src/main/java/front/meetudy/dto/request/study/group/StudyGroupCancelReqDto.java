@@ -1,4 +1,4 @@
-package front.meetudy.dto.request.study;
+package front.meetudy.dto.request.study.group;
 
 import front.meetudy.annotation.ValidationMode;
 import front.meetudy.constant.error.ValidationType;

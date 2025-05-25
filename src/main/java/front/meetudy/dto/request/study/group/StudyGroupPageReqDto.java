@@ -1,4 +1,4 @@
-package front.meetudy.dto.request.study;
+package front.meetudy.dto.request.study.group;
 
 import front.meetudy.annotation.customannotation.EnumValidation;
 import front.meetudy.annotation.customannotation.Sanitize;
