@@ -19,6 +19,7 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import static front.meetudy.annotation.ValidationGroups.*;
@@ -144,7 +145,7 @@ public class StudyGroupCreateReqDto extends BaseEntity {
                 JoinStatusEnum.APPROVED,
                 MemberRole.LEADER,
                 null,
-                null,
+                LocalDateTime.now(),
                 null,
                 null
         );

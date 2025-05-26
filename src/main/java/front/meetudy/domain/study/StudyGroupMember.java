@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -95,6 +96,28 @@ public class StudyGroupMember extends BaseEntity {
                 .leftAt(leftAt)
                 .rejectAt(rejectAt)
                 .build();
+    }
+
+    public void kickMember(JoinStatusEnum joinStatus) {
+        changeStatus(joinStatus);
+        this.getStudyGroup().memberCountDecrease();
+        this.leftAt = LocalDateTime.now();
+    }
+
+    public void rejectMember(JoinStatusEnum joinStatus) {
+        changeStatus(joinStatus);
+        this.rejectAt = LocalDateTime.now();
+    }
+
+    @Transactional
+    public void approvedMember(JoinStatusEnum joinStatus) {
+        changeStatus(joinStatus);
+        this.getStudyGroup().memberCountApproveIncrease();
+        this.joinApprovedAt = LocalDateTime.now();
+    }
+
+    private void changeStatus(JoinStatusEnum joinStatus) {
+        this.joinStatus = joinStatus;
     }
 
     @Override

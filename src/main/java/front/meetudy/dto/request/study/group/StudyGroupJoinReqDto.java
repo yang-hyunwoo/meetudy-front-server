@@ -20,13 +20,14 @@ public class StudyGroupJoinReqDto {
 
 
     public StudyGroupMember toEntity(Member member, StudyGroup studyGroup) {
+        studyGroup.memberCountIncrease();
         return StudyGroupMember.createStudyGroupMember(
                 studyGroup,
                 member,
                 studyGroup.isJoinType() ? JoinStatusEnum.PENDING : JoinStatusEnum.APPROVED,
                 MemberRole.MEMBER,
                 LocalDateTime.now(),
-                null,
+                studyGroup.isJoinType() ? null : LocalDateTime.now(),
                 null,
                 null
         );
