@@ -125,9 +125,31 @@ public class StudyGroup extends BaseEntity {
                 '}';
     }
 
+    /**
+     * 멤버 인원수 증가
+     */
     public void memberCountIncrease() {
         if(!this.joinType) {
             this.currentMemberCount++;
+        }
+    }
+
+    public void memberCountApproveIncrease() {
+        this.currentMemberCount++;
+    }
+
+    public void memberCountDecrease() {
+        this.currentMemberCount--;
+    }
+
+    /**
+     * 상태값 변경
+     */
+    public void statusChange() {
+        if(this.status.equals("active")) {
+            this.status = "closed";
+        } else {
+            this.status = "active";
         }
     }
 }

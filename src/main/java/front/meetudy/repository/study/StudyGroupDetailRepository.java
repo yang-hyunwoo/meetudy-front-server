@@ -5,6 +5,8 @@ import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.Optional;
+
 public interface StudyGroupDetailRepository extends JpaRepository<StudyGroupDetail , Long> {
 
     @Query(value = """
@@ -19,4 +21,7 @@ public interface StudyGroupDetailRepository extends JpaRepository<StudyGroupDeta
                    """, nativeQuery = true)
     int existsByGroupIdAndOtp(@Param("studyGroupId") Long studyGroupId,
                               @Param("optNumber") String optNumber);
+
+
+    Optional<StudyGroupDetail> findByStudyGroupIdAndDeleted(Long studyGroupId, boolean deleted);
 }

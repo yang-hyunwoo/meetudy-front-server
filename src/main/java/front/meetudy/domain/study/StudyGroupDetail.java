@@ -135,6 +135,11 @@ public class StudyGroupDetail extends BaseEntity {
                 .build();
     }
 
+
+    public void groupDelete() {
+        this.deleted = true;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

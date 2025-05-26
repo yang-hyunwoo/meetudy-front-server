@@ -1,5 +1,6 @@
 package front.meetudy.service.study;
 
+import front.meetudy.constant.study.JoinStatusEnum;
 import front.meetudy.domain.common.file.Files;
 import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.StudyGroup;
@@ -13,6 +14,8 @@ import front.meetudy.dto.response.study.group.StudyGroupStatusResDto;
 import front.meetudy.dto.response.study.group.StudyGroupDetailResDto;
 import front.meetudy.dto.response.study.group.StudyGroupPageResDto;
 import front.meetudy.dto.response.study.operate.GroupOperateListResDto;
+import front.meetudy.dto.response.study.operate.GroupOperateMemberListResDto;
+import front.meetudy.dto.response.study.operate.GroupOperateMemberResDto;
 import front.meetudy.dto.response.study.operate.GroupOperateResDto;
 import front.meetudy.dto.study.StudyGroupScheduleDto;
 import front.meetudy.exception.CustomApiException;
@@ -34,7 +37,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static front.meetudy.constant.error.ErrorEnum.*;
 import static org.springframework.http.HttpStatus.*;
@@ -103,7 +105,6 @@ public class StudyGroupService {
         });
         //3.저장
         StudyGroupMember studyGroupMember = studyGroupMemberRepository.save(studyGroupJoinReqDto.toEntity(member, studyGroup));
-        studyGroup.memberCountIncrease();
         return StudyGroupJoinResDto.from(studyGroupMember);
 
     }
@@ -115,6 +116,7 @@ public class StudyGroupService {
      * @param member
      * @return
      */
+    @Transactional(readOnly = true)
     public PageDto<StudyGroupPageResDto> findStudyGroupListPage(Pageable pageable, StudyGroupPageReqDto studyGroupPageReqDto, Member member) {
         Page<StudyGroupPageResDto> studyGroupListPage = studyGroupQueryDslRepository.findStudyGroupListPage(pageable, studyGroupPageReqDto, member);
         return PageDto.of(studyGroupListPage, Function.identity());
@@ -126,6 +128,7 @@ public class StudyGroupService {
      * @param member
      * @return
      */
+    @Transactional(readOnly = true)
     public List<StudyGroupStatusResDto> findStudyGroupStatus(List<Long> studyGroupId, Member member) {
         return studyGroupQueryDslRepository.findStudyGroupStatus(studyGroupId, member);
     }
@@ -161,41 +164,6 @@ public class StudyGroupService {
     public StudyGroupDetailResDto studyGroupDetail(Long studyGroupId) {
         return studyGroupQueryDslRepository.findStudyGroupDetail(studyGroupId).orElseThrow(() -> new CustomApiException(BAD_GATEWAY, ERR_012, ERR_012.getValue()));
     }
-
-    /**
-     * 운영 / 종료 스터디 그룹 조회
-     * @param member
-     * @return
-     */
-    public GroupOperateListResDto groupOperateList(Member member) {
-        LocalDateTime now = LocalDateTime.now();
-        List<GroupOperateResDto> operateList = studyGroupQueryDslRepository.findOperateList(member);
-
-        List<GroupOperateResDto> ongoing = operateList.stream()
-                .filter(dto -> {
-                    LocalDateTime endDateTime = LocalDateTime.of(dto.getEndDate(), dto.getMeetingEndTime());
-                    return endDateTime.isAfter(now) || endDateTime.isEqual(now);
-                })
-        .toList();
-
-        List<GroupOperateResDto> ended = operateList.stream()
-                .filter(dto -> {
-                    LocalDateTime endDateTime = LocalDateTime.of(dto.getEndDate(), dto.getMeetingEndTime());
-                    return endDateTime.isBefore(now);
-                })
-        .toList();
-
-        return GroupOperateListResDto.builder()
-                .ongoingGroup(ongoing)
-                .endGroup(ended)
-                .build();
-    }
-
-    public void GroupMemberList(Long studyGroupId , Member member) {
-        List<StudyGroupMember> studyGroupMemberList = studyGroupMemberRepository.findStudyGroupMemberList(studyGroupId, member.getId());
-
-    }
-
 
     /**
      * 그룹 생성 5개 체크
