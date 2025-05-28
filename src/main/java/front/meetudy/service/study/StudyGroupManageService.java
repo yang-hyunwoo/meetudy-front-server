@@ -21,8 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static front.meetudy.constant.error.ErrorEnum.ERR_012;
-import static front.meetudy.constant.error.ErrorEnum.ERR_015;
+import static front.meetudy.constant.error.ErrorEnum.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Service
@@ -36,11 +35,8 @@ public class StudyGroupManageService {
 
     private final StudyGroupMemberRepository studyGroupMemberRepository;
 
-    private final FilesRepository filesRepository;
-
     private final StudyGroupQueryDslRepository studyGroupQueryDslRepository;
 
-    private final StudyGroupScheduleRepository studyGroupScheduleRepository;
 
     /**
      * 운영 / 종료 스터디 그룹 조회
@@ -82,6 +78,7 @@ public class StudyGroupManageService {
                 .orElseThrow(()-> new CustomApiException(BAD_REQUEST,ERR_015,ERR_015.getValue()));
 
         List<GroupOperateMemberResDto> studyGroupMemberList = studyGroupMemberRepository.findStudyGroupMemberList(studyGroupId);
+
         return GroupOperateMemberListResDto.builder()
                 .approvedList(studyGroupMemberList.stream()
                         .filter(dto -> dto.getJoinStatus().equals(JoinStatusEnum.APPROVED))
@@ -100,6 +97,7 @@ public class StudyGroupManageService {
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
 
         studyGroup.statusChange();
+
         return studyGroup.getId();
     }
 
@@ -126,22 +124,26 @@ public class StudyGroupManageService {
 
         StudyGroup studyGroup = studyGroupRepository.findById(groupMemberStatusReqDto.getStudyGroupId())
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
-        //if(studyGroup.getCurrentMemberCount())
         studyGroupMember.kickMember(JoinStatusEnum.KICKED);
 
     }
 
     public void groupMemberApproved(GroupMemberStatusReqDto groupMemberStatusReqDto, Member member) {
 
-        groupLeaderChk(groupMemberStatusReqDto, member);
 
         StudyGroupMember studyGroupMember = studyGroupMemberRepository
-                                            .findByIdAndMemberIdAndJoinStatusAndRole(
-                                                    groupMemberStatusReqDto.getId() ,
-                                                    groupMemberStatusReqDto.getMemberId() ,
-                                                    JoinStatusEnum.PENDING ,
-                                                    MemberRole.MEMBER)
+                .findByIdAndMemberIdAndJoinStatusAndRole(
+                        groupMemberStatusReqDto.getId(),
+                        groupMemberStatusReqDto.getMemberId(),
+                        JoinStatusEnum.PENDING,
+                        MemberRole.MEMBER)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
+        StudyGroup studyGroup = studyGroupMember.getStudyGroup();
+
+        if (studyGroup.getCurrentMemberCount() >= studyGroup.getMaxMemberCount()) {
+            throw new CustomApiException(BAD_REQUEST, ERR_020, ERR_020.getValue());
+        }
+
         studyGroupMember.approvedMember(JoinStatusEnum.APPROVED);
     }
 
@@ -150,11 +152,11 @@ public class StudyGroupManageService {
         groupLeaderChk(groupMemberStatusReqDto, member);
 
         StudyGroupMember studyGroupMember = studyGroupMemberRepository
-                                            .findByIdAndMemberIdAndJoinStatusAndRole(
-                                                    groupMemberStatusReqDto.getId() ,
-                                                    groupMemberStatusReqDto.getMemberId() ,
-                                                    JoinStatusEnum.PENDING ,
-                                                    MemberRole.MEMBER)
+                .findByIdAndMemberIdAndJoinStatusAndRole(
+                        groupMemberStatusReqDto.getId(),
+                        groupMemberStatusReqDto.getMemberId(),
+                        JoinStatusEnum.PENDING,
+                        MemberRole.MEMBER)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
         studyGroupMember.rejectMember(JoinStatusEnum.REJECTED);
     }

@@ -62,5 +62,14 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
                                                                        JoinStatusEnum joinStatus,
                                                                        MemberRole role);
 
-
+    @Query("""
+                SELECT m FROM StudyGroupMember m
+                JOIN FETCH m.studyGroup
+                WHERE m.studyGroup.id = :StudyGroupId
+                  AND m.member.id = :memberId
+                  AND m.joinStatus = :joinStatus
+            """)
+    Optional<StudyGroupMember> findByStudyGroupIdAndMemberIdAndJoinStatus(Long StudyGroupId,
+                                                                       Long memberId,
+                                                                       JoinStatusEnum joinStatus);
 }

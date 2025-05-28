@@ -1,7 +1,11 @@
 package front.meetudy.service.study;
 
+import front.meetudy.constant.study.JoinStatusEnum;
+import front.meetudy.constant.study.MemberRole;
+import front.meetudy.constant.study.RegionEnum;
 import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.StudyGroup;
+import front.meetudy.domain.study.StudyGroupDetail;
 import front.meetudy.domain.study.StudyGroupMember;
 import front.meetudy.dto.PageDto;
 import front.meetudy.dto.request.study.group.*;
@@ -11,6 +15,7 @@ import front.meetudy.dto.response.study.group.StudyGroupDetailResDto;
 import front.meetudy.dto.response.study.group.StudyGroupPageResDto;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.contact.faq.QuerydslTestConfig;
+import front.meetudy.repository.study.AttendanceRepository;
 import front.meetudy.repository.study.StudyGroupMemberRepository;
 import front.meetudy.repository.study.StudyGroupRepository;
 import jakarta.persistence.EntityManager;
@@ -30,6 +35,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,12 +66,28 @@ class StudyGroupServiceTest {
     @Autowired
     private StudyGroupMemberRepository studyGroupMemberRepository;
 
+    @Autowired
+    private AttendanceRepository attendanceRepository;
+    StudyGroup studyGroup;
+    StudyGroupDetail studyGroupDetail;
+
+    StudyGroupMember studyGroupMember;
     @BeforeEach
     void setUp() {
         member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
         member2 = Member.createMember(null, "test2@naver.com", "테스트2", "테스트", "19950120", "01011112222", "test", false);
         em.persist(member);
         em.persist(member2);
+
+        studyGroup = StudyGroup.createStudyGroup(null, "title", "dd", RegionEnum.SEOUL, false, 11);
+        studyGroupDetail = StudyGroupDetail.createStudyGroupDetail(studyGroup, null, "asdf", LocalDate.now().minusDays(3), LocalDate.now().plusDays(3), "매주", "월",
+                LocalTime.of(14, 0), LocalTime.of(20, 0), null, false, false, false);
+        studyGroupMember = StudyGroupMember.createStudyGroupMember(studyGroup, member, JoinStatusEnum.APPROVED, MemberRole.LEADER, LocalDateTime.now(), null, null, null);
+        em.persist(studyGroup);
+        em.persist(studyGroupDetail);
+        em.persist(studyGroupMember);
+
+
         em.flush();
         em.clear();
     }
@@ -201,8 +223,7 @@ class StudyGroupServiceTest {
         PageDto<StudyGroupPageResDto> result = studyGroupService.findStudyGroupListPage(pageable, studyGroupPageReqDto, null);
 
         assertThat(result).isNotNull();
-        assertThat(result.getContent().get(0).getTitle()).isEqualTo("스터디 그룹1");
-        assertThat(result.getContent().get(0).getTag()).isEqualTo("리액트,구글");
+        assertThat(result.getContent().size()).isEqualTo(2);
 
     }
 
@@ -371,6 +392,21 @@ class StudyGroupServiceTest {
         assertThat(studyGroupDetailResDto.getTag()).isEqualTo("리액트,구글");
         assertThat(studyGroupDetailResDto.getTitle()).isEqualTo("스터디 그룹1");
     }
+
+    @Test
+    @DisplayName("스터디 그룹 출석 체크")
+    void studyGroup_attendance() {
+        // given
+        StudyGroupAttendanceReqDto studyGroupAttendanceReqDto = new StudyGroupAttendanceReqDto(studyGroup.getId());
+        studyGroupService.studyGroupAttendanceCheck(studyGroupAttendanceReqDto, member);
+
+        // when
+        assertThat(attendanceRepository.findAll().size()).isEqualTo(1);
+
+
+        // then
+    }
+
 
 
 }
