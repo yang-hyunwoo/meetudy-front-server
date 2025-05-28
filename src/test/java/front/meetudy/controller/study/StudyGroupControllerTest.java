@@ -4,14 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import front.meetudy.auth.LoginUser;
+import front.meetudy.constant.study.JoinStatusEnum;
+import front.meetudy.constant.study.MemberRole;
 import front.meetudy.constant.study.RegionEnum;
 import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.StudyGroup;
 import front.meetudy.domain.study.StudyGroupDetail;
-import front.meetudy.dto.request.study.group.StudyGroupCancelReqDto;
-import front.meetudy.dto.request.study.group.StudyGroupCreateReqDto;
-import front.meetudy.dto.request.study.group.StudyGroupJoinReqDto;
-import front.meetudy.dto.request.study.group.StudyGroupOtpReqDto;
+import front.meetudy.domain.study.StudyGroupMember;
+import front.meetudy.domain.study.StudyGroupSchedule;
+import front.meetudy.dto.request.study.group.*;
 import front.meetudy.service.common.file.FilesService;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -57,6 +59,12 @@ class StudyGroupControllerTest {
     StudyGroupDetail studyGroupDetail;
     StudyGroup studyGroup2;
     StudyGroupDetail studyGroupDetail2;
+
+    Member member3;
+
+    StudyGroupMember studyGroupMember;
+
+    StudyGroupSchedule studyGroupSchedule;
     private  final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -65,6 +73,10 @@ class StudyGroupControllerTest {
     void setUp() {
         member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
         member2 = Member.createMember(null, "test2@naver.com", "테스트2", "테스트2", "19950120", "01011112222", "test", false);
+        member3 = Member.createMember(null, "test3@naver.com", "테스트3", "테스트2", "19950120", "01011112222", "test", false);
+        em.persist(member);
+        em.persist(member2);
+        em.persist(member3);
         studyGroup = StudyGroup.createStudyGroup(null, "title", "dd", RegionEnum.SEOUL, false, 11);
         studyGroupDetail = StudyGroupDetail.createStudyGroupDetail(studyGroup, null, "asdf", LocalDate.now().minusDays(3), LocalDate.now().plusDays(3), "매주", "월",
                 LocalTime.of(14, 0), LocalTime.of(20, 0), null, false, false, false);
@@ -74,11 +86,18 @@ class StudyGroupControllerTest {
         studyGroup2 = StudyGroup.createStudyGroup(null, "title2", "dd2", RegionEnum.SEOUL, true, 11);
         studyGroupDetail2 = StudyGroupDetail.createStudyGroupDetail(studyGroup2, null, "asdf", LocalDate.now().minusDays(3), LocalDate.now().plusDays(3), "매주", "월",
                 LocalTime.of(14, 0), LocalTime.of(20, 0), "123456", true, false, false);
+        studyGroupMember = StudyGroupMember.createStudyGroupMember(studyGroup, member3, JoinStatusEnum.APPROVED, MemberRole.LEADER, LocalDateTime.now(), null, null, null);
+        studyGroupSchedule = StudyGroupSchedule.createStudyGroupSchedule(
+                studyGroup, LocalDate.of(2025, 05, 28)
+                , LocalTime.of(18, 00)
+                , LocalTime.of(21, 00)
+        );
         em.persist(studyGroup2);
         em.persist(studyGroupDetail2);
+        em.persist(studyGroupMember);
+        em.persist(studyGroupSchedule);
 
-        em.persist(member);
-        em.persist(member2);
+
         em.flush();
         em.clear();
     }
@@ -230,6 +249,23 @@ class StudyGroupControllerTest {
 
         mockMvc.perform(get("/api/study-group/detail/"+studyGroup.getId()))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("스터디 그룹 출석 체크")
+    void studyGroupAttendanceSucc() throws Exception {
+        Member savedMember = em.merge(member3);
+        LoginUser loginUser = new LoginUser(savedMember);
+        StudyGroupAttendanceReqDto studyGroupAttendanceReqDto = new StudyGroupAttendanceReqDto(studyGroup.getId());
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+
+        mockMvc.perform(post("/api/private/study-group/attendance")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(studyGroupAttendanceReqDto)))
+                .andExpect(status().isCreated());
     }
 
 }
