@@ -42,7 +42,6 @@ class MemberServiceTest {
     private FilesService filesService;
 
 
-
     @Test
     @DisplayName("회원가입 성공 테스트")
     void testJoinMember() {

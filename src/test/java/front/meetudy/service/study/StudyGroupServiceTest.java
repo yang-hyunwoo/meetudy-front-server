@@ -13,6 +13,7 @@ import front.meetudy.dto.response.study.group.StudyGroupJoinResDto;
 import front.meetudy.dto.response.study.group.StudyGroupStatusResDto;
 import front.meetudy.dto.response.study.group.StudyGroupDetailResDto;
 import front.meetudy.dto.response.study.group.StudyGroupPageResDto;
+import front.meetudy.dto.response.study.operate.StudyGroupAttendanceRateResDto;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.contact.faq.QuerydslTestConfig;
 import front.meetudy.repository.study.AttendanceRepository;
@@ -53,6 +54,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 class StudyGroupServiceTest {
 
+
+
+
     @Autowired
     private StudyGroupService studyGroupService;
 
@@ -68,6 +72,7 @@ class StudyGroupServiceTest {
 
     @Autowired
     private AttendanceRepository attendanceRepository;
+
     StudyGroup studyGroup;
     StudyGroupDetail studyGroupDetail;
 
@@ -80,8 +85,8 @@ class StudyGroupServiceTest {
         em.persist(member2);
 
         studyGroup = StudyGroup.createStudyGroup(null, "title", "dd", RegionEnum.SEOUL, false, 11);
-        studyGroupDetail = StudyGroupDetail.createStudyGroupDetail(studyGroup, null, "asdf", LocalDate.now().minusDays(3), LocalDate.now().plusDays(3), "매주", "월",
-                LocalTime.of(14, 0), LocalTime.of(20, 0), null, false, false, false);
+        studyGroupDetail = StudyGroupDetail.createStudyGroupDetail(studyGroup, null, "asdf", LocalDate.now().minusDays(3), LocalDate.now().plusDays(3), "매주", "월,화,수,목,금,토,일",
+                LocalTime.of(9, 0), LocalTime.of(20, 0), null, false, false, false);
         studyGroupMember = StudyGroupMember.createStudyGroupMember(studyGroup, member, JoinStatusEnum.APPROVED, MemberRole.LEADER, LocalDateTime.now(), null, null, null);
         em.persist(studyGroup);
         em.persist(studyGroupDetail);
@@ -398,11 +403,50 @@ class StudyGroupServiceTest {
     void studyGroup_attendance() {
         // given
         StudyGroupAttendanceReqDto studyGroupAttendanceReqDto = new StudyGroupAttendanceReqDto(studyGroup.getId());
+        // when
         studyGroupService.studyGroupAttendanceCheck(studyGroupAttendanceReqDto, member);
 
-        // when
+        // then
         assertThat(attendanceRepository.findAll().size()).isEqualTo(1);
 
+    }
+
+    @Test
+    @DisplayName("스터디 그룹 출석률")
+    void studyGroup_attendanceRate() {
+        // given
+        StudyGroupCreateReqDto studyGroupCreateReqDto = new StudyGroupCreateReqDto(
+                null,
+                "SEOUL",
+                "스터디 그룹1",
+                "스터디 그룹 요약",
+                false,
+                "리액트,구글",
+                "내용입니다.",
+                LocalDate.now().minusDays(3L).toString(),
+                LocalDate.now().plusDays(21L).toString(),
+                10,
+                "매주",
+                "월,화,수,목,금,토,일",
+                LocalTime.of(19,00).toString(),
+                LocalTime.of(23,00).toString(),
+                null,
+                false,
+                false,
+                false
+        );
+
+        Long l = studyGroupService.studySave(member, studyGroupCreateReqDto);
+
+        // given
+        StudyGroupAttendanceReqDto studyGroupAttendanceReqDto = new StudyGroupAttendanceReqDto(l);
+        studyGroupService.studyGroupAttendanceCheck(studyGroupAttendanceReqDto, member);
+        StudyGroupAttendanceRateReqDto studyGroupAttendanceRateReqDto = new StudyGroupAttendanceRateReqDto(studyGroupAttendanceReqDto.getStudyGroupId(), member.getId());
+
+        // when
+        StudyGroupAttendanceRateResDto studyGroupAttendanceRateResDto = studyGroupService.studyGroupAttendanceRateList(studyGroupAttendanceRateReqDto);
+
+        assertThat(studyGroupAttendanceRateResDto.getAttendanceList().size()).isEqualTo(1);
 
         // then
     }
