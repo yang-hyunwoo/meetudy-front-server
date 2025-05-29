@@ -6,6 +6,7 @@ import front.meetudy.domain.study.StudyGroupMember;
 import front.meetudy.dto.response.study.operate.GroupOperateMemberResDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +22,7 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
                 AND sgm.member_id =:memberId
                 AND sgm.join_status = 'PENDING'
              """, nativeQuery = true)
-    Optional<StudyGroupMember> findStudyGroupMember(Long studyGroupId, Long memberId);
+    Optional<StudyGroupMember> findStudyGroupMember(@Param("studyGroupId") Long studyGroupId, @Param("memberId") Long memberId);
 
     @Query(value = """
                     SELECT new front.meetudy.dto.response.study.operate.GroupOperateMemberResDto(
@@ -47,7 +48,7 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
                       and sgm.study_group_id =:studyGroupId
                       and role='LEADER'
             """, nativeQuery = true)
-    Optional<StudyGroupMember> findGroupAuth(Long studyGroupId , Long memberId);
+    Optional<StudyGroupMember> findGroupAuth(@Param("studyGroupId") Long studyGroupId, @Param("memberId") Long memberId);
 
     @Query("""
                 SELECT m FROM StudyGroupMember m

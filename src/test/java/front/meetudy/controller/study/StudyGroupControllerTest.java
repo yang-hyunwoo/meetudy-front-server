@@ -88,8 +88,8 @@ class StudyGroupControllerTest {
                 LocalTime.of(14, 0), LocalTime.of(20, 0), "123456", true, false, false);
         studyGroupMember = StudyGroupMember.createStudyGroupMember(studyGroup, member3, JoinStatusEnum.APPROVED, MemberRole.LEADER, LocalDateTime.now(), null, null, null);
         studyGroupSchedule = StudyGroupSchedule.createStudyGroupSchedule(
-                studyGroup, LocalDate.of(2025, 05, 28)
-                , LocalTime.of(18, 00)
+                studyGroup, LocalDate.now()
+                , LocalTime.of(10, 00)
                 , LocalTime.of(21, 00)
         );
         em.persist(studyGroup2);
@@ -266,6 +266,23 @@ class StudyGroupControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(studyGroupAttendanceReqDto)))
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    @DisplayName("스터디 그룹 출석률")
+    void studyGroupAttendaceRate() throws Exception {
+        Member savedMember = em.merge(member3);
+        LoginUser loginUser = new LoginUser(savedMember);
+        StudyGroupAttendanceReqDto studyGroupAttendanceReqDto = new StudyGroupAttendanceReqDto(studyGroup.getId());
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        mockMvc.perform(get("/api/private/study-group/attendance/rate")
+                        .param("studyGroupId", String.valueOf(studyGroupAttendanceReqDto.getStudyGroupId()))
+                        .param("memberId", String.valueOf(member3.getId())))
+                .andExpect(status().isOk());
+
     }
 
 }

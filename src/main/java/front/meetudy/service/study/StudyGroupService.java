@@ -11,6 +11,8 @@ import front.meetudy.dto.response.study.group.StudyGroupJoinResDto;
 import front.meetudy.dto.response.study.group.StudyGroupStatusResDto;
 import front.meetudy.dto.response.study.group.StudyGroupDetailResDto;
 import front.meetudy.dto.response.study.group.StudyGroupPageResDto;
+import front.meetudy.dto.response.study.operate.AttendanceSimpleDto;
+import front.meetudy.dto.response.study.operate.StudyGroupAttendanceRateResDto;
 import front.meetudy.dto.study.StudyGroupScheduleDto;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.common.file.FilesRepository;
@@ -19,6 +21,7 @@ import front.meetudy.util.date.CustomDateUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,7 +66,7 @@ public class StudyGroupService {
      * @return
      */
     public Long studySave(Member member, StudyGroupCreateReqDto studyGroupCreateReqDto) {
-        studyGroupCreateCount(member);
+        studyGroupCreateMaxCount(member);
         studyGroupCreatValidation(studyGroupCreateReqDto);
 
         Files files = null;
@@ -73,8 +76,10 @@ public class StudyGroupService {
 
         StudyGroup entity = studyGroupCreateReqDto.toStudyGroupEntity(files);
         studyGroupRepository.save(entity);
+
         StudyGroupDetail studyGroupDetailEntity = studyGroupDetailRepository.save(studyGroupCreateReqDto.toDetailEntity(entity));
         studyGroupMemberRepository.save(studyGroupCreateReqDto.toLeaderEntity(member, entity));
+
         List<StudyGroupSchedule> studyGroupScheduleList = createGroupSchedule(studyGroupDetailEntity)
                                         .stream()
                                         .map(StudyGroupScheduleDto::toEntity)
@@ -171,10 +176,11 @@ public class StudyGroupService {
      * @param member
      */
     public void studyGroupAttendanceCheck(StudyGroupAttendanceReqDto studyGroupAttendanceReqDto, Member member) {
-        int attendanceCount = attendanceRepository.findAttendanceCount(member.getId(), studyGroupAttendanceReqDto.getStudyGroupId());
+        int attendanceCount = attendanceRepository.findAttendanceCount(studyGroupAttendanceReqDto.getStudyGroupId(), member.getId());
         if (attendanceCount >= 1) {
             throw new CustomApiException(BAD_REQUEST, ERR_003, ERR_003.getValue());
         }
+        //멤버 여부 확인
         StudyGroupMember studyGroupMember = studyGroupMemberRepository
                 .findByStudyGroupIdAndMemberIdAndJoinStatus(
                         studyGroupAttendanceReqDto.getStudyGroupId(),
@@ -182,9 +188,11 @@ public class StudyGroupService {
                         JoinStatusEnum.APPROVED)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
 
+        //그룹 여부 확인
         StudyGroupDetail studyGroupDetail = studyGroupDetailRepository.findByStudyGroupIdAndDeleted(studyGroupAttendanceReqDto.getStudyGroupId(), false)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
 
+        //스케줄 여부 확인
         StudyGroupSchedule studyGroupSchedule = studyGroupScheduleRepository.findScheduleDetail(studyGroupAttendanceReqDto.getStudyGroupId())
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
 
@@ -193,6 +201,49 @@ public class StudyGroupService {
                 getAttendanceLateEnumCheck(studyGroupSchedule));
 
         attendanceRepository.save(attendanceEntity);
+    }
+
+    /**
+     * 출석률 및 출석 리스트 최근[10개]
+     */
+    @Transactional(readOnly = true)
+    public StudyGroupAttendanceRateResDto studyGroupAttendanceRateList(StudyGroupAttendanceRateReqDto studyGroupAttendanceRateReqDto) {
+        //1.studymember 조회
+        StudyGroupMember studyGroupMember = studyGroupMemberRepository.findByStudyGroupIdAndMemberIdAndJoinStatus(studyGroupAttendanceRateReqDto.getStudyGroupId(),
+                        studyGroupAttendanceRateReqDto.getMemberId(),
+                        JoinStatusEnum.APPROVED)
+                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
+
+        //2.스케줄 갯수 조회
+        double rate = attendanceRate(studyGroupAttendanceRateReqDto, studyGroupMember.getJoinApprovedAt());
+        //최근 10개 참석 리스트 조회
+        List<Attendance> attendanceList = attendanceRepository.findTop10ByMemberIdAndStudyGroupIdOrderByAttendanceAtDesc(studyGroupAttendanceRateReqDto.getMemberId(),
+                studyGroupAttendanceRateReqDto.getStudyGroupId());
+
+        return StudyGroupAttendanceRateResDto.builder()
+                .rate(rate) //출석률 계산
+                .attendanceList(attendanceList.stream()
+                        .map(AttendanceSimpleDto::from)
+                        .toList())
+                .build();
+    }
+
+    /**
+     * 출석률 값
+     * @param studyGroupAttendanceRateReqDto
+     * @param joinApprovedAt
+     * @return
+     */
+    private double attendanceRate(StudyGroupAttendanceRateReqDto studyGroupAttendanceRateReqDto, LocalDateTime joinApprovedAt) {
+        //가입일 ~ 현재까지의 스케줄 갯수
+        int scheduleListCount = studyGroupScheduleRepository.findScheduleListCount(studyGroupAttendanceRateReqDto.getStudyGroupId(), joinApprovedAt);
+        //출석 참석 갯수 [PRESENT]
+        int attendancePresentCount = attendanceRepository.findAttendancePresentCount(studyGroupAttendanceRateReqDto.getStudyGroupId(), studyGroupAttendanceRateReqDto.getMemberId(), AttendanceEnum.PRESENT);
+
+        //출석 참여 갯수 /현재 스케줄 갯수 %
+        double attendanceRate = (double) attendancePresentCount / scheduleListCount * 100;
+
+        return Math.round(attendanceRate * 10) / 10.0;
     }
 
     /**
@@ -219,7 +270,7 @@ public class StudyGroupService {
      * 그룹 생성 5개 체크
      * @param member
      */
-    private void studyGroupCreateCount(Member member) {
+    private void studyGroupCreateMaxCount(Member member) {
         int studyGroupCreateCount = studyGroupQueryDslRepository.findStudyGroupCreateCount(member);
         if(studyGroupCreateCount>5) {
             throw new CustomApiException(BAD_REQUEST, ERR_019, ERR_019.getValue());
