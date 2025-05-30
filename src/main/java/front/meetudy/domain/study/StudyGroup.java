@@ -3,6 +3,7 @@ package front.meetudy.domain.study;
 import front.meetudy.constant.study.RegionEnum;
 import front.meetudy.domain.common.BaseEntity;
 import front.meetudy.domain.common.file.Files;
+import front.meetudy.dto.request.study.operate.StudyGroupUpdateReqDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -97,33 +98,7 @@ public class StudyGroup extends BaseEntity {
                 .build();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        StudyGroup that = (StudyGroup) o;
-        return Objects.equals(id, that.id);
-    }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    @Override
-    public String toString() {
-        return "StudyGroup{" +
-                "id=" + id +
-                ", thumbnailFile=" + thumbnailFile +
-                ", title='" + title + '\'' +
-                ", summary='" + summary + '\'' +
-                ", region=" + region +
-                ", joinType=" + joinType +
-                ", status='" + status + '\'' +
-                ", currentMemberCount=" + currentMemberCount +
-                ", maxMemberCount=" + maxMemberCount +
-                '}';
-    }
 
     /**
      * 멤버 인원수 증가
@@ -152,4 +127,46 @@ public class StudyGroup extends BaseEntity {
             this.status = "active";
         }
     }
+
+
+    public void studyGroupUpdate(StudyGroupUpdateCommand studyGroupUpdateCommand) {
+        this.title = studyGroupUpdateCommand.getTitle();
+        this.summary = studyGroupUpdateCommand.getSummary();
+        this.region = RegionEnum.valueOf(studyGroupUpdateCommand.getRegion());
+        this.joinType = studyGroupUpdateCommand.isJoinType();
+        this.maxMemberCount = studyGroupUpdateCommand.getMaxMemberCount();
+        this.studyGroupDetail.studyGroupDetailUpdate(studyGroupUpdateCommand);
+    }
+
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StudyGroup that = (StudyGroup) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "StudyGroup{" +
+                "id=" + id +
+                ", thumbnailFile=" + thumbnailFile +
+                ", title='" + title + '\'' +
+                ", summary='" + summary + '\'' +
+                ", region=" + region +
+                ", joinType=" + joinType +
+                ", status='" + status + '\'' +
+                ", currentMemberCount=" + currentMemberCount +
+                ", maxMemberCount=" + maxMemberCount +
+                '}';
+    }
+
+
 }

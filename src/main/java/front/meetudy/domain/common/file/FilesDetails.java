@@ -6,6 +6,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.Where;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.Objects;
@@ -18,6 +20,7 @@ import java.util.Objects;
         @Index(name = "idx_files_detail_id", columnList = "file_id"),
         @Index(name = "idx_created_by", columnList = "createdBy")
 })
+@SQLRestriction("deleted = false")
 public class FilesDetails extends BaseEntity {
 
     @Id
@@ -85,7 +88,6 @@ public class FilesDetails extends BaseEntity {
 
     public void updateFileDeleted() {
         this.deleted = true;
-        this.fileUrl = null;
     }
 
     @Override

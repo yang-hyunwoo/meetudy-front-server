@@ -108,12 +108,5 @@ public class StudyGroupController {
         return Response.create("스터디 그룹 출석 체크 완료", null);
     }
 
-    @Operation(summary = "스터디 그룹 출석률 및 출석 리스트 조회", description = "스터디 그룹 출석률 및 출석 리스트 조회")
-    @GetMapping("/private/study-group/attendance/rate")
-    public ResponseEntity<Response<StudyGroupAttendanceRateResDto>> studyGroupAttendanceList(
-            StudyGroupAttendanceRateReqDto studyGroupAttendanceRateReqDto,
-            @CurrentMember Member member
-    ) {
-        return Response.ok("스터디 그룹 출석률 조회 완료", studyGroupService.studyGroupAttendanceRateList(studyGroupAttendanceRateReqDto));
-    }
+
 }

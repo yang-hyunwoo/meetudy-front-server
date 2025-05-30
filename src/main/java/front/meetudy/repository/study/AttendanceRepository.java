@@ -25,5 +25,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
     List<Attendance> findTop10ByMemberIdAndStudyGroupIdOrderByAttendanceAtDesc(Long memberId, Long studyGroupId);
 
+    void deleteByStudyGroupId(Long studyGroupId);
+
 
 }

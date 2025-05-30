@@ -6,6 +6,7 @@ import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.domain.common.file.Files;
 import front.meetudy.domain.common.file.FilesDetails;
 import front.meetudy.domain.member.Member;
+import front.meetudy.dto.response.file.FileResDto;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.common.file.FilesDetailsRepository;
 import front.meetudy.repository.common.file.FilesRepository;
@@ -26,6 +27,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static front.meetudy.constant.error.ErrorEnum.ERR_012;
+import static front.meetudy.constant.error.ErrorEnum.ERR_015;
+import static org.springframework.http.HttpStatus.*;
 
 @Service
 @RequiredArgsConstructor
@@ -49,12 +52,25 @@ public class FilesService {
      * @param fileId
      * @return
      */
-    public Files createFilesGroup(Member member,Long fileId) {
+    public FileResDto createFilesGroup(Member member, Long fileId, List<MultipartFile> files) {
+        Files filesGroup;
         if(fileId == null) {
-            return filesRepository.save(Files.createFiles(member,false));
+            filesGroup = filesRepository.save(Files.createFiles(member, false));
         } else {
-            return filesRepository.findById(fileId).orElseThrow(()-> new CustomApiException(HttpStatus.BAD_REQUEST, ERR_012, ERR_012.getValue()));
+            filesGroup = filesRepository.findById(fileId).orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
         }
+        for (MultipartFile file : files) {
+            String contentType = file.getContentType();
+
+            if (contentType != null && contentType.startsWith("image/")) {
+                //cloudinary 이미지 저장
+                uploadImageCloudinary(filesGroup, file);
+            } else {
+                //cloudFlare 이미지 제외 저장
+                uploadEtcCloudflare(filesGroup, file);
+            }
+        }
+        return FileResDto.from(filesGroup);
     }
 
     /**
@@ -62,6 +78,7 @@ public class FilesService {
      * @param group
      * @param file
      */
+    @Transactional
     public void uploadImageCloudinary(Files group , MultipartFile file) {
         Cloudinary cloudinary = cloudinaryService.connectCloudinary();
         String fileUrl;
@@ -124,10 +141,14 @@ public class FilesService {
     }
 
     /**
-     * filesDetails -> deleted 처리
+     * 첨부파일 soft-delete
+     * @param member
+     * @param fileId
      * @param delFileDetailsId
      */
-    public void deleteFileDetail(List<Long> delFileDetailsId) {
+    public void deleteFileDetail(Member member, Long fileId, List<Long> delFileDetailsId) {
+        filesRepository.findByIdAndMemberId(fileId, member.getId())
+                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue()));
         for (Long fileDetailId : delFileDetailsId) {
             filesDetailsRepository.findById(fileDetailId).ifPresent(FilesDetails::updateFileDeleted);
         }

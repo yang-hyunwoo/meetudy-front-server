@@ -444,7 +444,7 @@ class StudyGroupServiceTest {
         StudyGroupAttendanceRateReqDto studyGroupAttendanceRateReqDto = new StudyGroupAttendanceRateReqDto(studyGroupAttendanceReqDto.getStudyGroupId(), member.getId());
 
         // when
-        StudyGroupAttendanceRateResDto studyGroupAttendanceRateResDto = studyGroupService.studyGroupAttendanceRateList(studyGroupAttendanceRateReqDto);
+        StudyGroupAttendanceRateResDto studyGroupAttendanceRateResDto = studyGroupService.studyGroupAttendanceRateList(studyGroupAttendanceRateReqDto,member);
 
         assertThat(studyGroupAttendanceRateResDto.getAttendanceList().size()).isEqualTo(1);
 

@@ -7,12 +7,14 @@ import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.*;
 import front.meetudy.dto.PageDto;
 import front.meetudy.dto.request.study.group.*;
+import front.meetudy.dto.request.study.operate.StudyGroupUpdateReqDto;
 import front.meetudy.dto.response.study.group.StudyGroupJoinResDto;
 import front.meetudy.dto.response.study.group.StudyGroupStatusResDto;
 import front.meetudy.dto.response.study.group.StudyGroupDetailResDto;
 import front.meetudy.dto.response.study.group.StudyGroupPageResDto;
 import front.meetudy.dto.response.study.operate.AttendanceSimpleDto;
 import front.meetudy.dto.response.study.operate.StudyGroupAttendanceRateResDto;
+import front.meetudy.dto.response.study.operate.StudyGroupUpdateDetailResDto;
 import front.meetudy.dto.study.StudyGroupScheduleDto;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.common.file.FilesRepository;
@@ -29,6 +31,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -207,14 +210,19 @@ public class StudyGroupService {
      * 출석률 및 출석 리스트 최근[10개]
      */
     @Transactional(readOnly = true)
-    public StudyGroupAttendanceRateResDto studyGroupAttendanceRateList(StudyGroupAttendanceRateReqDto studyGroupAttendanceRateReqDto) {
-        //1.studymember 조회
+    public StudyGroupAttendanceRateResDto studyGroupAttendanceRateList(StudyGroupAttendanceRateReqDto studyGroupAttendanceRateReqDto,Member member) {
+
+        //1.studygroup Leader 확인
+        studyGroupMemberRepository.findGroupAuth(studyGroupAttendanceRateReqDto.getStudyGroupId(), member.getId())
+                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue()));
+
+        //2.studymember 조회
         StudyGroupMember studyGroupMember = studyGroupMemberRepository.findByStudyGroupIdAndMemberIdAndJoinStatus(studyGroupAttendanceRateReqDto.getStudyGroupId(),
                         studyGroupAttendanceRateReqDto.getMemberId(),
                         JoinStatusEnum.APPROVED)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
 
-        //2.스케줄 갯수 조회
+        //3.스케줄 갯수 조회
         double rate = attendanceRate(studyGroupAttendanceRateReqDto, studyGroupMember.getJoinApprovedAt());
         //최근 10개 참석 리스트 조회
         List<Attendance> attendanceList = attendanceRepository.findTop10ByMemberIdAndStudyGroupIdOrderByAttendanceAtDesc(studyGroupAttendanceRateReqDto.getMemberId(),
@@ -226,6 +234,74 @@ public class StudyGroupService {
                         .map(AttendanceSimpleDto::from)
                         .toList())
                 .build();
+    }
+
+    /**
+     * 스터디 그룹 수정 상세 조회
+     * @param studyGroupId
+     * @param member
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public StudyGroupUpdateDetailResDto findGroupUpdateDetail(Long studyGroupId , Member member) {
+        studyGroupMemberRepository.findGroupAuth(studyGroupId, member.getId())
+                .ifPresentOrElse(
+                        v -> {},
+                        () -> {throw new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue());}
+                );
+
+        return studyGroupQueryDslRepository.findGroupUpdateDetail(studyGroupId)
+                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
+
+    }
+
+    /**
+     * 스터디 그룹 수정
+     * @param studyGroupUpdateReqDto
+     * @param member
+     */
+    public void studyGroupUpdate(StudyGroupUpdateReqDto studyGroupUpdateReqDto , Member member) {
+
+        //권한 체크
+        studyGroupMemberRepository.findGroupAuth(studyGroupUpdateReqDto.getStudyGroupId(), member.getId())
+                .ifPresentOrElse(
+                        v -> {},
+                        () -> {throw new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue());}
+                );
+
+        //그룹 존재 확인
+        StudyGroup studyGroup = studyGroupRepository.findById(studyGroupUpdateReqDto.getStudyGroupId())
+                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue()));
+
+        //그룹 시작일자가 넘을시 수정 불가능  == 날짜랑 시간만 수정 안되게
+
+        LocalDate startDate = studyGroup.getStudyGroupDetail().getStartDate();
+        LocalDate endDate = studyGroup.getStudyGroupDetail().getEndDate();
+        LocalTime meetingStartTime = studyGroup.getStudyGroupDetail().getMeetingStartTime();
+        LocalTime meetingEndTime = studyGroup.getStudyGroupDetail().getMeetingEndTime();
+        LocalDateTime meetingDateTime = LocalDateTime.of(startDate, meetingStartTime);
+        LocalDateTime now = LocalDateTime.now();
+
+        //시작일자가 넘었다면 변경하지 않는다.
+        if(meetingDateTime.isBefore(now)) {
+            studyGroupUpdateReqDto.setStartDate(startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+            studyGroupUpdateReqDto.setEndDate(endDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+            studyGroupUpdateReqDto.setMeetingStartTime(meetingStartTime.format(DateTimeFormatter.ofPattern("HH:mm")));
+            studyGroupUpdateReqDto.setMeetingEndTime(meetingEndTime.format(DateTimeFormatter.ofPattern("HH:mm")));
+            studyGroup.studyGroupUpdate(StudyGroupUpdateCommand.from(studyGroupUpdateReqDto));
+        } else { //스케줄 삭제 후 재 생성
+            studyGroup.studyGroupUpdate(StudyGroupUpdateCommand.from(studyGroupUpdateReqDto));
+            //스케줄 삭제
+            studyGroupScheduleRepository.deleteByStudyGroupId(studyGroup.getId());
+            attendanceRepository.deleteByStudyGroupId(studyGroup.getId());
+
+            //스케줄 생성
+            List<StudyGroupSchedule> studyGroupScheduleList = createGroupSchedule(studyGroup.getStudyGroupDetail())
+                    .stream()
+                    .map(StudyGroupScheduleDto::toEntity)
+                    .toList();
+            studyGroupScheduleRepository.saveAll(studyGroupScheduleList);
+        }
     }
 
     /**
@@ -257,8 +333,7 @@ public class StudyGroupService {
         LocalTime meetingStartTime = studyGroupSchedule.getMeetingStartTime();
         LocalDateTime meetingStartDateTime = LocalDateTime.of(meetingDate, meetingStartTime);
         LocalDateTime now = LocalDateTime.now();
-        boolean isLate = now.isAfter(meetingStartDateTime);
-        if(isLate) {
+        if(now.isAfter(meetingStartDateTime)) {
             attendanceEnum = AttendanceEnum.LATE;
         } else {
             attendanceEnum = AttendanceEnum.PRESENT;

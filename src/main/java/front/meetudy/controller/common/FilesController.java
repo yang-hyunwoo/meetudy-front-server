@@ -39,27 +39,18 @@ public class FilesController {
                                                            @RequestParam(required = false) List<Long> delFileDetailsId) {
 
         //files 생성
-        Files filesGroup = filesService.createFilesGroup(member,fileId);
 
-        for (MultipartFile file : files) {
-            String contentType = file.getContentType();
-
-            if (contentType != null && contentType.startsWith("image/")) {
-                //cloudinary 이미지 저장
-                filesService.uploadImageCloudinary(filesGroup, file);
-            } else {
-                //cloudFlare 이미지 제외 저장
-                filesService.uploadEtcCloudflare(filesGroup, file);
-            }
-        }
-        deletedFilePresent(delFileDetailsId);
-        return Response.ok("업로드 완료", FileResDto.from(filesGroup));
+        return Response.ok("업로드 완료",filesService.createFilesGroup(member,fileId,files));
     }
 
-    private void deletedFilePresent(List<Long> delFileDetailsId) {
+    @PutMapping("file-delete")
+    public ResponseEntity<Response<Void>> fileDelete(@CurrentMember Member member,
+                                                     @RequestParam(required = false) Long fileId,
+                                                     @RequestParam(required = false) List<Long> delFileDetailsId) {
         if (delFileDetailsId != null && !delFileDetailsId.isEmpty()) {
-            filesService.deleteFileDetail(delFileDetailsId);
+            filesService.deleteFileDetail(member, fileId, delFileDetailsId);
         }
+        return Response.update("파일 삭제 완료", null);
     }
 
 }
