@@ -15,5 +15,5 @@ public class GroupOperateListResDto {
 
     @Schema(description = "종료된 그룹 리스트")
     List<GroupOperateResDto> endGroup;
-    
+
 }

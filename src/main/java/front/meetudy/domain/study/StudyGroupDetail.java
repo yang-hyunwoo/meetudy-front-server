@@ -1,6 +1,7 @@
 package front.meetudy.domain.study;
 
 import front.meetudy.domain.common.BaseEntity;
+import front.meetudy.dto.request.study.operate.StudyGroupUpdateReqDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -138,6 +139,20 @@ public class StudyGroupDetail extends BaseEntity {
 
     public void groupDelete() {
         this.deleted = true;
+    }
+
+    public void studyGroupDetailUpdate(StudyGroupUpdateCommand studyGroupUpdateCommand) {
+        this.tag = studyGroupUpdateCommand.getTag();
+        this.content = studyGroupUpdateCommand.getContent();
+        this.startDate = LocalDate.parse(studyGroupUpdateCommand.getStartDate());
+        this.endDate = LocalDate.parse(studyGroupUpdateCommand.getEndDate());
+        this.meetingFrequency = studyGroupUpdateCommand.getMeetingFrequency();
+        this.meetingDay = studyGroupUpdateCommand.getMeetingDay();
+        this.meetingStartTime = LocalTime.parse(studyGroupUpdateCommand.getMeetingStartTime());
+        this.meetingEndTime = LocalTime.parse(studyGroupUpdateCommand.getMeetingEndTime());
+        this.secretPassword = studyGroupUpdateCommand.getSecretPassword();
+        this.secret = studyGroupUpdateCommand.isSecret();
+        this.allowComment = studyGroupUpdateCommand.isAllowComment();
     }
 
     @Override

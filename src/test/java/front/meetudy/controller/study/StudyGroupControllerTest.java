@@ -278,7 +278,7 @@ class StudyGroupControllerTest {
                 new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        mockMvc.perform(get("/api/private/study-group/attendance/rate")
+        mockMvc.perform(get("/api/private/study-group/operate/attendance/rate")
                         .param("studyGroupId", String.valueOf(studyGroupAttendanceReqDto.getStudyGroupId()))
                         .param("memberId", String.valueOf(member3.getId())))
                 .andExpect(status().isOk());

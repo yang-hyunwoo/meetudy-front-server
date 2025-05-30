@@ -17,6 +17,8 @@ import front.meetudy.dto.request.study.group.StudyGroupPageReqDto;
 import front.meetudy.dto.response.study.group.*;
 import front.meetudy.dto.response.study.operate.GroupOperateResDto;
 import front.meetudy.dto.response.study.operate.QGroupOperateResDto;
+import front.meetudy.dto.response.study.operate.QStudyGroupUpdateDetailResDto;
+import front.meetudy.dto.response.study.operate.StudyGroupUpdateDetailResDto;
 import front.meetudy.repository.study.StudyGroupQueryDslRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -72,7 +74,7 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 ))
                 .from(studyGroup)
                 .leftJoin(filesDetails)
-                .on(studyGroup.thumbnailFile.id.eq(filesDetails.id).and(filesDetails.deleted.eq(false)))
+                .on(studyGroup.thumbnailFile.id.eq(filesDetails.files.id).and(filesDetails.deleted.eq(false)))
                 .innerJoin(studyGroupDetail)
                 .on(studyGroup.id.eq(studyGroupDetail.studyGroup.id))
                 .where(builder)
@@ -111,7 +113,7 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 ))
                 .from(studyGroup)
                 .leftJoin(filesDetails)
-                .on(studyGroup.thumbnailFile.id.eq(filesDetails.id).and(filesDetails.deleted.eq(false)))
+                .on(studyGroup.thumbnailFile.id.eq(filesDetails.files.id).and(filesDetails.deleted.eq(false)))
                 .innerJoin(studyGroupDetail)
                 .on(studyGroup.id.eq(studyGroupDetail.studyGroup.id)).where(studyGroup.id.eq(studyGroupId))
                 .fetchOne();
@@ -165,7 +167,7 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 ))
                 .from(studyGroup)
                 .leftJoin(filesDetails)
-                .on(studyGroup.thumbnailFile.id.eq(filesDetails.id).and(filesDetails.deleted.eq(false)))
+                .on(studyGroup.thumbnailFile.id.eq(filesDetails.files.id).and(filesDetails.deleted.eq(false)))
                 .innerJoin(studyGroupDetail)
                 .on(studyGroup.id.eq(studyGroupDetail.studyGroup.id))
                 .innerJoin(studyGroupMember)
@@ -173,6 +175,42 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .where(builder)
                 .orderBy(studyGroup.id.asc())
                 .fetch();
+    }
+
+    @Override
+    public Optional<StudyGroupUpdateDetailResDto> findGroupUpdateDetail(Long studyGroupId) {
+        StudyGroupUpdateDetailResDto studyGroupUpdateDetailResDto = queryFactory.select(new QStudyGroupUpdateDetailResDto(
+                        studyGroup.id,
+                        studyGroupDetail.id,
+                        filesDetails.fileUrl,
+                        studyGroup.thumbnailFile.id,
+                        filesDetails.id,
+                        filesDetails.originFileName,
+                        studyGroup.region,
+                        studyGroup.title,
+                        studyGroup.summary,
+                        studyGroupDetail.tag,
+                        studyGroupDetail.content,
+                        studyGroupDetail.startDate,
+                        studyGroupDetail.endDate,
+                        studyGroup.maxMemberCount,
+                        studyGroup.currentMemberCount,
+                        studyGroupDetail.meetingFrequency,
+                        studyGroupDetail.meetingDay,
+                        studyGroupDetail.meetingStartTime,
+                        studyGroupDetail.meetingEndTime,
+                        studyGroup.joinType,
+                        studyGroupDetail.secret,
+                        studyGroupDetail.secretPassword,
+                        studyGroupDetail.allowComment
+                ))
+                .from(studyGroup)
+                .leftJoin(filesDetails)
+                .on(studyGroup.thumbnailFile.id.eq(filesDetails.files.id).and(filesDetails.deleted.eq(false)))
+                .innerJoin(studyGroupDetail)
+                .on(studyGroup.id.eq(studyGroupDetail.studyGroup.id)).where(studyGroup.id.eq(studyGroupId))
+                .fetchOne();
+        return Optional.ofNullable(studyGroupUpdateDetailResDto);
     }
 
     private void groupOperateCondition(Member member, BooleanBuilder builder) {
