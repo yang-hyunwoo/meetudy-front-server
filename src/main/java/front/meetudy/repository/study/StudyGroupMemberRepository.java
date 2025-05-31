@@ -73,4 +73,14 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
     Optional<StudyGroupMember> findByStudyGroupIdAndMemberIdAndJoinStatus(Long StudyGroupId,
                                                                        Long memberId,
                                                                        JoinStatusEnum joinStatus);
+
+    @Query("""
+                SELECT m FROM StudyGroupMember m
+                JOIN FETCH m.studyGroup sg
+                JOIN FETCH sg.studyGroupDetail sd
+                WHERE m.member.id = :memberId
+                  AND m.joinStatus = 'APPROVED'
+                  AND sd.deleted=false
+            """)
+    List<StudyGroupMember> findByGroupIncludeMember(Long memberId);
 }

@@ -7,11 +7,14 @@ import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.*;
 import front.meetudy.dto.PageDto;
 import front.meetudy.dto.request.study.group.*;
+import front.meetudy.dto.request.study.join.GroupScheduleListReqDto;
 import front.meetudy.dto.request.study.operate.StudyGroupUpdateReqDto;
 import front.meetudy.dto.response.study.group.StudyGroupJoinResDto;
 import front.meetudy.dto.response.study.group.StudyGroupStatusResDto;
 import front.meetudy.dto.response.study.group.StudyGroupDetailResDto;
 import front.meetudy.dto.response.study.group.StudyGroupPageResDto;
+import front.meetudy.dto.response.study.join.GroupScheduleDayResDto;
+import front.meetudy.dto.response.study.join.GroupScheduleMonthResDto;
 import front.meetudy.dto.response.study.operate.AttendanceSimpleDto;
 import front.meetudy.dto.response.study.operate.StudyGroupAttendanceRateResDto;
 import front.meetudy.dto.response.study.operate.StudyGroupUpdateDetailResDto;
@@ -302,6 +305,32 @@ public class StudyGroupService {
                     .toList();
             studyGroupScheduleRepository.saveAll(studyGroupScheduleList);
         }
+    }
+
+    /**
+     * 스케줄 1달 조회
+     * @param groupScheduleListReqDto
+     * @param member
+     * @return
+     */
+    public List<GroupScheduleMonthResDto> studyGroupMonthScheduleList(GroupScheduleListReqDto groupScheduleListReqDto , Member member) {
+        //사용자 그룹 조회
+        List<StudyGroupMember> byGroupIncludeMember = studyGroupMemberRepository.findByGroupIncludeMember(member.getId());
+        List<Long> studyGroupId = new ArrayList<>();
+        for (StudyGroupMember studyGroupMember : byGroupIncludeMember) {
+            studyGroupId.add(studyGroupMember.getStudyGroup().getId());
+        }
+       return studyGroupQueryDslRepository.findScheduleMonth(studyGroupId, groupScheduleListReqDto.getScheduleDate());
+    }
+
+    public List<GroupScheduleDayResDto> studyGroupDayScheduleList(GroupScheduleListReqDto groupScheduleListReqDto, Member member) {
+        //사용자 그룹 조회
+        List<StudyGroupMember> byGroupIncludeMember = studyGroupMemberRepository.findByGroupIncludeMember(member.getId());
+        List<Long> studyGroupId = new ArrayList<>();
+        for (StudyGroupMember studyGroupMember : byGroupIncludeMember) {
+            studyGroupId.add(studyGroupMember.getStudyGroup().getId());
+        }
+        return studyGroupQueryDslRepository.findScheduleDay(studyGroupId, groupScheduleListReqDto.getScheduleDate());
     }
 
     /**
