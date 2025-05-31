@@ -10,11 +10,13 @@ import front.meetudy.constant.study.MemberRole;
 import front.meetudy.constant.study.RegionEnum;
 import front.meetudy.domain.common.file.QFilesDetails;
 import front.meetudy.domain.member.Member;
-import front.meetudy.domain.study.QStudyGroup;
-import front.meetudy.domain.study.QStudyGroupDetail;
-import front.meetudy.domain.study.QStudyGroupMember;
+import front.meetudy.domain.study.*;
 import front.meetudy.dto.request.study.group.StudyGroupPageReqDto;
 import front.meetudy.dto.response.study.group.*;
+import front.meetudy.dto.response.study.join.GroupScheduleDayResDto;
+import front.meetudy.dto.response.study.join.GroupScheduleMonthResDto;
+import front.meetudy.dto.response.study.join.QGroupScheduleDayResDto;
+import front.meetudy.dto.response.study.join.QGroupScheduleMonthResDto;
 import front.meetudy.dto.response.study.operate.GroupOperateResDto;
 import front.meetudy.dto.response.study.operate.QGroupOperateResDto;
 import front.meetudy.dto.response.study.operate.QStudyGroupUpdateDetailResDto;
@@ -29,6 +31,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,6 +44,8 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
     QFilesDetails filesDetails = QFilesDetails.filesDetails;
     QStudyGroupDetail studyGroupDetail = QStudyGroupDetail.studyGroupDetail;
     QStudyGroupMember studyGroupMember = QStudyGroupMember.studyGroupMember;
+    QStudyGroupSchedule studyGroupSchedule = QStudyGroupSchedule.studyGroupSchedule;
+    QAttendance attendance = QAttendance.attendance;
 
     /**
      * 그룹 리스트 조회
@@ -211,6 +216,56 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .on(studyGroup.id.eq(studyGroupDetail.studyGroup.id)).where(studyGroup.id.eq(studyGroupId))
                 .fetchOne();
         return Optional.ofNullable(studyGroupUpdateDetailResDto);
+    }
+
+    /**
+     * 캘린더 그룹 조회
+     * @param studyGroupId
+     * @param date
+     * @return
+     */
+    @Override
+    public List<GroupScheduleMonthResDto> findScheduleMonth(List<Long> studyGroupId, String date) {
+        YearMonth yearMonth = YearMonth.parse(date);
+        LocalDate startOfMonth = yearMonth.atDay(1);
+        LocalDate endOfMonth = yearMonth.atEndOfMonth();
+        return queryFactory.select(new QGroupScheduleMonthResDto(
+                        studyGroup.id,
+                        studyGroup.title,
+                        studyGroupSchedule.meetingDate,
+                        studyGroupSchedule.meetingStartTime,
+                        studyGroupSchedule.meetingEndTime
+
+                ))
+                .from(studyGroup)
+                .innerJoin(studyGroupSchedule)
+                .on(studyGroup.id.eq(studyGroupSchedule.studyGroup.id))
+                .where(studyGroup.id.in(studyGroupId),
+                        studyGroupSchedule.meetingDate.between(startOfMonth,endOfMonth))
+                .fetch();
+    }
+
+    @Override
+    public List<GroupScheduleDayResDto> findScheduleDay(List<Long> studyGroupId, String date) {
+        return queryFactory.select(new QGroupScheduleDayResDto(
+                studyGroup.id,
+                studyGroup.title,
+                studyGroupSchedule.meetingDate,
+                studyGroupSchedule.meetingStartTime,
+                filesDetails.fileUrl,
+                attendance.status
+        ))
+        .from(studyGroup)
+        .innerJoin(studyGroupSchedule)
+        .on(studyGroup.id.eq(studyGroupSchedule.studyGroup.id))
+        .leftJoin(filesDetails)
+        .on(studyGroup.thumbnailFile.id.eq(filesDetails.files.id).and(filesDetails.deleted.eq(false)))
+        .leftJoin(attendance)
+        .on(studyGroup.id.eq(attendance.studyGroup.id))
+        .where(studyGroup.id.in(studyGroupId),
+                studyGroupSchedule.meetingDate.eq(LocalDate.parse(date)))
+        .fetch();
+
     }
 
     private void groupOperateCondition(Member member, BooleanBuilder builder) {

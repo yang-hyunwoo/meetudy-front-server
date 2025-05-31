@@ -5,6 +5,8 @@ import front.meetudy.dto.request.study.group.StudyGroupPageReqDto;
 import front.meetudy.dto.response.study.group.StudyGroupStatusResDto;
 import front.meetudy.dto.response.study.group.StudyGroupDetailResDto;
 import front.meetudy.dto.response.study.group.StudyGroupPageResDto;
+import front.meetudy.dto.response.study.join.GroupScheduleDayResDto;
+import front.meetudy.dto.response.study.join.GroupScheduleMonthResDto;
 import front.meetudy.dto.response.study.operate.GroupOperateResDto;
 import front.meetudy.dto.response.study.operate.StudyGroupUpdateDetailResDto;
 import org.springframework.data.domain.Page;
@@ -26,4 +28,10 @@ public interface StudyGroupQueryDslRepository {
     List<GroupOperateResDto> findOperateList(Member member);
 
     Optional<StudyGroupUpdateDetailResDto> findGroupUpdateDetail(Long studyGroupId);
+
+
+    List<GroupScheduleMonthResDto> findScheduleMonth(List<Long> studyGroupId , String date);
+
+    List<GroupScheduleDayResDto> findScheduleDay(List<Long> studyGroupId, String date);
+
 }
