@@ -248,24 +248,48 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
     @Override
     public List<GroupScheduleDayResDto> findScheduleDay(List<Long> studyGroupId, String date) {
         return queryFactory.select(new QGroupScheduleDayResDto(
-                studyGroup.id,
-                studyGroup.title,
-                studyGroupSchedule.meetingDate,
-                studyGroupSchedule.meetingStartTime,
-                filesDetails.fileUrl,
-                attendance.status
-        ))
-        .from(studyGroup)
-        .innerJoin(studyGroupSchedule)
-        .on(studyGroup.id.eq(studyGroupSchedule.studyGroup.id))
-        .leftJoin(filesDetails)
-        .on(studyGroup.thumbnailFile.id.eq(filesDetails.files.id).and(filesDetails.deleted.eq(false)))
-        .leftJoin(attendance)
-        .on(studyGroup.id.eq(attendance.studyGroup.id))
-        .where(studyGroup.id.in(studyGroupId),
-                studyGroupSchedule.meetingDate.eq(LocalDate.parse(date)))
-        .fetch();
+                        studyGroup.id,
+                        studyGroup.title,
+                        studyGroupSchedule.meetingDate,
+                        studyGroupSchedule.meetingStartTime,
+                        studyGroupSchedule.meetingEndTime,
+                        filesDetails.fileUrl,
+                        attendance.status
+                ))
+                .from(studyGroup)
+                .innerJoin(studyGroupSchedule)
+                .on(studyGroup.id.eq(studyGroupSchedule.studyGroup.id))
+                .leftJoin(filesDetails)
+                .on(studyGroup.thumbnailFile.id.eq(filesDetails.files.id).and(filesDetails.deleted.eq(false)))
+                .leftJoin(attendance)
+                .on(studyGroup.id.eq(attendance.studyGroup.id).and(attendance.attendanceDate.eq(LocalDate.parse(date))))
+                .where(studyGroup.id.in(studyGroupId),
+                        studyGroupSchedule.meetingDate.eq(LocalDate.parse(date)))
+                .fetch();
+    }
 
+    @Override
+    public List<GroupScheduleDayResDto> findScheduleWeek(List<Long> studyGroupId, String startDate, String endDate) {
+        return queryFactory.select(new QGroupScheduleDayResDto(
+                        studyGroup.id,
+                        studyGroup.title,
+                        studyGroupSchedule.meetingDate,
+                        studyGroupSchedule.meetingStartTime,
+                        studyGroupSchedule.meetingEndTime,
+                        filesDetails.fileUrl,
+                        attendance.status
+                ))
+                .from(studyGroup)
+                .innerJoin(studyGroupSchedule)
+                .on(studyGroup.id.eq(studyGroupSchedule.studyGroup.id))
+                .leftJoin(filesDetails)
+                .on(studyGroup.thumbnailFile.id.eq(filesDetails.files.id).and(filesDetails.deleted.eq(false)))
+                .leftJoin(attendance)
+                .on(studyGroup.id.eq(attendance.studyGroup.id).and(attendance.attendanceDate.between(LocalDate.parse(startDate), LocalDate.parse(endDate))))
+                .where(studyGroup.id.in(studyGroupId),
+                        studyGroupSchedule.meetingDate.between(LocalDate.parse(startDate), LocalDate.parse(endDate)))
+                .orderBy(studyGroupSchedule.meetingDate.asc(),studyGroupSchedule.meetingStartTime.asc())
+                .fetch();
     }
 
     private void groupOperateCondition(Member member, BooleanBuilder builder) {

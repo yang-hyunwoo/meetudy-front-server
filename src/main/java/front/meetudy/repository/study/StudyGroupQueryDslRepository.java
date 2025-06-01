@@ -34,4 +34,6 @@ public interface StudyGroupQueryDslRepository {
 
     List<GroupScheduleDayResDto> findScheduleDay(List<Long> studyGroupId, String date);
 
+    List<GroupScheduleDayResDto> findScheduleWeek(List<Long> studyGroupId, String startDate,String endDate);
+
 }

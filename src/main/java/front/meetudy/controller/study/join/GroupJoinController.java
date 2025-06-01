@@ -2,7 +2,9 @@ package front.meetudy.controller.study.join;
 
 import front.meetudy.annotation.customannotation.CurrentMember;
 import front.meetudy.domain.member.Member;
-import front.meetudy.dto.request.study.join.GroupScheduleListReqDto;
+import front.meetudy.dto.request.study.join.GroupScheduleDayListReqDto;
+import front.meetudy.dto.request.study.join.GroupScheduleMonthListReqDto;
+import front.meetudy.dto.request.study.join.GroupScheduleWeekListReqDto;
 import front.meetudy.dto.response.study.join.GroupScheduleDayResDto;
 import front.meetudy.dto.response.study.join.GroupScheduleMonthResDto;
 import front.meetudy.service.study.StudyGroupService;
@@ -31,7 +33,7 @@ public class GroupJoinController {
     @Operation(summary = "참여중인 스터디 그룹 캘린더 리스트" , description = "참여중인 스터디 그룹 캘린더 리스트")
     @GetMapping("/month/list")
     public ResponseEntity<Response<List<GroupScheduleMonthResDto>>> studyGroupMonthScheduleList(
-            GroupScheduleListReqDto groupScheduleListReqDto,
+            GroupScheduleMonthListReqDto groupScheduleListReqDto,
             @CurrentMember Member member
             ) {
         return Response.ok("참여중인 스터디 그룹 캘린더 리스트 조회 완료", studyGroupService.studyGroupMonthScheduleList(groupScheduleListReqDto, member));
@@ -40,10 +42,19 @@ public class GroupJoinController {
     @Operation(summary = "참여중인 스터디 그룹 하루 리스트" , description = "참여중인 스터디 그룹 하루 리스트")
     @GetMapping("/day/list")
     public ResponseEntity<Response<List<GroupScheduleDayResDto>>> studyGroupDayScheduleList(
-            GroupScheduleListReqDto groupScheduleListReqDto,
+            GroupScheduleDayListReqDto groupScheduleDayListReqDto,
             @CurrentMember Member member
     ) {
-        return Response.ok("참여중인 스터디 그룹 캘린더 리스트 조회 완료", studyGroupService.studyGroupDayScheduleList(groupScheduleListReqDto, member));
+        return Response.ok("참여중인 스터디 그룹 당일 스케줄 조회 완료", studyGroupService.studyGroupDayScheduleList(groupScheduleDayListReqDto, member));
+    }
+
+    @Operation(summary = "참영중인 스터디 그룹 한주 리스트", description = "참여중인 스터디 그룹 한주 리스트")
+    @GetMapping("/week/list")
+    public ResponseEntity<Response<List<GroupScheduleDayResDto>>> studyGroupWeekScheduleList(
+            GroupScheduleWeekListReqDto groupScheduleWeekListReqDto,
+            @CurrentMember Member member
+    ) {
+        return Response.ok("참여중인 스터디 그룹 1주 스케줄 조회 완료", studyGroupService.studyGroupWeekScheduleList(groupScheduleWeekListReqDto, member));
     }
 
 }

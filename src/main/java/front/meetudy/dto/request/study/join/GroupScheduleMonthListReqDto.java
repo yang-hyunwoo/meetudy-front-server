@@ -14,11 +14,12 @@ import lombok.*;
 @ValidationMode(ValidationType.SINGLE)  // SINGLE 단일 / ALL 다중 에러 리턴
 @AllArgsConstructor
 @Builder
-public class GroupScheduleListReqDto {
+public class GroupScheduleMonthListReqDto {
 
-    @Schema(description = "스케줄 일자", example = "2025-01-01")
-    @NotNull(message = "{join.scheduleDate.blank}", groups = ValidationGroups.Step6.class)
-    @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "날짜 형식은 yyyy-MM-dd 이어야 합니다.", groups = ValidationGroups.Step6.class)
+    @Schema(description = "스케줄 일자", example = "2025-01")
+    @NotNull(message = "{join.scheduleDate.blank}", groups = ValidationGroups.Step1.class)
+    @Pattern(regexp = "^\\d{4}-\\d{2}$", message = "날짜 형식은 yyyy-MM 이어야 합니다.", groups = ValidationGroups.Step1.class)
     private String scheduleDate;
+
 
 }
