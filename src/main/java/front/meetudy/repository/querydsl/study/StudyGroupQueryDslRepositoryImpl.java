@@ -163,6 +163,7 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                         studyGroup.id,
                         filesDetails.fileUrl,
                         studyGroup.title,
+                        studyGroup.summary,
                         studyGroup.region,
                         studyGroup.currentMemberCount,
                         studyGroup.maxMemberCount,

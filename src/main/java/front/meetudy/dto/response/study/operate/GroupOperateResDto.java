@@ -22,6 +22,9 @@ public class GroupOperateResDto {
     @Schema(description = "스터디 그룹 제목", example = "asd")
     private String title;
 
+    @Schema(description = "스터디 그룹 요약", example = "asd")
+    private String summary;
+
     @Schema(description = "스터디 그룹 지역", example = "BUSAN")
     private RegionEnum regionEnum;
 
@@ -45,6 +48,7 @@ public class GroupOperateResDto {
     public GroupOperateResDto(Long id,
                               String thumbnailFileUrl,
                               String title,
+                              String summary,
                               RegionEnum regionEnum ,
                               int currentMemberCount,
                               int maxMemberCount,
@@ -54,6 +58,7 @@ public class GroupOperateResDto {
         this.id = id;
         this.thumbnailFileUrl = thumbnailFileUrl;
         this.title = title;
+        this.summary = summary;
         this.regionEnum = regionEnum;
         this.currentMemberCount = currentMemberCount;
         this.maxMemberCount = maxMemberCount;
