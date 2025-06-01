@@ -28,7 +28,8 @@ public class GroupScheduleDayResDto {
     @Schema(description = "시작 시간")
     private LocalDateTime nextMeeting;
 
-
+    @Schema(description = "종료 시간")
+    private LocalDateTime endMeeting;
 
 
 
@@ -38,11 +39,13 @@ public class GroupScheduleDayResDto {
                                   String groupName,
                                   LocalDate meetingDate,
                                   LocalTime startTime,
+                                  LocalTime endTime,
                                   String groupImageUrl,
                                   AttendanceEnum attended) {
         this.groupId = groupId;
         this.groupName = groupName;
         this.nextMeeting = LocalDateTime.of(meetingDate, startTime);
+        this.endMeeting = LocalDateTime.of(meetingDate, endTime);
         this.groupImageUrl = groupImageUrl;
         this.attended = attended;
     }
