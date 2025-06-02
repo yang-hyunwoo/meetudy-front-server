@@ -89,6 +89,12 @@ public class StudyGroupManageService {
                 .build();
     }
 
+    /**
+     * 그룹 사용자 상태 변경
+     * @param studyGroupId
+     * @param member
+     * @return
+     */
     public Long groupStatusChange(Long studyGroupId , Member member) {
         studyGroupMemberRepository.findGroupAuth(studyGroupId,member.getId())
                 .orElseThrow(()-> new CustomApiException(BAD_REQUEST,ERR_015,ERR_015.getValue()));
@@ -101,6 +107,11 @@ public class StudyGroupManageService {
         return studyGroup.getId();
     }
 
+    /**
+     * 그룹 삭제
+     * @param studyGroupId
+     * @param member
+     */
     public void groupDelete(Long studyGroupId , Member member) {
         studyGroupMemberRepository.findGroupAuth(studyGroupId,member.getId())
                 .orElseThrow(()-> new CustomApiException(BAD_REQUEST,ERR_015,ERR_015.getValue()));
@@ -110,6 +121,11 @@ public class StudyGroupManageService {
         studyGroupDetail.groupDelete();
     }
 
+    /**
+     * 그룹 사용자 강퇴
+     * @param groupMemberStatusReqDto
+     * @param member
+     */
     public void groupMemberKick(GroupMemberStatusReqDto groupMemberStatusReqDto, Member member) {
 
         groupLeaderChk(groupMemberStatusReqDto, member);
@@ -128,8 +144,14 @@ public class StudyGroupManageService {
 
     }
 
+    /**
+     * 그룹 사용자 승인
+     * @param groupMemberStatusReqDto
+     * @param member
+     */
     public void groupMemberApproved(GroupMemberStatusReqDto groupMemberStatusReqDto, Member member) {
 
+        groupLeaderChk(groupMemberStatusReqDto, member);
 
         StudyGroupMember studyGroupMember = studyGroupMemberRepository
                 .findByIdAndMemberIdAndJoinStatusAndRole(
@@ -147,6 +169,11 @@ public class StudyGroupManageService {
         studyGroupMember.approvedMember(JoinStatusEnum.APPROVED);
     }
 
+    /**
+     * 그룹 사용자 거절
+     * @param groupMemberStatusReqDto
+     * @param member
+     */
     public void groupMemberReject(GroupMemberStatusReqDto groupMemberStatusReqDto,Member member) {
 
         groupLeaderChk(groupMemberStatusReqDto, member);

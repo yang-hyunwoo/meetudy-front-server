@@ -362,8 +362,11 @@ class StudyGroupServiceTest {
         StudyGroupJoinResDto studyGroupJoinResDto = studyGroupService.joinStudyGroup(studyGroupJoinReqDto, member2);
         StudyGroupCancelReqDto studyGroupCancelReqDto = new StudyGroupCancelReqDto(studyGroupJoinResDto.getStudyGroupId());
         studyGroupService.joinGroupMemberCancel(studyGroupCancelReqDto, member2);
-
-        Optional<StudyGroupMember> byId = studyGroupMemberRepository.findByStudyGroupIdAndMemberId(studyGroupJoinResDto.getStudyGroupId(),member2.getId());
+        List<JoinStatusEnum> includeStatus = new ArrayList<>();
+        includeStatus.add(JoinStatusEnum.KICKED);
+        includeStatus.add(JoinStatusEnum.PENDING);
+        includeStatus.add(JoinStatusEnum.APPROVED);
+        Optional<StudyGroupMember> byId = studyGroupMemberRepository.findByStudyGroupIdAndMemberId(studyGroupJoinResDto.getStudyGroupId(),member2.getId(),includeStatus);
         assertThat(byId).isEmpty();
     }
 

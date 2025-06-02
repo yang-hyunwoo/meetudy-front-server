@@ -13,7 +13,16 @@ import java.util.Optional;
 
 public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMember, Long> {
 
-    Optional<StudyGroupMember> findByStudyGroupIdAndMemberId(Long studyGroupId , Long memberId);
+    @Query("""
+                SELECT m FROM StudyGroupMember m
+                WHERE m.studyGroup.id = :studyGroupId
+                  AND m.member.id = :memberId
+                  AND m.joinStatus in(:includeStatus)
+            """)
+    Optional<StudyGroupMember> findByStudyGroupIdAndMemberId(@Param("studyGroupId") Long studyGroupId ,
+                                                             @Param("memberId") Long memberId ,
+                                                             @Param("includeStatus") List<JoinStatusEnum> includeStatus);
+
 
     @Query(value = """
             SELECT *
@@ -59,6 +68,19 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
                   AND m.role = :role
             """)
     Optional<StudyGroupMember> findByIdAndMemberIdAndJoinStatusAndRole(Long id,
+                                                                       Long memberId,
+                                                                       JoinStatusEnum joinStatus,
+                                                                       MemberRole role);
+
+    @Query("""
+                SELECT m FROM StudyGroupMember m
+                JOIN FETCH m.studyGroup
+                WHERE m.studyGroup.id = :id
+                  AND m.member.id = :memberId
+                  AND m.joinStatus = :joinStatus
+                  AND m.role = :role
+            """)
+    Optional<StudyGroupMember> findByStudyGroupIdAndMemberIdAndJoinStatusAndRole(Long id,
                                                                        Long memberId,
                                                                        JoinStatusEnum joinStatus,
                                                                        MemberRole role);

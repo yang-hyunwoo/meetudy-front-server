@@ -6,6 +6,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.TimePath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import front.meetudy.constant.study.JoinStatusEnum;
 import front.meetudy.constant.study.MemberRole;
 import front.meetudy.constant.study.RegionEnum;
 import front.meetudy.domain.common.file.QFilesDetails;
@@ -59,7 +60,7 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
 
         BooleanBuilder builder = new BooleanBuilder();
         groupCondition(studyGroupPageReqDto, builder);
-        groupDateCondition(builder);
+        //groupDateCondition(builder);
 
         BooleanExpression joinMember = member != null
                 ? studyGroupMember.studyGroup.id.eq(studyGroup.id)
@@ -75,7 +76,13 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                         studyGroup.currentMemberCount,
                         studyGroup.maxMemberCount,
                         studyGroupDetail.secret,
-                        studyGroupDetail.tag
+                        studyGroupDetail.tag,
+                        studyGroupDetail.startDate,
+                        studyGroupDetail.endDate,
+                        studyGroupDetail.meetingStartTime,
+                        studyGroupDetail.meetingEndTime,
+                        studyGroupDetail.meetingFrequency,
+                        studyGroupDetail.meetingDay
                 ))
                 .from(studyGroup)
                 .leftJoin(filesDetails)
@@ -114,7 +121,13 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                         studyGroup.maxMemberCount,
                         studyGroupDetail.secret,
                         studyGroupDetail.tag,
-                        studyGroupDetail.allowComment
+                        studyGroupDetail.allowComment,
+                        studyGroupDetail.startDate,
+                        studyGroupDetail.endDate,
+                        studyGroupDetail.meetingStartTime,
+                        studyGroupDetail.meetingEndTime,
+                        studyGroupDetail.meetingFrequency,
+                        studyGroupDetail.meetingDay
                 ))
                 .from(studyGroup)
                 .leftJoin(filesDetails)
@@ -182,6 +195,35 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .orderBy(studyGroup.id.asc())
                 .fetch();
     }
+
+    @Override
+    public List<GroupOperateResDto> findJoinGroupList(Member member,JoinStatusEnum joinStatusEnum) {
+        BooleanBuilder builder = new BooleanBuilder();
+        groupJoinCondition(member,builder,joinStatusEnum);
+        return queryFactory.select(new QGroupOperateResDto(
+                        studyGroup.id,
+                        filesDetails.fileUrl,
+                        studyGroup.title,
+                        studyGroup.summary,
+                        studyGroup.region,
+                        studyGroup.currentMemberCount,
+                        studyGroup.maxMemberCount,
+                        studyGroup.status,
+                        studyGroupDetail.endDate,
+                        studyGroupDetail.meetingEndTime
+                ))
+                .from(studyGroup)
+                .leftJoin(filesDetails)
+                .on(studyGroup.thumbnailFile.id.eq(filesDetails.files.id).and(filesDetails.deleted.eq(false)))
+                .innerJoin(studyGroupDetail)
+                .on(studyGroup.id.eq(studyGroupDetail.studyGroup.id))
+                .innerJoin(studyGroupMember)
+                .on(studyGroup.id.eq(studyGroupMember.studyGroup.id))
+                .where(builder)
+                .orderBy(studyGroup.id.asc())
+                .fetch();
+    }
+
 
     @Override
     public Optional<StudyGroupUpdateDetailResDto> findGroupUpdateDetail(Long studyGroupId) {
@@ -296,6 +338,12 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
     private void groupOperateCondition(Member member, BooleanBuilder builder) {
         builder.and(studyGroupMember.member.id.eq(member.getId()));
         builder.and(studyGroupMember.role.eq(MemberRole.LEADER));
+        builder.and(studyGroupDetail.deleted.eq(false));
+    }
+
+    private void groupJoinCondition(Member member, BooleanBuilder builder,JoinStatusEnum joinStatusEnum) {
+        builder.and(studyGroupMember.member.id.eq(member.getId()));
+        builder.and(studyGroupMember.joinStatus.eq(joinStatusEnum));
         builder.and(studyGroupDetail.deleted.eq(false));
     }
 

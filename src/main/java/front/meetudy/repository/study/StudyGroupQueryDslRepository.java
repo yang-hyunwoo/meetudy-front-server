@@ -1,5 +1,6 @@
 package front.meetudy.repository.study;
 
+import front.meetudy.constant.study.JoinStatusEnum;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.study.group.StudyGroupPageReqDto;
 import front.meetudy.dto.response.study.group.StudyGroupStatusResDto;
@@ -35,5 +36,7 @@ public interface StudyGroupQueryDslRepository {
     List<GroupScheduleDayResDto> findScheduleDay(List<Long> studyGroupId, String date);
 
     List<GroupScheduleDayResDto> findScheduleWeek(List<Long> studyGroupId, String startDate,String endDate);
+
+    List<GroupOperateResDto> findJoinGroupList(Member member, JoinStatusEnum joinStatusEnum);
 
 }
