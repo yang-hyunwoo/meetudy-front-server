@@ -7,6 +7,8 @@ import front.meetudy.exception.CustomApiException;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -192,17 +194,7 @@ public class Member extends BaseEntity {
                 .build();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Member member = (Member) o;
-        return Objects.equals(id, member.id);
-    }
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
 
     /**
      * 비밀번호 오류 횟수 증가
@@ -220,6 +212,39 @@ public class Member extends BaseEntity {
      */
     public void initLoginCount() {
         this.failLoginCount = 0;
+    }
+
+
+
+    public void passwordChange(String currentPw , String newPw , PasswordEncoder passwordEncoder) {
+        if(!passwordEncoder.matches(currentPw,this.password)) {
+            throw new CustomApiException(HttpStatus.BAD_REQUEST, ERR_012, ERR_012.getValue());
+        }
+        this.password = passwordEncoder.encode(newPw);
+    }
+
+    public void memberDetailChange(String nickname, String phoneNumber, Long profileImageId) {
+        this.nickname = nickname;
+        this.phoneNumber = phoneNumber;
+        this.profileImageId = profileImageId;
+    }
+
+    public void memberWithdraw() {
+        this.deleted = true;
+        this.deletedAt = LocalDateTime.now();
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Member member = (Member) o;
+        return Objects.equals(id, member.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }
 
