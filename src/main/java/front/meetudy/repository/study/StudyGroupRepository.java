@@ -15,7 +15,7 @@ public interface StudyGroupRepository extends JpaRepository<StudyGroup, Long> {
             JOIN FETCH sg.studyGroupDetail sgd
             WHERE sg.id = :id
               AND sgd.deleted = false
-              AND current_timestamp BETWEEN sgd.startDate AND sgd.endDate
+              AND current_timestamp <= sgd.endDate
             """)
     Optional<StudyGroup> findValidStudyGroupById(@Param("id") Long id);
 

@@ -10,6 +10,7 @@ public enum JoinStatusEnum {
     APPROVED("참여중"),
     KICKED("강퇴"),
     REJECTED("거절"),
+    WITHDRAW("탈퇴")
     ;
     private final String value;
 }

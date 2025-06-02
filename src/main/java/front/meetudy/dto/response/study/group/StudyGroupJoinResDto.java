@@ -16,11 +16,15 @@ public class StudyGroupJoinResDto {
     @Schema(description = "스터디 그룹 멤버 상태" , example = "APPROVED")
     private JoinStatusEnum joinStatus;
 
+    @Schema(description = "스터디 그룹 인원 수" , example = "1")
+    private int currentMemberCount;
+
 
     public static StudyGroupJoinResDto from(StudyGroupMember studyGroupMember) {
         return StudyGroupJoinResDto.builder()
                 .studyGroupId(studyGroupMember.getStudyGroup().getId())
                 .joinStatus(studyGroupMember.getJoinStatus())
+                .currentMemberCount(studyGroupMember.getStudyGroup().getCurrentMemberCount())
                 .build();
     }
 }

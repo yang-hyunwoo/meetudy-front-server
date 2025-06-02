@@ -2,6 +2,7 @@ package front.meetudy.service.study;
 
 import front.meetudy.constant.study.AttendanceEnum;
 import front.meetudy.constant.study.JoinStatusEnum;
+import front.meetudy.constant.study.MemberRole;
 import front.meetudy.domain.common.file.Files;
 import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.*;
@@ -10,6 +11,7 @@ import front.meetudy.dto.request.study.group.*;
 import front.meetudy.dto.request.study.join.GroupScheduleDayListReqDto;
 import front.meetudy.dto.request.study.join.GroupScheduleMonthListReqDto;
 import front.meetudy.dto.request.study.join.GroupScheduleWeekListReqDto;
+import front.meetudy.dto.request.study.operate.GroupMemberStatusReqDto;
 import front.meetudy.dto.request.study.operate.StudyGroupUpdateReqDto;
 import front.meetudy.dto.response.study.group.StudyGroupJoinResDto;
 import front.meetudy.dto.response.study.group.StudyGroupStatusResDto;
@@ -17,9 +19,7 @@ import front.meetudy.dto.response.study.group.StudyGroupDetailResDto;
 import front.meetudy.dto.response.study.group.StudyGroupPageResDto;
 import front.meetudy.dto.response.study.join.GroupScheduleDayResDto;
 import front.meetudy.dto.response.study.join.GroupScheduleMonthResDto;
-import front.meetudy.dto.response.study.operate.AttendanceSimpleDto;
-import front.meetudy.dto.response.study.operate.StudyGroupAttendanceRateResDto;
-import front.meetudy.dto.response.study.operate.StudyGroupUpdateDetailResDto;
+import front.meetudy.dto.response.study.operate.*;
 import front.meetudy.dto.study.StudyGroupScheduleDto;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.common.file.FilesRepository;
@@ -36,10 +36,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 import static front.meetudy.constant.error.ErrorEnum.*;
@@ -108,13 +105,29 @@ public class StudyGroupService {
         //1.studygroup 존재 여부 확인
         StudyGroup studyGroup = studyGroupRepository.findValidStudyGroupById(studyGroupJoinReqDto.getStudyGroupId())
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
-        //2.db 멤버 확인
-        studyGroupMemberRepository.findByStudyGroupIdAndMemberId(studyGroup.getId(), member.getId()).ifPresent(
+        //2.db 멤버 확인 (추방 / 신청 중인 경우)
+        List<JoinStatusEnum> includeStatus = new ArrayList<>();
+        includeStatus.add(JoinStatusEnum.KICKED);
+        includeStatus.add(JoinStatusEnum.PENDING);
+        includeStatus.add(JoinStatusEnum.APPROVED);
+        studyGroupMemberRepository.findByStudyGroupIdAndMemberId(studyGroup.getId(), member.getId(),includeStatus).ifPresent(
             user -> {
                 throw new CustomApiException(BAD_REQUEST, ERR_003, ERR_003.getValue());
         });
-        //3.저장
-        StudyGroupMember studyGroupMember = studyGroupMemberRepository.save(studyGroupJoinReqDto.toEntity(member, studyGroup));
+
+        List<JoinStatusEnum> includeStatusApprove = new ArrayList<>();
+        includeStatusApprove.add(JoinStatusEnum.REJECTED);
+        includeStatusApprove.add(JoinStatusEnum.WITHDRAW);
+        Optional<StudyGroupMember> optional = studyGroupMemberRepository.findByStudyGroupIdAndMemberId(studyGroup.getId(), member.getId(), includeStatusApprove);
+        StudyGroupMember studyGroupMember;
+
+        if(optional.isPresent()) {
+            studyGroupMember = optional.orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_003, ERR_003.getValue()));
+            studyGroupMember.presentMemberUpdate();
+        } else {
+            studyGroupMember = studyGroupMemberRepository.save(studyGroupJoinReqDto.toEntity(member, studyGroup));
+        }
+
         return StudyGroupJoinResDto.from(studyGroupMember);
 
     }
@@ -314,6 +327,7 @@ public class StudyGroupService {
      * @param member
      * @return
      */
+    @Transactional(readOnly = true)
     public List<GroupScheduleMonthResDto> studyGroupMonthScheduleList(GroupScheduleMonthListReqDto groupScheduleListReqDto , Member member) {
         //사용자 그룹 조회
         List<StudyGroupMember> byGroupIncludeMember = studyGroupMemberRepository.findByGroupIncludeMember(member.getId());
@@ -330,6 +344,7 @@ public class StudyGroupService {
      * @param member
      * @return
      */
+    @Transactional(readOnly = true)
     public List<GroupScheduleDayResDto> studyGroupDayScheduleList(GroupScheduleDayListReqDto groupScheduleDayListReqDto, Member member) {
         //사용자 그룹 조회
         List<StudyGroupMember> byGroupIncludeMember = studyGroupMemberRepository.findByGroupIncludeMember(member.getId());
@@ -346,6 +361,7 @@ public class StudyGroupService {
      * @param member
      * @return
      */
+    @Transactional(readOnly = true)
     public List<GroupScheduleDayResDto> studyGroupWeekScheduleList(GroupScheduleWeekListReqDto groupScheduleWeekListReqDto, Member member) {
         //사용자 그룹 조회
         List<StudyGroupMember> byGroupIncludeMember = studyGroupMemberRepository.findByGroupIncludeMember(member.getId());
@@ -357,6 +373,113 @@ public class StudyGroupService {
                 groupScheduleWeekListReqDto.getStartDate(),
                 groupScheduleWeekListReqDto.getEndDate());
     }
+
+    /**
+     * 참여 중인 스터디 그룹 멤버 리스트 조회
+     * @param studyGroupId
+     * @param member
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public List<GroupOperateMemberResDto> studyGroupMemberList(Long studyGroupId , Member member) {
+        studyGroupMemberRepository.findByStudyGroupIdAndMemberIdAndJoinStatus(studyGroupId, member.getId(), JoinStatusEnum.APPROVED)
+                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue()));
+
+        List<GroupOperateMemberResDto> studyGroupMemberList = studyGroupMemberRepository.findStudyGroupMemberList(studyGroupId);
+
+        return studyGroupMemberList.stream()
+                .filter(dto -> dto.getJoinStatus().equals(JoinStatusEnum.APPROVED))
+                .toList();
+    }
+
+
+    /**
+     * 사용자 출석률 및 출석 리스트 조회
+     * @param studyGroupId
+     * @param member
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public StudyGroupAttendanceRateResDto memberAttendanceRateList(Long studyGroupId, Member member) {
+
+        //1.studymember 조회
+        StudyGroupMember studyGroupMember = studyGroupMemberRepository.findByStudyGroupIdAndMemberIdAndJoinStatus(studyGroupId,
+                        member.getId(),
+                        JoinStatusEnum.APPROVED)
+                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
+
+        StudyGroupAttendanceRateReqDto studyGroupAttendanceRateReqDto = new StudyGroupAttendanceRateReqDto(studyGroupId, member.getId());
+
+        //3.스케줄 갯수 조회
+        double rate = attendanceRate(studyGroupAttendanceRateReqDto, studyGroupMember.getJoinApprovedAt());
+        //최근 10개 참석 리스트 조회
+        List<Attendance> attendanceList = attendanceRepository.findTop10ByMemberIdAndStudyGroupIdOrderByAttendanceAtDesc(studyGroupAttendanceRateReqDto.getMemberId(),
+                studyGroupAttendanceRateReqDto.getStudyGroupId());
+
+        return StudyGroupAttendanceRateResDto.builder()
+                .rate(rate) //출석률 계산
+                .attendanceList(attendanceList.stream()
+                        .map(AttendanceSimpleDto::from)
+                        .toList())
+                .build();
+    }
+
+    /**
+     * 운영 / 종료 스터디 그룹 조회
+     * @param member
+     * @return
+     */
+    public GroupOperateListResDto groupJoinList(Member member) {
+        LocalDateTime now = LocalDateTime.now();
+        List<GroupOperateResDto> operateList = studyGroupQueryDslRepository.findJoinGroupList(member,JoinStatusEnum.APPROVED);
+
+        List<GroupOperateResDto> ongoing = operateList.stream()
+                .filter(dto -> {
+                    LocalDateTime endDateTime = LocalDateTime.of(dto.getEndDate(), dto.getMeetingEndTime());
+                    return endDateTime.isAfter(now) || endDateTime.isEqual(now);
+                })
+                .toList();
+
+        List<GroupOperateResDto> ended = operateList.stream()
+                .filter(dto -> {
+                    LocalDateTime endDateTime = LocalDateTime.of(dto.getEndDate(), dto.getMeetingEndTime());
+                    return endDateTime.isBefore(now);
+                })
+                .toList();
+
+        return GroupOperateListResDto.builder()
+                .ongoingGroup(ongoing)
+                .endGroup(ended)
+                .build();
+    }
+
+    /**
+     * 요청중인 그룹 리스트
+     * @param member
+     * @return
+     */
+    public List<GroupOperateResDto> groupPendingJoinList(Member member) {
+        return studyGroupQueryDslRepository.findJoinGroupList(member,JoinStatusEnum.PENDING);
+    }
+
+    public void groupMemberWithdraw(Long studyGroupId , Member member) {
+        StudyGroupMember studyGroupMember = studyGroupMemberRepository
+                .findByStudyGroupIdAndMemberIdAndJoinStatus(
+                        studyGroupId,
+                        member.getId() ,
+                        JoinStatusEnum.APPROVED)
+                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
+
+        if(studyGroupMember.getRole().equals(MemberRole.LEADER)) {
+            throw new CustomApiException(BAD_REQUEST, ERR_021, ERR_021.getValue());
+        }
+
+        StudyGroup studyGroup = studyGroupRepository.findById(studyGroupId)
+                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
+        studyGroupMember.kickMember(JoinStatusEnum.WITHDRAW);
+
+    }
+
 
     /**
      * 출석률 값

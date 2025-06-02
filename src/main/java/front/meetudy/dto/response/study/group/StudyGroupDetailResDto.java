@@ -6,6 +6,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 @Getter
 @Builder
 public class StudyGroupDetailResDto {
@@ -43,18 +46,36 @@ public class StudyGroupDetailResDto {
     @Schema(description = "스터디 댓글 사용 여부" , example = "true")
     private boolean allowComment;
 
+    private LocalDate startDate;
+
+    private LocalDate endDate;
+
+    private LocalTime meetingStartTime;
+
+    private LocalTime meetingEndTime;
+
+    private String meetingFrequency;
+
+    private String meetingDay;
+
     @QueryProjection
-    public StudyGroupDetailResDto(Long id ,
-                                  String thumbnailFileUrl ,
-                                  String title ,
-                                  String content ,
-                                  RegionEnum regionEnum ,
-                                  boolean joinType ,
-                                  int currentMemberCount ,
-                                  int maxMemberCount ,
-                                  boolean secret ,
-                                  String tag ,
-                                  boolean allowComment) {
+    public StudyGroupDetailResDto(Long id,
+                                  String thumbnailFileUrl,
+                                  String title,
+                                  String content,
+                                  RegionEnum regionEnum,
+                                  boolean joinType,
+                                  int currentMemberCount,
+                                  int maxMemberCount,
+                                  boolean secret,
+                                  String tag,
+                                  boolean allowComment,
+                                  LocalDate startDate,
+                                  LocalDate endDate,
+                                  LocalTime meetingStartTime,
+                                  LocalTime meetingEndTime,
+                                  String meetingFrequency,
+                                  String meetingDay) {
         this.id = id;
         this.thumbnailFileUrl = thumbnailFileUrl;
         this.title = title;
@@ -66,7 +87,16 @@ public class StudyGroupDetailResDto {
         this.secret = secret;
         this.tag = tag;
         this.allowComment = allowComment;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.meetingStartTime = meetingStartTime;
+        this.meetingEndTime = meetingEndTime;
+        this.meetingFrequency = meetingFrequency;
+        this.meetingDay = meetingDay;
     }
+
+
+
 
     public String getRegionEnum(){
         return regionEnum.getValue();

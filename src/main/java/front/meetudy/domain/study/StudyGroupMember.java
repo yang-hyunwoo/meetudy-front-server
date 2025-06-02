@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -118,6 +119,20 @@ public class StudyGroupMember extends BaseEntity {
 
     private void changeStatus(JoinStatusEnum joinStatus) {
         this.joinStatus = joinStatus;
+    }
+
+    /**
+     * 그룹 탈퇴 회원 재 등록
+     */
+    @Transactional
+    public void presentMemberUpdate() {
+        this.joinStatus = this.getStudyGroup().isJoinType() ? JoinStatusEnum.PENDING : JoinStatusEnum.APPROVED;
+        this.joinApprovedAt = this.getStudyGroup().isJoinType() ? null : LocalDateTime.now();
+        this.getStudyGroup().memberCountApproveIncrease();
+        this.joinRequestedAt = LocalDateTime.now();
+        this.leftAt = null;
+        this.rejectAt = null;
+
     }
 
     @Override
