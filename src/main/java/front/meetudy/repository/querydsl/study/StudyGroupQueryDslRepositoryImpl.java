@@ -13,6 +13,8 @@ import front.meetudy.domain.common.file.QFilesDetails;
 import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.*;
 import front.meetudy.dto.request.study.group.StudyGroupPageReqDto;
+import front.meetudy.dto.response.main.MainStudyGroupResDto;
+import front.meetudy.dto.response.main.QMainStudyGroupResDto;
 import front.meetudy.dto.response.study.group.*;
 import front.meetudy.dto.response.study.join.GroupScheduleDayResDto;
 import front.meetudy.dto.response.study.join.GroupScheduleMonthResDto;
@@ -221,6 +223,28 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .on(studyGroup.id.eq(studyGroupMember.studyGroup.id))
                 .where(builder)
                 .orderBy(studyGroup.id.asc())
+                .fetch();
+    }
+
+    @Override
+    public List<MainStudyGroupResDto> findMainStudyGroupList() {
+        return queryFactory.select(new QMainStudyGroupResDto(
+                        studyGroup.id,
+                        filesDetails.fileUrl,
+                        studyGroup.title,
+                        studyGroup.summary,
+                        studyGroup.region,
+                        studyGroupDetail.tag
+                ))
+                .from(studyGroup)
+                .leftJoin(filesDetails)
+                .on(studyGroup.thumbnailFile.id.eq(filesDetails.files.id).and(filesDetails.deleted.eq(false)))
+                .innerJoin(studyGroupDetail)
+                .on(studyGroup.id.eq(studyGroupDetail.studyGroup.id))
+                .where(studyGroupDetail.deleted.eq(false)
+                        .and(studyGroup.currentMemberCount.lt(studyGroup.maxMemberCount)))
+                .orderBy(Expressions.numberTemplate(Double.class, "random()").asc())
+                .limit(3)
                 .fetch();
     }
 

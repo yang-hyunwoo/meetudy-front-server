@@ -48,9 +48,9 @@ class NoticeServiceTest {
     void setUp() {
         member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
         em.persist(member);
-        em.persist(NoticeBoard.createNoticeBoard(member,"공지","공지", NoticeType.NOTICE,1,true,false));
-        em.persist(NoticeBoard.createNoticeBoard(member,"공지2","공지2", NoticeType.NOTICE,2,true,false));
-        em.persist(NoticeBoard.createNoticeBoard(member,"공지3","공지3", NoticeType.NOTICE,3,true,false));
+        em.persist(NoticeBoard.createNoticeBoard(null,member,"공지","요약","공지", NoticeType.NOTICE,1,true,false));
+        em.persist(NoticeBoard.createNoticeBoard(null,member,"공지2","요약","공지2", NoticeType.NOTICE,2,true,false));
+        em.persist(NoticeBoard.createNoticeBoard(null,member,"공지3","요약","공지3", NoticeType.NOTICE,3,true,false));
         em.flush();
         em.clear();
     }

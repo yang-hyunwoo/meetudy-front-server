@@ -2,6 +2,7 @@ package front.meetudy.domain.contact.notice;
 
 import front.meetudy.constant.contact.faq.NoticeType;
 import front.meetudy.domain.common.BaseEntity;
+import front.meetudy.domain.common.file.Files;
 import front.meetudy.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -29,8 +30,9 @@ public class NoticeBoard extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // TODO 파일 ID 추가
-    //private ? thumbFileId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "thumbnail_file_id")
+    private Files thumbnailFile;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
@@ -38,6 +40,9 @@ public class NoticeBoard extends BaseEntity {
 
     @Column(length = 100)
     private String title;
+
+    @Column(length = 100)
+    private String summary;
 
     @Column(columnDefinition = "TEXT")
     private String content;
@@ -58,8 +63,10 @@ public class NoticeBoard extends BaseEntity {
 
     @Builder
     protected NoticeBoard(Long id,
+                          Files thumbnailFile,
                           Member member,
                           String title,
+                          String summary,
                           String content,
                           NoticeType noticeType,
                           int sort,
@@ -68,8 +75,10 @@ public class NoticeBoard extends BaseEntity {
 
     ) {
         this.id = id;
+        this.thumbnailFile = thumbnailFile;
         this.member = member;
         this.title = title;
+        this.summary = summary;
         this.content = content;
         this.noticeType = noticeType;
         this.sort = sort;
@@ -79,8 +88,10 @@ public class NoticeBoard extends BaseEntity {
 
 
     public static NoticeBoard createNoticeBoard(
+                            Files thumbnailFile,
                           Member member,
                           String title,
+                          String summary,
                           String content,
                           NoticeType noticeType,
                           int sort,
@@ -88,8 +99,10 @@ public class NoticeBoard extends BaseEntity {
                           boolean deleted
                           ) {
         return NoticeBoard.builder()
+                .thumbnailFile(thumbnailFile)
                 .member(member)
                 .title(title)
+                .summary(summary)
                 .content(content)
                 .noticeType(noticeType)
                 .sort(sort)
