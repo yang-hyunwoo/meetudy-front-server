@@ -39,11 +39,11 @@ class NoticeRepositoryTest {
     void setUp() {
         member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
         Member persist = em.persist(member);
-        NoticeBoard persist1 = em.persist(NoticeBoard.createNoticeBoard(persist, "공지", "공지", NoticeType.NOTICE, 1, true, false));
+        NoticeBoard persist1 = em.persist(NoticeBoard.createNoticeBoard(null,persist, "공지","요약", "공지", NoticeType.NOTICE, 1, true, false));
         id1 = persist1.getId();
-        NoticeBoard persist2 = em.persist(NoticeBoard.createNoticeBoard(persist, "공지2", "공지2", NoticeType.NOTICE, 2, true, false));
+        NoticeBoard persist2 = em.persist(NoticeBoard.createNoticeBoard(null,persist, "공지2","요약", "공지2", NoticeType.NOTICE, 2, true, false));
         id2 = persist2.getId();
-        NoticeBoard persist3 = em.persist(NoticeBoard.createNoticeBoard(persist, "공지3", "공지3", NoticeType.NOTICE, 3, true, false));
+        NoticeBoard persist3 = em.persist(NoticeBoard.createNoticeBoard(null,persist, "공지3","요약", "공지3", NoticeType.NOTICE, 3, true, false));
         id3 = persist3.getId();
         em.flush();
         em.clear();
