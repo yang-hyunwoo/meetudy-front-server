@@ -11,6 +11,7 @@ import front.meetudy.constant.study.MemberRole;
 import front.meetudy.constant.study.RegionEnum;
 import front.meetudy.domain.common.file.QFilesDetails;
 import front.meetudy.domain.member.Member;
+import front.meetudy.domain.member.QMember;
 import front.meetudy.domain.study.*;
 import front.meetudy.dto.request.study.group.StudyGroupPageReqDto;
 import front.meetudy.dto.response.main.MainStudyGroupResDto;
@@ -35,6 +36,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,6 +47,9 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
     private final JPAQueryFactory queryFactory;
     QStudyGroup studyGroup = QStudyGroup.studyGroup;
     QFilesDetails filesDetails = QFilesDetails.filesDetails;
+
+    QMember memberq = QMember.member;
+
     QStudyGroupDetail studyGroupDetail = QStudyGroupDetail.studyGroupDetail;
     QStudyGroupMember studyGroupMember = QStudyGroupMember.studyGroupMember;
     QStudyGroupSchedule studyGroupSchedule = QStudyGroupSchedule.studyGroupSchedule;
@@ -91,6 +96,12 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .on(studyGroup.thumbnailFile.id.eq(filesDetails.files.id).and(filesDetails.deleted.eq(false)))
                 .innerJoin(studyGroupDetail)
                 .on(studyGroup.id.eq(studyGroupDetail.studyGroup.id))
+                .innerJoin(studyGroupMember)
+                .on(studyGroup.id.eq(studyGroupMember.studyGroup.id)
+                        .and(studyGroupMember.role.eq(MemberRole.LEADER)))
+                .innerJoin(memberq)
+                .on(studyGroupMember.member.id.eq(memberq.id)
+                        .and(memberq.deleted.eq(false)))
                 .where(builder)
                 .fetch();
 
@@ -99,6 +110,12 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .from(studyGroup)
                 .innerJoin(studyGroupDetail)
                 .on(studyGroup.id.eq(studyGroupDetail.studyGroup.id))
+                .innerJoin(studyGroupMember)
+                .on(studyGroup.id.eq(studyGroupMember.studyGroup.id)
+                        .and(studyGroupMember.role.eq(MemberRole.LEADER)))
+                .innerJoin(memberq)
+                .on(studyGroupMember.member.id.eq(memberq.id)
+                        .and(memberq.deleted.eq(false)))
                 .where(builder)
                 .fetchOne();
         return new PageImpl<>(studyGroupList, pageable, count);
@@ -136,6 +153,12 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .on(studyGroup.thumbnailFile.id.eq(filesDetails.files.id).and(filesDetails.deleted.eq(false)))
                 .innerJoin(studyGroupDetail)
                 .on(studyGroup.id.eq(studyGroupDetail.studyGroup.id)).where(studyGroup.id.eq(studyGroupId))
+                .innerJoin(studyGroupMember)
+                .on(studyGroup.id.eq(studyGroupMember.studyGroup.id)
+                        .and(studyGroupMember.role.eq(MemberRole.LEADER)))
+                .innerJoin(memberq)
+                .on(studyGroupMember.member.id.eq(memberq.id)
+                        .and(memberq.deleted.eq(false)))
                 .fetchOne();
 
         return Optional.ofNullable(studyGroupDetailResDto);
@@ -150,6 +173,12 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                         studyGroupMember.studyGroup.id,
                         studyGroupMember.joinStatus.stringValue()))
                 .from(studyGroupMember)
+                .innerJoin(studyGroup)
+                .on(studyGroup.id.eq(studyGroupMember.studyGroup.id)
+                        .and(studyGroupMember.role.eq(MemberRole.LEADER)))
+                .innerJoin(memberq)
+                .on(studyGroupMember.member.id.eq(memberq.id)
+                        .and(memberq.deleted.eq(false)))
                 .where(studyGroupMember.member.id.eq(member.getId())
                        .and(studyGroupMember.studyGroup.id.in(groupIds)))
                 .fetch();
@@ -241,6 +270,12 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .on(studyGroup.thumbnailFile.id.eq(filesDetails.files.id).and(filesDetails.deleted.eq(false)))
                 .innerJoin(studyGroupDetail)
                 .on(studyGroup.id.eq(studyGroupDetail.studyGroup.id))
+                .innerJoin(studyGroupMember)
+                .on(studyGroup.id.eq(studyGroupMember.studyGroup.id)
+                        .and(studyGroupMember.role.eq(MemberRole.LEADER)))
+                .innerJoin(memberq)
+                .on(studyGroupMember.member.id.eq(memberq.id)
+                        .and(memberq.deleted.eq(false)))
                 .where(studyGroupDetail.deleted.eq(false)
                         .and(studyGroup.currentMemberCount.lt(studyGroup.maxMemberCount)))
                 .orderBy(Expressions.numberTemplate(Double.class, "random()").asc())
@@ -293,7 +328,8 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
      */
     @Override
     public List<GroupScheduleMonthResDto> findScheduleMonth(List<Long> studyGroupId, String date) {
-        YearMonth yearMonth = YearMonth.parse(date);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
+        YearMonth yearMonth = YearMonth.parse(date, formatter);
         LocalDate startOfMonth = yearMonth.atDay(1);
         LocalDate endOfMonth = yearMonth.atEndOfMonth();
         return queryFactory.select(new QGroupScheduleMonthResDto(
@@ -307,6 +343,12 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .from(studyGroup)
                 .innerJoin(studyGroupSchedule)
                 .on(studyGroup.id.eq(studyGroupSchedule.studyGroup.id))
+                .innerJoin(studyGroupMember)
+                .on(studyGroup.id.eq(studyGroupMember.studyGroup.id)
+                        .and(studyGroupMember.role.eq(MemberRole.LEADER)))
+                .innerJoin(memberq)
+                .on(studyGroupMember.member.id.eq(memberq.id)
+                        .and(memberq.deleted.eq(false)))
                 .where(studyGroup.id.in(studyGroupId),
                         studyGroupSchedule.meetingDate.between(startOfMonth,endOfMonth))
                 .fetch();
@@ -328,6 +370,12 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .on(studyGroup.id.eq(studyGroupSchedule.studyGroup.id))
                 .leftJoin(filesDetails)
                 .on(studyGroup.thumbnailFile.id.eq(filesDetails.files.id).and(filesDetails.deleted.eq(false)))
+                .innerJoin(studyGroupMember)
+                .on(studyGroup.id.eq(studyGroupMember.studyGroup.id)
+                        .and(studyGroupMember.role.eq(MemberRole.LEADER)))
+                .innerJoin(memberq)
+                .on(studyGroupMember.member.id.eq(memberq.id)
+                        .and(memberq.deleted.eq(false)))
                 .leftJoin(attendance)
                 .on(studyGroup.id.eq(attendance.studyGroup.id).and(attendance.attendanceDate.eq(LocalDate.parse(date))))
                 .where(studyGroup.id.in(studyGroupId),
@@ -351,6 +399,12 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .on(studyGroup.id.eq(studyGroupSchedule.studyGroup.id))
                 .leftJoin(filesDetails)
                 .on(studyGroup.thumbnailFile.id.eq(filesDetails.files.id).and(filesDetails.deleted.eq(false)))
+                .innerJoin(studyGroupMember)
+                .on(studyGroup.id.eq(studyGroupMember.studyGroup.id)
+                        .and(studyGroupMember.role.eq(MemberRole.LEADER)))
+                .innerJoin(memberq)
+                .on(studyGroupMember.member.id.eq(memberq.id)
+                        .and(memberq.deleted.eq(false)))
                 .leftJoin(attendance)
                 .on(studyGroup.id.eq(attendance.studyGroup.id).and(attendance.attendanceDate.between(LocalDate.parse(startDate), LocalDate.parse(endDate))))
                 .where(studyGroup.id.in(studyGroupId),

@@ -27,11 +27,11 @@ public class Log {
 
     private String httpMethod;
 
-    @Column(length = 4000)
+    @Column(columnDefinition = "TEXT")
     private String response;
-    @Column(length = 4000)
+    @Column(columnDefinition = "TEXT")
     private String request;
-    @Column(length = 4000)
+    @Column(columnDefinition = "TEXT")
     private String errorMsg;
 
     @Builder

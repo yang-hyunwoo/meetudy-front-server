@@ -89,6 +89,7 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
                 SELECT m FROM StudyGroupMember m
                 JOIN FETCH m.studyGroup
                 WHERE m.studyGroup.id = :StudyGroupId
+                  AND m.member.deleted=false
                   AND m.member.id = :memberId
                   AND m.joinStatus = :joinStatus
             """)
@@ -101,8 +102,21 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
                 JOIN FETCH m.studyGroup sg
                 JOIN FETCH sg.studyGroupDetail sd
                 WHERE m.member.id = :memberId
+                  AND m.member.deleted=false
                   AND m.joinStatus = 'APPROVED'
                   AND sd.deleted=false
             """)
     List<StudyGroupMember> findByGroupIncludeMember(Long memberId);
+
+
+//    @Query("""
+//    SELECT m FROM StudyGroupMember m
+//    JOIN FETCH m.studyGroup sg
+//    JOIN FETCH sg.studyGroupDetail sd
+//    WHERE m.member.id = :memberId
+//      AND m.member.deleted = false
+//      AND m.joinStatus = 'APPROVED'
+//      AND sd.deleted = false
+//""")
+//    List<StudyGroupMember> findMemberGroupInclude(@Param("memberId") Long memberId);
 }

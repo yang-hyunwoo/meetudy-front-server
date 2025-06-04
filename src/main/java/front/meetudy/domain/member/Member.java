@@ -218,7 +218,7 @@ public class Member extends BaseEntity {
 
     public void passwordChange(String currentPw , String newPw , PasswordEncoder passwordEncoder) {
         if(!passwordEncoder.matches(currentPw,this.password)) {
-            throw new CustomApiException(HttpStatus.BAD_REQUEST, ERR_012, ERR_012.getValue());
+            throw new CustomApiException(HttpStatus.BAD_REQUEST, ERR_022, ERR_022.getValue());
         }
         this.password = passwordEncoder.encode(newPw);
     }

@@ -20,6 +20,9 @@ public class MyPageMemberResDto {
     @Schema(description = "프로필 이미지 url", example = "https://a")
     private String profileImageUrl;
 
+    @Schema(description = "파일 상세 id", example = "1")
+    private Long filesDetailsId;
+
     @Schema(description = "이메일", example = "2@naver.com")
     private String email;
 
@@ -35,6 +38,7 @@ public class MyPageMemberResDto {
     public MyPageMemberResDto(Long id,
                               Long profileImageId,
                               String profileImageUrl,
+                              Long filesDetailsId,
                               String email,
                               String phoneNumber,
                               String nickname,
@@ -42,6 +46,7 @@ public class MyPageMemberResDto {
         this.id = id;
         this.profileImageId = profileImageId;
         this.profileImageUrl = profileImageUrl;
+        this.filesDetailsId = filesDetailsId;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.nickname = nickname;

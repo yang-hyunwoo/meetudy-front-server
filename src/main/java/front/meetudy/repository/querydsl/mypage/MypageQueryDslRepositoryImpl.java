@@ -30,6 +30,7 @@ public class MypageQueryDslRepositoryImpl implements MypageQueryDslRepository {
                         member.id,
                         member.profileImageId,
                         filesDetails.fileUrl,
+                        filesDetails.id,
                         member.email,
                         member.phoneNumber,
                         member.nickname,

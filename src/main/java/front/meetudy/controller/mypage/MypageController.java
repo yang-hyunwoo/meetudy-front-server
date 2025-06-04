@@ -14,10 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static front.meetudy.util.cookie.CustomCookie.deleteCookie;
 
@@ -42,7 +39,7 @@ public class MypageController {
     @Operation(summary = "멤버 상세 수정", description = "멤버 상세 수정")
     @PutMapping("/profile/detail/update")
     public ResponseEntity<Response<Void>> memberDetailChange(
-            MypageDetailChgReqDto mypageDetailChgReqDto,
+            @RequestBody MypageDetailChgReqDto mypageDetailChgReqDto,
             @CurrentMember Member member
     ) {
         myPageService.memberDetailChange(member, mypageDetailChgReqDto);
@@ -52,7 +49,7 @@ public class MypageController {
     @Operation(summary = "멤버 비밀번호 변경", description = "멤버 비밀번호 변경")
     @PutMapping("/profile/pwd-change")
     public ResponseEntity<Response<Void>> memberPwdChange(
-            MypagePwdChgReqDto mypagePwdChgReqDto,
+            @RequestBody MypagePwdChgReqDto mypagePwdChgReqDto,
             @CurrentMember Member member
     ) {
         myPageService.changePassword(member, mypagePwdChgReqDto);
