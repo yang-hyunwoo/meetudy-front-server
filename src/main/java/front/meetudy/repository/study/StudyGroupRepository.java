@@ -5,10 +5,16 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface StudyGroupRepository extends JpaRepository<StudyGroup, Long> {
 
+    /**
+     * 그룹 가입 존재 여부 확인
+     * @param id
+     * @return
+     */
     @Query("""
             SELECT sg
             FROM StudyGroup sg
@@ -19,6 +25,12 @@ public interface StudyGroupRepository extends JpaRepository<StudyGroup, Long> {
             """)
     Optional<StudyGroup> findValidStudyGroupById(@Param("id") Long id);
 
+
+    /**
+     * 탈퇴 시 회원 그룹 포함 그룹 조회
+     * @param memberId
+     * @return
+     */
 
 
 

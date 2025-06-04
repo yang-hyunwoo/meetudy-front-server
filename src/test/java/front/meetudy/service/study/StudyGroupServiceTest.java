@@ -7,6 +7,7 @@ import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.StudyGroup;
 import front.meetudy.domain.study.StudyGroupDetail;
 import front.meetudy.domain.study.StudyGroupMember;
+import front.meetudy.domain.study.StudyGroupSchedule;
 import front.meetudy.dto.PageDto;
 import front.meetudy.dto.request.study.group.*;
 import front.meetudy.dto.response.study.group.StudyGroupJoinResDto;
@@ -77,6 +78,8 @@ class StudyGroupServiceTest {
     StudyGroupDetail studyGroupDetail;
 
     StudyGroupMember studyGroupMember;
+
+    StudyGroupSchedule studyGroupSchedule;
     @BeforeEach
     void setUp() {
         member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
@@ -88,10 +91,15 @@ class StudyGroupServiceTest {
         studyGroupDetail = StudyGroupDetail.createStudyGroupDetail(studyGroup, null, "asdf", LocalDate.now().minusDays(3), LocalDate.now().plusDays(3), "매주", "월,화,수,목,금,토,일",
                 LocalTime.of(9, 0), LocalTime.of(20, 0), null, false, false, false);
         studyGroupMember = StudyGroupMember.createStudyGroupMember(studyGroup, member, JoinStatusEnum.APPROVED, MemberRole.LEADER, LocalDateTime.now(), null, null, null);
+        studyGroupSchedule = StudyGroupSchedule.createStudyGroupSchedule(
+                studyGroup, LocalDate.now()
+                , LocalTime.of(10, 00)
+                , LocalTime.of(21, 00)
+        );
         em.persist(studyGroup);
         em.persist(studyGroupDetail);
         em.persist(studyGroupMember);
-
+        em.persist(studyGroupSchedule);
 
         em.flush();
         em.clear();
