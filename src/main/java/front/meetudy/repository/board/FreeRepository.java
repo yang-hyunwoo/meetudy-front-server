@@ -2,6 +2,8 @@ package front.meetudy.repository.board;
 
 import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.member.Member;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,6 +21,10 @@ public interface FreeRepository extends JpaRepository<FreeBoard , Long> {
             "AND f.member.id = :memberId " +
             "AND f.deleted = false")
     Optional<FreeBoard> findUpdateAuth(Long id, Long memberId);
+
+    Page<FreeBoard> findByMemberIdAndDeletedOrderByCreatedAtDesc(Pageable pageable, Long memberId, boolean deleted);
+
+
 
 
 }
