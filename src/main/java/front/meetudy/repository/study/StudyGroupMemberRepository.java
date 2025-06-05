@@ -13,6 +13,13 @@ import java.util.Optional;
 
 public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMember, Long> {
 
+    /**
+     * 멤버 확인
+     * @param studyGroupId
+     * @param memberId
+     * @param includeStatus
+     * @return
+     */
     @Query("""
                 SELECT m FROM StudyGroupMember m
                 WHERE m.studyGroup.id = :studyGroupId
@@ -23,15 +30,6 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
                                                              @Param("memberId") Long memberId ,
                                                              @Param("includeStatus") List<JoinStatusEnum> includeStatus);
 
-
-    @Query(value = """
-            SELECT *
-             FROM study_group_member sgm
-               WHERE sgm.study_group_id = :studyGroupId
-                AND sgm.member_id =:memberId
-                AND sgm.join_status = 'PENDING'
-             """, nativeQuery = true)
-    Optional<StudyGroupMember> findStudyGroupMember(@Param("studyGroupId") Long studyGroupId, @Param("memberId") Long memberId);
 
     @Query(value = """
                     SELECT new front.meetudy.dto.response.study.operate.GroupOperateMemberResDto(
@@ -75,19 +73,6 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
     @Query("""
                 SELECT m FROM StudyGroupMember m
                 JOIN FETCH m.studyGroup
-                WHERE m.studyGroup.id = :id
-                  AND m.member.id = :memberId
-                  AND m.joinStatus = :joinStatus
-                  AND m.role = :role
-            """)
-    Optional<StudyGroupMember> findByStudyGroupIdAndMemberIdAndJoinStatusAndRole(Long id,
-                                                                       Long memberId,
-                                                                       JoinStatusEnum joinStatus,
-                                                                       MemberRole role);
-
-    @Query("""
-                SELECT m FROM StudyGroupMember m
-                JOIN FETCH m.studyGroup
                 WHERE m.studyGroup.id = :StudyGroupId
                   AND m.member.deleted=false
                   AND m.member.id = :memberId
@@ -108,15 +93,23 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
             """)
     List<StudyGroupMember> findByGroupIncludeMember(Long memberId);
 
-
-//    @Query("""
-//    SELECT m FROM StudyGroupMember m
-//    JOIN FETCH m.studyGroup sg
-//    JOIN FETCH sg.studyGroupDetail sd
-//    WHERE m.member.id = :memberId
-//      AND m.member.deleted = false
-//      AND m.joinStatus = 'APPROVED'
-//      AND sd.deleted = false
-//""")
-//    List<StudyGroupMember> findMemberGroupInclude(@Param("memberId") Long memberId);
+    /**
+     * 멤버 그룹 카운트
+     *
+     * @param memberId
+     * @param role
+     * @return
+     */
+    @Query(value = """
+                SELECT COUNT(*)
+                FROM study_group_member m
+                JOIN study_group sg ON m.study_group_id = sg.id
+                JOIN study_group_detail sd ON sg.id = sd.study_group_id
+                WHERE m.member_id = :memberId
+                  AND m.join_status = 'APPROVED'
+                  AND m.role in (:role)
+                  AND sd.deleted = false
+                  AND (sd.end_date + sd.meeting_end_time) >= NOW()
+            """, nativeQuery = true)
+    int findMemberCount(@Param("memberId") Long memberId, @Param("role") List<String> role);
 }

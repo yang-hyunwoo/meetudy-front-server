@@ -1,11 +1,14 @@
 package front.meetudy.service.mypage;
 
 import front.meetudy.constant.error.ErrorEnum;
+import front.meetudy.constant.study.MemberRole;
 import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.StudyGroup;
 import front.meetudy.domain.study.StudyGroupMember;
 import front.meetudy.dto.request.mypage.MypageDetailChgReqDto;
 import front.meetudy.dto.request.mypage.MypagePwdChgReqDto;
+import front.meetudy.dto.request.mypage.MypageWithdrawReqDto;
+import front.meetudy.dto.response.mypage.MyPageGroupCountResDto;
 import front.meetudy.dto.response.mypage.MyPageMemberResDto;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.member.MemberRepository;
@@ -34,8 +37,6 @@ public class MyPageService {
 
     private final PasswordEncoder passwordEncoder;
 
-    private StudyGroupRepository studyGroupRepository;
-
     private final StudyGroupMemberRepository studyGroupMemberRepository;
 
     @Transactional(readOnly = true)
@@ -61,20 +62,23 @@ public class MyPageService {
                 mypageDetailChgReqDto.getProfileImageId());
     }
 
-    public void memberWithdraw(Member member){
+    public void memberWithdraw(Member member, MypageWithdrawReqDto mypageWithdrawReqDto) {
+
         Member memberDb = memberRepository.findByIdAndDeleted(member.getId(), false)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_013, ERR_013.getValue()));
-//        List<StudyGroup> memberGroupInclude = studyGroupRepository.findMemberGroupInclude(member.getId());
+        memberDb.withdrawValid(mypageWithdrawReqDto.getCurrentPw(), passwordEncoder);
         List<StudyGroupMember> byGroupIncludeMember = studyGroupMemberRepository.findByGroupIncludeMember(member.getId());
         for (StudyGroupMember studyGroupMember : byGroupIncludeMember) {
-             studyGroupMember.getStudyGroup().memberCountDecrease();
+            studyGroupMember.getStudyGroup().memberCountDecrease();
         }
-
         memberDb.memberWithdraw();
-
     }
 
+    public MyPageGroupCountResDto memberGroupCount(Member member) {
+        return MyPageGroupCountResDto.builder()
+                .operationCount(studyGroupMemberRepository.findMemberCount(member.getId(), List.of(MemberRole.LEADER.name())))
+                .joinCount(studyGroupMemberRepository.findMemberCount(member.getId(), List.of(MemberRole.MEMBER.name(),MemberRole.LEADER.name())))
+                .build();
 
-
-
+    }
 }

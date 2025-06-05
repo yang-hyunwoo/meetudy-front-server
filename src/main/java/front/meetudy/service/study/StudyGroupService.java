@@ -174,7 +174,7 @@ public class StudyGroupService {
      */
     public void joinGroupMemberCancel(StudyGroupCancelReqDto studyGroupCancelReqDto, Member member) {
 
-        StudyGroupMember studyGroupMember = studyGroupMemberRepository.findStudyGroupMember(studyGroupCancelReqDto.getStudyGroupId(), member.getId())
+        StudyGroupMember studyGroupMember = studyGroupMemberRepository.findByStudyGroupIdAndMemberId(studyGroupCancelReqDto.getStudyGroupId(), member.getId(),List.of(JoinStatusEnum.PENDING))
                 .orElseThrow(() -> new CustomApiException(BAD_GATEWAY, ERR_012, ERR_012.getValue()));
         studyGroupMemberRepository.delete(studyGroupMember);
     }

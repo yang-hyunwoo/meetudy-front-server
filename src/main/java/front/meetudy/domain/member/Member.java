@@ -15,6 +15,7 @@ import java.util.Objects;
 
 import static front.meetudy.constant.error.ErrorEnum.*;
 import static front.meetudy.constant.login.LoginErrorCode.LG_PASSWORD_WRONG_LOCKED;
+import static org.springframework.http.HttpStatus.*;
 
 
 @Entity
@@ -215,20 +216,44 @@ public class Member extends BaseEntity {
     }
 
 
-
+    /**
+     * 비밀번호 변경 이벤트
+     * @param currentPw
+     * @param newPw
+     * @param passwordEncoder
+     */
     public void passwordChange(String currentPw , String newPw , PasswordEncoder passwordEncoder) {
         if(!passwordEncoder.matches(currentPw,this.password)) {
-            throw new CustomApiException(HttpStatus.BAD_REQUEST, ERR_022, ERR_022.getValue());
+            throw new CustomApiException(BAD_REQUEST, ERR_022, ERR_022.getValue());
+        }
+        if(currentPw.equals(newPw)) {
+            throw new CustomApiException(BAD_REQUEST, ERR_023, ERR_023.getValue());
         }
         this.password = passwordEncoder.encode(newPw);
     }
 
+    /**
+     * 멤버 상세 수정
+     * @param nickname
+     * @param phoneNumber
+     * @param profileImageId
+     */
     public void memberDetailChange(String nickname, String phoneNumber, Long profileImageId) {
         this.nickname = nickname;
         this.phoneNumber = phoneNumber;
         this.profileImageId = profileImageId;
     }
 
+    public void withdrawValid(String currentPw , PasswordEncoder passwordEncoder){
+        if(!passwordEncoder.matches(currentPw,this.password)) {
+            throw new CustomApiException(BAD_REQUEST, ERR_022, ERR_022.getValue());
+        }
+
+    }
+
+    /**
+     * 멤버 탈퇴
+     */
     public void memberWithdraw() {
         this.deleted = true;
         this.deletedAt = LocalDateTime.now();
