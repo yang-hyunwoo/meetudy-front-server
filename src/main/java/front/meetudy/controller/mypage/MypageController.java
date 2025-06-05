@@ -3,9 +3,13 @@ package front.meetudy.controller.mypage;
 import front.meetudy.annotation.customannotation.CurrentMember;
 import front.meetudy.constant.security.CookieEnum;
 import front.meetudy.domain.member.Member;
+import front.meetudy.dto.PageDto;
+import front.meetudy.dto.request.board.FreePageReqDto;
 import front.meetudy.dto.request.mypage.MypageDetailChgReqDto;
 import front.meetudy.dto.request.mypage.MypagePwdChgReqDto;
 import front.meetudy.dto.request.mypage.MypageWithdrawReqDto;
+import front.meetudy.dto.response.board.FreePageResDto;
+import front.meetudy.dto.response.mypage.MyPageBoardWriteResDto;
 import front.meetudy.dto.response.mypage.MyPageGroupCountResDto;
 import front.meetudy.dto.response.mypage.MyPageMemberResDto;
 import front.meetudy.service.mypage.MyPageService;
@@ -15,6 +19,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -80,5 +86,13 @@ public class MypageController {
         return Response.delete("멤버 삭제 완료", null);
     }
 
+    @Operation(summary = "멤버가 작성한 게시판 리스트 조회" , description ="멤버가 작성한 게시판 리스트 조회")
+    @GetMapping("/board/list")
+    public ResponseEntity<Response<PageDto<MyPageBoardWriteResDto>>> memberBoardWriteList(
+            @PageableDefault(size = 5, page = 0) Pageable pageable,
+            @CurrentMember Member member
+    ) {
+        return Response.ok("멤버가 작성한 게시판 리스트 조회 성공", myPageService.memberBoardWriteList(member, pageable));
+    }
 
 }
