@@ -55,7 +55,4 @@ public class MemberController {
         return Response.ok("LoginOk",new LoginResDto(member));
     }
 
-
-
-
 }
