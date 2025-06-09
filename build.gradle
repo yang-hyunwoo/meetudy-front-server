@@ -58,6 +58,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation "io.micrometer:micrometer-registry-prometheus" //프로메테우스
 
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
 	//cloudinary
 	implementation 'com.cloudinary:cloudinary-http44:1.39.0'
 
