@@ -99,8 +99,10 @@ public class JwtProcess {
                     );
             return new LoginUser(member);
         } catch (TokenExpiredException e) {
+            log.error("TokenExpiredException : {0}", e);
             throw e;
         } catch (JWTVerificationException e) {
+            log.error("JWTVerificationException : {0}", e);
             throw new CustomApiException(UNAUTHORIZED, ERR_004,SC_ACCESS_TOKEN_INVALID.getValue());
         }
     }

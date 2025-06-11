@@ -22,8 +22,8 @@ public class ValidationGroupAspect {
 
     private final SequentialValidator validator;
 
-    @Around("execution(* *..*Controller.*(..))")
-    public Object autoValidate(ProceedingJoinPoint joinPoint) throws Throwable {
+    @Around("execution(* *..*Controller.*(..)) && !@annotation(org.springframework.messaging.handler.annotation.MessageMapping)")
+    public Object validateHttpControllersOnly(ProceedingJoinPoint joinPoint) throws Throwable {
         for (Object arg : joinPoint.getArgs()) {
             if (arg == null) continue;
 
@@ -37,8 +37,11 @@ public class ValidationGroupAspect {
                 }
             }
         }
+
         return joinPoint.proceed();
     }
+
+
 
     private Class<?>[] getValidationOrder(Class<?> clazz) {
         if (!clazz.getSimpleName().endsWith("ReqDto")) return null;

@@ -31,7 +31,7 @@ public class AspectAdvice {
     private final LogService logService;
     private final ThreadLocal<AspectUUID> traceIdHolder = new ThreadLocal<>();
 
-    @Pointcut("execution(* front.meetudy.controller..*.*(..))")
+    @Pointcut("execution(* front.meetudy.controller..*.*(..)) && !@annotation(org.springframework.messaging.handler.annotation.MessageMapping)")
     private void cut() {}
 
     private void syncTraceId() {

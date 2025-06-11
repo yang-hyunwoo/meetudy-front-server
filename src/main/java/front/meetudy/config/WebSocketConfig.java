@@ -1,5 +1,8 @@
 package front.meetudy.config;
 
+import front.meetudy.config.chatinterceptor.CustomHandshakeHandler;
+import front.meetudy.config.chatinterceptor.JwtHandshakeInterceptor;
+import front.meetudy.config.chatinterceptor.StompHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -15,6 +18,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final StompHandler stompHandler;
 
+    private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
+
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/topic", "/queue"); //topic/{path}
@@ -24,6 +29,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-chat")
+                .addInterceptors(jwtHandshakeInterceptor)
+                .setHandshakeHandler(new CustomHandshakeHandler())
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
     }
