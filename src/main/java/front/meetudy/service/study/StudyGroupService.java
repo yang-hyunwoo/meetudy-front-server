@@ -462,6 +462,11 @@ public class StudyGroupService {
         return studyGroupQueryDslRepository.findJoinGroupList(member,JoinStatusEnum.PENDING);
     }
 
+    /**
+     * 멤버 탈퇴
+     * @param studyGroupId
+     * @param member
+     */
     public void groupMemberWithdraw(Long studyGroupId , Member member) {
         StudyGroupMember studyGroupMember = studyGroupMemberRepository
                 .findByStudyGroupIdAndMemberIdAndJoinStatus(
@@ -478,6 +483,18 @@ public class StudyGroupService {
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
         studyGroupMember.kickMember(JoinStatusEnum.WITHDRAW);
 
+    }
+
+    /**
+     * 참여 중인 스터디 그룹 멤버 여부 확인
+     * @param studyGroupId
+     * @param member
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public void studyGroupMemberPresent(Long studyGroupId , Member member) {
+        studyGroupMemberRepository.findByStudyGroupIdAndMemberIdAndJoinStatus(studyGroupId, member.getId(), JoinStatusEnum.APPROVED)
+                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue()));
     }
 
 
