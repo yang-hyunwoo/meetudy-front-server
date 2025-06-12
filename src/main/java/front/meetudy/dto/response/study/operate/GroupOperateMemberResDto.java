@@ -24,6 +24,9 @@ public class GroupOperateMemberResDto {
     @Schema(description = "멤버 닉네임" , example = "양")
     private String nickname;
 
+    @Schema(description = "멤버 이름", example = "양")
+    private String name;
+
     @Schema(description = "멤버 상태 값", example = "PENDING")
     private JoinStatusEnum joinStatus;
 

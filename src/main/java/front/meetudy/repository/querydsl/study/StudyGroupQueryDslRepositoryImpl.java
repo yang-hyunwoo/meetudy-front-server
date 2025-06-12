@@ -354,6 +354,12 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .fetch();
     }
 
+    /**
+     * 스케줄 하루 조회
+     * @param studyGroupId
+     * @param date
+     * @return
+     */
     @Override
     public List<GroupScheduleDayResDto> findScheduleDay(List<Long> studyGroupId, String date) {
         return queryFactory.select(new QGroupScheduleDayResDto(
@@ -383,6 +389,13 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .fetch();
     }
 
+    /**
+     * 스케줄 1주 조회
+     * @param studyGroupId
+     * @param startDate
+     * @param endDate
+     * @return
+     */
     @Override
     public List<GroupScheduleDayResDto> findScheduleWeek(List<Long> studyGroupId, String startDate, String endDate) {
         return queryFactory.select(new QGroupScheduleDayResDto(

@@ -216,15 +216,17 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     private void refreshTokenGenerated(HttpServletRequest request, HttpServletResponse response, Long userId) {
         Member member = memberRepository.findById(userId).orElseThrow(() -> new CustomApiException(LG_MEMBER_ID_PW_INVALID.getStatus(), ERR_004, LG_MEMBER_ID_PW_INVALID.getMessage()));
         String cookieValue = getCookieValue(request, isAutoLogin);
-        Duration ttl = cookieValue.equals("true") ? Duration.ofDays(7) : Duration.ofDays(1);   // 자동 로그인: 7일;  // 일반 로그인: 1일
-        String newRefreshToken = jwtProcess.createRefreshToken(new LoginUser(member),ttl);
+        if(cookieValue != null) {
+            Duration ttl = cookieValue.equals("true") ? Duration.ofDays(7) : Duration.ofDays(1);   // 자동 로그인: 7일;  // 일반 로그인: 1일
+            String newRefreshToken = jwtProcess.createRefreshToken(new LoginUser(member), ttl);
 
-        String refreshUuid = jwtProcess.extractRefreshUuid(newRefreshToken);
+            String refreshUuid = jwtProcess.extractRefreshUuid(newRefreshToken);
 
-        boolean chk = Boolean.parseBoolean(cookieValue);
+            boolean chk = Boolean.parseBoolean(cookieValue);
 
-        redisService.saveRefreshToken(refreshUuid, member.getId(),chk, ttl);
-        response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(newRefreshToken, CookieEnum.refreshToken,ttl ).toString());
+            redisService.saveRefreshToken(refreshUuid, member.getId(), chk, ttl);
+            response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(newRefreshToken, CookieEnum.refreshToken, ttl).toString());
+        }
     }
 
     private static void setAuthentication(LoginUser loginUser) {

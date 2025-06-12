@@ -1,16 +1,13 @@
 package front.meetudy.config;
 
 import front.meetudy.config.jwt.JwtProcess;
-import front.meetudy.config.jwt.filter.JwtAuthenticationFilter;
 import front.meetudy.config.jwt.filter.JwtAuthorizationFilter;
-import front.meetudy.constant.security.CookieEnum;
 import front.meetudy.oauth.OAuth2AuthenticationFailureHandler;
 import front.meetudy.oauth.OAuth2AuthenticationSuccessHandler;
 import front.meetudy.oauth.PrincipalOauth2UserService;
 import front.meetudy.property.JwtProperty;
 import front.meetudy.repository.member.MemberRepository;
 import front.meetudy.security.handler.CustomLogOutHandler;
-import front.meetudy.service.member.MemberService;
 import front.meetudy.service.redis.RedisService;
 import front.meetudy.util.CustomAccessDeniedHandler;
 import front.meetudy.util.CustomAuthenticationEntryPoint;
@@ -33,7 +30,6 @@ public class SecurityConfig {
 
     private final CorsConfig corsConfig;
     private final MemberRepository memberRepository;
-    private final MemberService memberService;
     private final PrincipalOauth2UserService principalOauth2UserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;

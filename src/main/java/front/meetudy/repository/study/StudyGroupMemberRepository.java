@@ -37,12 +37,13 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
                     m.id,
                     fd.fileUrl,
                     m.nickname,
+                    m.name,
                     sgm.joinStatus,
                     sgm.joinApprovedAt
                     )
                     FROM Member m
                     JOIN StudyGroupMember sgm ON m.id = sgm.member.id
-                    LEFT JOIN FilesDetails fd ON m.profileImageId = fd.id AND fd.deleted = false
+                    LEFT JOIN FilesDetails fd ON m.profileImageId = fd.files.id AND fd.deleted = false
                     WHERE m.deleted = false
                       AND sgm.studyGroup.id = :studyGroupId
             """)
