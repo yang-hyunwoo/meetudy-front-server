@@ -42,4 +42,5 @@ public interface StudyGroupQueryDslRepository {
 
     List<MainStudyGroupResDto> findMainStudyGroupList();
 
+
 }

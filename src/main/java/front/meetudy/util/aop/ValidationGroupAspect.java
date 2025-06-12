@@ -22,7 +22,7 @@ public class ValidationGroupAspect {
 
     private final SequentialValidator validator;
 
-    @Around("execution(* *..*Controller.*(..)) && !@annotation(org.springframework.messaging.handler.annotation.MessageMapping)")
+    @Around("execution(* *..*Controller.*(..)) && !within(front.meetudy.controller.chat.ChatController)")
     public Object validateHttpControllersOnly(ProceedingJoinPoint joinPoint) throws Throwable {
         for (Object arg : joinPoint.getArgs()) {
             if (arg == null) continue;

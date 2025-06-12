@@ -17,6 +17,7 @@ public class ChatMessageDto {
     private Long senderId;
     private String nickname;
     private LocalDateTime sentAt;
+    private String status;
 
 
     public ChatMessage toEntity(MessageType messageType) {
