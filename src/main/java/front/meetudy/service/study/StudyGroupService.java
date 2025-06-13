@@ -497,6 +497,18 @@ public class StudyGroupService {
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue()));
     }
 
+    /**
+     * 그룹 리더 권한 체크
+     * @param studyGroupId
+     * @param memberId
+     */
+    @Transactional(readOnly = true)
+    public void findGroupAuth(Long studyGroupId , Long memberId) {
+        studyGroupMemberRepository.findGroupAuth(studyGroupId, memberId)
+                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue()));
+
+    }
+
 
     /**
      * 출석률 값
@@ -629,5 +641,7 @@ public class StudyGroupService {
         }
         return schedules;
     }
+
+
 
 }

@@ -1,6 +1,7 @@
 package front.meetudy.config.jwt.filter;
 
 import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -151,32 +152,30 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             }
             //accessToken이 만료가 되었다면 client에서 refreshToken을 받아와
             String refreshToken = getCookieValue(request, CookieEnum.refreshToken);
-            String refreshUuid = jwtProcess.extractRefreshUuid(refreshToken);
-            String value = redisService.getRefreshToken(refreshUuid); // null이면 만료 or 조작
-            if (value == null) {
-                sendError(response, SC_REFRESH_TOKEN_EXPIRED.getValue(),SC_ACCESS_TOKEN_EXPIRED.getCode());
-                return;
-            }
-            String[] parts = value.split("\\|");
-            String redisMemberId = parts[0];
-            if (redisMemberId != null) {
-                Long memberId = jwtProcess.verifyRefreshToken(refreshToken); // signature & exp 체크
-                if (redisMemberId.equals(memberId.toString())) {
-                    handleRefreshToken(request,response, refreshToken); // 재발급
-                } else {
-                    sendError(response, SC_REFRESH_TOKEN_EXPIRED.getValue(),SC_REFRESH_TOKEN_EXPIRED.getCode());
-
+            if (refreshToken != null && !"undefined".equals(refreshToken)) {
+                String refreshUuid = jwtProcess.extractRefreshUuid(refreshToken);
+                String value = redisService.getRefreshToken(refreshUuid); // null이면 만료 or 조작
+                if (value == null) {
+                    sendError(response, SC_REFRESH_TOKEN_EXPIRED.getValue(), SC_ACCESS_TOKEN_EXPIRED.getCode());
+                    return;
                 }
-            } else {
-                sendError(response, SC_REFRESH_TOKEN_EXPIRED.getValue(),SC_REFRESH_TOKEN_EXPIRED.getCode());
+                String[] parts = value.split("\\|");
+                String redisMemberId = parts[0];
+                if (redisMemberId != null) {
+                    Long memberId = jwtProcess.verifyRefreshToken(refreshToken); // signature & exp 체크
+                    if (redisMemberId.equals(memberId.toString())) {
+                        handleRefreshToken(request, response, refreshToken); // 재발급
+                    } else {
+                        sendError(response, SC_REFRESH_TOKEN_EXPIRED.getValue(), SC_REFRESH_TOKEN_EXPIRED.getCode());
+
+                    }
+                } else {
+                    sendError(response, SC_REFRESH_TOKEN_EXPIRED.getValue(), SC_REFRESH_TOKEN_EXPIRED.getCode());
+                }
             }
-        } catch (JWTDecodeException e){
+        } catch (JWTVerificationException e){
             e.printStackTrace();
             sendError(response, SC_TOKEN_DECODE_ERROR.getValue(),SC_TOKEN_DECODE_ERROR.getCode());
-            return;
-        } catch (SignatureVerificationException e) {
-            e.printStackTrace();
-            sendError(response, SC_ALGORITHM_ERROR.getValue(),SC_ALGORITHM_ERROR.getCode());
             return;
         } catch (CustomApiException e) {
             e.printStackTrace();
