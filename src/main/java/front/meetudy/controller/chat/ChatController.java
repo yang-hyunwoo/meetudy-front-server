@@ -1,12 +1,21 @@
 package front.meetudy.controller.chat;
 
+import front.meetudy.constant.chat.ChatMessageType;
+import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.domain.common.StompPrincipal;
+import front.meetudy.dto.chat.ChatLinkDto;
 import front.meetudy.dto.chat.ChatMessageDto;
+import front.meetudy.dto.chat.ChatNoticeDto;
+import front.meetudy.exception.CustomApiException;
+import front.meetudy.service.chat.ChatLinkService;
 import front.meetudy.service.chat.ChatMessageService;
+import front.meetudy.service.chat.ChatNoticeService;
 import front.meetudy.service.chat.ChatRoomService;
+import front.meetudy.service.study.StudyGroupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
+import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -19,6 +28,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+import static front.meetudy.constant.chat.ChatMessageType.*;
+import static front.meetudy.constant.error.ErrorEnum.*;
+import static org.springframework.http.HttpStatus.*;
+
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -29,6 +42,12 @@ public class ChatController {
     private final ChatMessageService chatMessageService;
 
     private final ChatRoomService chatRoomService;
+
+    private final StudyGroupService studyGroupService;
+
+    private final ChatNoticeService chatNoticeService;
+
+    private final ChatLinkService chatLinkService;
 
 
     @MessageMapping("/chat.send")
@@ -84,5 +103,48 @@ public class ChatController {
                     onlineUsers
             );
         }
+    }
+
+    @MessageMapping("/notice.send")
+    public ChatNoticeDto sendNotice(ChatNoticeDto notice , SimpMessageHeaderAccessor headerAccessor) {
+        StompPrincipal user = (StompPrincipal) headerAccessor.getUser();
+        if (Objects.equals(user.getStudyGroupId(), notice.getStudyGroupId())) {
+            studyGroupService.findGroupAuth(notice.getStudyGroupId(), user.getUserId());
+            notice.setSenderId(user.getUserId());
+            ChatNoticeDto chatNoticeDto = null;
+            if(notice.getStatus().equals(CREATE)) {
+                chatNoticeDto = chatNoticeService.chatNoticeSave(notice);
+            } else if(notice.getStatus().equals(UPDATE)) {
+                chatNoticeDto = chatNoticeService.chatNoticeUpdate(notice);
+            } else if(notice.getStatus().equals(DELETE)){
+                chatNoticeDto = chatNoticeService.chatNoticeDelete(notice);
+            } else {
+                throw new CustomApiException(BAD_REQUEST, ERR_014, ERR_014.getValue());
+            }
+            messagingTemplate.convertAndSend("/topic/notice." + user.getStudyGroupId(),
+                    chatNoticeDto);
+            return chatNoticeDto;
+        }
+        throw new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue());
+    }
+
+    @MessageMapping("/link.send")
+    public ChatLinkDto sendLink(ChatLinkDto link , SimpMessageHeaderAccessor headerAccessor) {
+        StompPrincipal user = (StompPrincipal) headerAccessor.getUser();
+        if (Objects.equals(user.getStudyGroupId(), link.getStudyGroupId())) {
+            link.setMemberId(user.getUserId());
+            ChatLinkDto chatLinkDto = null;
+            if(link.getStatus().equals(CREATE)) {
+                chatLinkDto = chatLinkService.chatLinkSave(link);
+            } else if(link.getStatus().equals(DELETE)){
+                chatLinkDto = chatLinkService.chatLinkDelete(link,user.getUserId());
+            } else {
+                throw new CustomApiException(BAD_REQUEST, ERR_014, ERR_014.getValue());
+            }
+            messagingTemplate.convertAndSend("/topic/link." + user.getStudyGroupId(),
+                    chatLinkDto);
+            return chatLinkDto;
+        }
+        throw new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue());
     }
 }

@@ -3,6 +3,7 @@ package front.meetudy.config.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -140,7 +141,13 @@ public class JwtProcess {
     }
 
     public String extractRefreshUuid(String refreshToken) {
-        DecodedJWT decodedJWT = jwtVerifier.verify(refreshToken);
+        DecodedJWT decodedJWT;
+        try {
+             decodedJWT = jwtVerifier.verify(refreshToken);
+        } catch (JWTVerificationException e) {
+            log.warn("❌ Refresh token 검증 실패: {}", e.getMessage());
+            throw e;
+        }
         return decodedJWT.getClaim(CookieEnum.refreshToken.getValue()).asString();
     }
 
