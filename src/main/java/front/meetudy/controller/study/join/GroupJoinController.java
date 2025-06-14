@@ -1,7 +1,9 @@
 package front.meetudy.controller.study.join;
 
 import front.meetudy.annotation.customannotation.CurrentMember;
+import front.meetudy.constant.study.JoinStatusEnum;
 import front.meetudy.domain.member.Member;
+import front.meetudy.dto.member.ChatMemberDto;
 import front.meetudy.dto.request.study.join.GroupScheduleDayListReqDto;
 import front.meetudy.dto.request.study.join.GroupScheduleMonthListReqDto;
 import front.meetudy.dto.request.study.join.GroupScheduleWeekListReqDto;
@@ -11,6 +13,7 @@ import front.meetudy.dto.response.study.operate.GroupOperateListResDto;
 import front.meetudy.dto.response.study.operate.GroupOperateMemberResDto;
 import front.meetudy.dto.response.study.operate.GroupOperateResDto;
 import front.meetudy.dto.response.study.operate.StudyGroupAttendanceRateResDto;
+import front.meetudy.service.member.MemberService;
 import front.meetudy.service.study.StudyGroupService;
 import front.meetudy.util.response.Response;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,7 +34,6 @@ import java.util.List;
 public class GroupJoinController {
 
     private final StudyGroupService studyGroupService;
-
 
     @Operation(summary = "참여 중인 스터디 그룹 캘린더 리스트", description = "참여 중인 스터디 그룹 캘린더 리스트")
     @GetMapping("/month/list")
@@ -94,6 +97,8 @@ public class GroupJoinController {
         studyGroupService.groupMemberWithdraw(studyGroupId, member);
         return Response.delete("참여 중인 스터디 그룹 탈퇴 완료" , null);
     }
+
+
 
     @Operation(summary = "승인 대기 중인 스터디 그룹 리스트 조회" , description ="승인 대기 중인 스터디 그룹 리스트 조회")
     @GetMapping("/pending/list")

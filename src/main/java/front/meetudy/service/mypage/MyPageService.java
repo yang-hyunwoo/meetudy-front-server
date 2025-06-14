@@ -7,9 +7,11 @@ import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.StudyGroup;
 import front.meetudy.domain.study.StudyGroupMember;
 import front.meetudy.dto.PageDto;
+import front.meetudy.dto.member.ChatMemberDto;
 import front.meetudy.dto.request.mypage.MypageDetailChgReqDto;
 import front.meetudy.dto.request.mypage.MypagePwdChgReqDto;
 import front.meetudy.dto.request.mypage.MypageWithdrawReqDto;
+import front.meetudy.dto.request.study.operate.GroupMemberStatusReqDto;
 import front.meetudy.dto.response.mypage.MyPageBoardWriteResDto;
 import front.meetudy.dto.response.mypage.MyPageGroupCountResDto;
 import front.meetudy.dto.response.mypage.MyPageMemberResDto;
@@ -23,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +49,8 @@ public class MyPageService {
     private final StudyGroupMemberRepository studyGroupMemberRepository;
 
     private final FreeRepository freeRepository;
+
+    private final SimpMessagingTemplate messagingTemplate;
 
     /**
      * 멤버 상세 조회
@@ -98,7 +103,9 @@ public class MyPageService {
         List<StudyGroupMember> byGroupIncludeMember = studyGroupMemberRepository.findByGroupIncludeMember(member.getId());
         for (StudyGroupMember studyGroupMember : byGroupIncludeMember) {
             studyGroupMember.getStudyGroup().memberCountDecrease();
+            chatGroupMemberPM(member.getId(), studyGroupMember.getStudyGroup().getId(), "leave");
         }
+
         memberDb.memberWithdraw();
     }
 
@@ -117,5 +124,17 @@ public class MyPageService {
     public PageDto<MyPageBoardWriteResDto> memberBoardWriteList(Member member, Pageable pageable) {
         Page<FreeBoard> page = freeRepository.findByMemberIdAndDeletedOrderByCreatedAtDesc(pageable, member.getId(), false);
         return PageDto.of(page, MyPageBoardWriteResDto::from);
+    }
+
+    /**
+     * 채팅 그룹 사용자 전체 탈퇴
+     */
+    private void chatGroupMemberPM(Long memberId , Long studyGroupId, String endUrl) {
+        ChatMemberDto chatMemberDto = memberRepository.findChatMember(memberId)
+                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_013, ERR_013.getValue()));
+        messagingTemplate.convertAndSend(
+                "/topic/group." + studyGroupId + ".member."+endUrl,
+                chatMemberDto
+        );
     }
 }

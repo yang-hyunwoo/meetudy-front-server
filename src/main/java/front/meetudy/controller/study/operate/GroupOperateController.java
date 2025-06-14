@@ -2,7 +2,9 @@ package front.meetudy.controller.study.operate;
 
 
 import front.meetudy.annotation.customannotation.CurrentMember;
+import front.meetudy.constant.member.MemberEnum;
 import front.meetudy.domain.member.Member;
+import front.meetudy.dto.member.ChatMemberDto;
 import front.meetudy.dto.request.study.group.StudyGroupAttendanceRateReqDto;
 import front.meetudy.dto.request.study.operate.GroupMemberStatusReqDto;
 import front.meetudy.dto.request.study.operate.StudyGroupUpdateReqDto;
@@ -10,6 +12,7 @@ import front.meetudy.dto.response.study.operate.GroupOperateListResDto;
 import front.meetudy.dto.response.study.operate.GroupOperateMemberListResDto;
 import front.meetudy.dto.response.study.operate.StudyGroupAttendanceRateResDto;
 import front.meetudy.dto.response.study.operate.StudyGroupUpdateDetailResDto;
+import front.meetudy.service.member.MemberService;
 import front.meetudy.service.study.StudyGroupManageService;
 import front.meetudy.service.study.StudyGroupService;
 import front.meetudy.util.response.Response;
@@ -31,6 +34,8 @@ public class GroupOperateController {
     private final StudyGroupManageService studyGroupManageService;
 
     private final StudyGroupService studyGroupService;
+
+
 
     @Operation(summary = "스터디 그룹 운영 리스트 조회", description = "스터디 그룹 운영 리스트 조회")
     @GetMapping("/list")
@@ -88,6 +93,7 @@ public class GroupOperateController {
         return Response.update("그룹 멤버 승인 완료", null);
     }
 
+
     @Operation(summary = "그룹 멤버 거절" , description = "그룹 멤버 거절")
     @PutMapping("/reject")
     public ResponseEntity<Response<Void>> groupMemberReject(
@@ -125,4 +131,7 @@ public class GroupOperateController {
         studyGroupService.studyGroupUpdate(studyGroupUpdateReqDto, member);
         return Response.update("스터디 그룹 수정 완료", null);
     }
+
+
+
 }

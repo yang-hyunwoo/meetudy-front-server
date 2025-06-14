@@ -7,11 +7,11 @@ import front.meetudy.domain.common.file.Files;
 import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.*;
 import front.meetudy.dto.PageDto;
+import front.meetudy.dto.member.ChatMemberDto;
 import front.meetudy.dto.request.study.group.*;
 import front.meetudy.dto.request.study.join.GroupScheduleDayListReqDto;
 import front.meetudy.dto.request.study.join.GroupScheduleMonthListReqDto;
 import front.meetudy.dto.request.study.join.GroupScheduleWeekListReqDto;
-import front.meetudy.dto.request.study.operate.GroupMemberStatusReqDto;
 import front.meetudy.dto.request.study.operate.StudyGroupUpdateReqDto;
 import front.meetudy.dto.response.study.group.StudyGroupJoinResDto;
 import front.meetudy.dto.response.study.group.StudyGroupStatusResDto;
@@ -23,11 +23,15 @@ import front.meetudy.dto.response.study.operate.*;
 import front.meetudy.dto.study.StudyGroupScheduleDto;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.common.file.FilesRepository;
+import front.meetudy.repository.member.MemberRepository;
 import front.meetudy.repository.study.*;
 import front.meetudy.util.date.CustomDateUtil;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.validator.internal.util.stereotypes.Lazy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,7 +65,12 @@ public class StudyGroupService {
 
     private final AttendanceRepository attendanceRepository;
 
+    private final SimpMessagingTemplate messagingTemplate;
+
+    private final MemberRepository memberRepository;
+
     private static final String TODAY = "매일";
+
 
     /**
      * 그룹 생성
@@ -127,10 +136,13 @@ public class StudyGroupService {
         } else {
             studyGroupMember = studyGroupMemberRepository.save(studyGroupJoinReqDto.toEntity(member, studyGroup));
         }
+        chatGroupMemberPM(member, studyGroupMember, "join");
 
         return StudyGroupJoinResDto.from(studyGroupMember);
 
     }
+
+
 
     /**
      * 그룹 리스트 조회
@@ -463,7 +475,7 @@ public class StudyGroupService {
     }
 
     /**
-     * 멤버 탈퇴
+     * 멤버 탈퇴[자신이 탈퇴]
      * @param studyGroupId
      * @param member
      */
@@ -483,7 +495,11 @@ public class StudyGroupService {
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
         studyGroupMember.kickMember(JoinStatusEnum.WITHDRAW);
 
+
+        chatGroupMemberPM(member, studyGroupMember, "leave");
     }
+
+
 
     /**
      * 참여 중인 스터디 그룹 멤버 여부 확인
@@ -640,6 +656,24 @@ public class StudyGroupService {
 
         }
         return schedules;
+    }
+
+    /**
+     * 채팅 그룹 사용자 추가 및 탈퇴
+     *
+     * @param member
+     * @param studyGroupMember
+     */
+    private void chatGroupMemberPM(Member member, StudyGroupMember studyGroupMember, String endUrl) {
+        if (!endUrl.equals("join") || studyGroupMember.getJoinStatus().equals(JoinStatusEnum.APPROVED)) {
+            ChatMemberDto chatMemberDto = memberRepository.findChatMember(member.getId())
+                    .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_013, ERR_013.getValue()));
+
+            messagingTemplate.convertAndSend(
+                    "/topic/group." + studyGroupMember.getStudyGroup().getId() + ".member." + endUrl,
+                    chatMemberDto
+            );
+        }
     }
 
 
