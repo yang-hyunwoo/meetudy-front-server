@@ -6,6 +6,7 @@ import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.StudyGroup;
 import front.meetudy.domain.study.StudyGroupDetail;
 import front.meetudy.domain.study.StudyGroupMember;
+import front.meetudy.dto.member.ChatMemberDto;
 import front.meetudy.dto.request.study.operate.GroupMemberStatusReqDto;
 import front.meetudy.dto.response.study.operate.GroupOperateListResDto;
 import front.meetudy.dto.response.study.operate.GroupOperateMemberListResDto;
@@ -13,8 +14,10 @@ import front.meetudy.dto.response.study.operate.GroupOperateMemberResDto;
 import front.meetudy.dto.response.study.operate.GroupOperateResDto;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.common.file.FilesRepository;
+import front.meetudy.repository.member.MemberRepository;
 import front.meetudy.repository.study.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +40,9 @@ public class StudyGroupManageService {
 
     private final StudyGroupQueryDslRepository studyGroupQueryDslRepository;
 
+    private final SimpMessagingTemplate messagingTemplate;
 
+    private final MemberRepository memberRepository;
     /**
      * 운영 / 종료 스터디 그룹 조회
      * @param member
@@ -122,7 +127,7 @@ public class StudyGroupManageService {
     }
 
     /**
-     * 그룹 사용자 강퇴
+     * 그룹 사용자 강퇴[리더가 멤버 탈퇴]
      * @param groupMemberStatusReqDto
      * @param member
      */
@@ -142,7 +147,10 @@ public class StudyGroupManageService {
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
         studyGroupMember.kickMember(JoinStatusEnum.KICKED);
 
+        chatGroupMemberPM(groupMemberStatusReqDto,"leave");
     }
+
+
 
     /**
      * 그룹 사용자 승인
@@ -167,6 +175,9 @@ public class StudyGroupManageService {
         }
 
         studyGroupMember.approvedMember(JoinStatusEnum.APPROVED);
+
+        chatGroupMemberPM(groupMemberStatusReqDto,"join");
+
     }
 
     /**
@@ -192,4 +203,19 @@ public class StudyGroupManageService {
         studyGroupMemberRepository.findGroupAuth(groupMemberStatusReqDto.getStudyGroupId(), member.getId())
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue()));
     }
+
+    /**
+     * 채팅 그룹 사용자 추가/및 삭제
+     * @param groupMemberStatusReqDto
+     */
+    private void chatGroupMemberPM(GroupMemberStatusReqDto groupMemberStatusReqDto,String endUrl) {
+        ChatMemberDto chatMemberDto = memberRepository.findChatMember(groupMemberStatusReqDto.getMemberId())
+                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_013, ERR_013.getValue()));
+        messagingTemplate.convertAndSend(
+                "/topic/group." + groupMemberStatusReqDto.getStudyGroupId() + ".member."+endUrl,
+                chatMemberDto
+        );
+    }
+
+
 }

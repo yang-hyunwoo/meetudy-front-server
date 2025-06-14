@@ -8,6 +8,7 @@ import front.meetudy.domain.common.StompPrincipal;
 import front.meetudy.domain.member.Member;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.member.MemberRepository;
+import front.meetudy.repository.study.StudyGroupMemberRepository;
 import front.meetudy.service.study.StudyGroupService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -26,14 +27,13 @@ import static org.springframework.http.HttpStatus.*;
 
 
 @RequiredArgsConstructor
-@Component
 public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
     private final JwtProcess jwtProcess;
 
-    private final StudyGroupService studyGroupService;
-
     private final MemberRepository memberRepository;
+
+    private final StudyGroupAuthValidator authValidator;
 
 
     /**
@@ -66,7 +66,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
                     .nickname(member.getNickname())
                     .build();
              ;
-            studyGroupService.studyGroupMemberPresent(longStudyGroupId, member);
+            authValidator.validateMemberInGroup(Long.parseLong(studyGroupId), member.getId());
             attributes.put("studyGroupId", longStudyGroupId);
             attributes.put("loginUser", new LoginUser(member1));
             return true;

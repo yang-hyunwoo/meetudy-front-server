@@ -1,14 +1,18 @@
 package front.meetudy.controller.study.group;
 
 import front.meetudy.annotation.customannotation.CurrentMember;
+import front.meetudy.constant.study.JoinStatusEnum;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.PageDto;
+import front.meetudy.dto.member.ChatMemberDto;
+import front.meetudy.dto.member.MemberDto;
 import front.meetudy.dto.request.study.group.*;
 import front.meetudy.dto.response.study.group.StudyGroupJoinResDto;
 import front.meetudy.dto.response.study.group.StudyGroupStatusResDto;
 import front.meetudy.dto.response.study.group.StudyGroupDetailResDto;
 import front.meetudy.dto.response.study.group.StudyGroupPageResDto;
 import front.meetudy.dto.response.study.operate.StudyGroupAttendanceRateResDto;
+import front.meetudy.service.member.MemberService;
 import front.meetudy.service.study.StudyGroupService;
 import front.meetudy.util.response.Response;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -78,8 +83,14 @@ public class StudyGroupController {
             @RequestBody StudyGroupJoinReqDto studyGroupJoinReqDto,
             @CurrentMember Member member
             ) {
-        return Response.create("스터디 그룹 멤버 가입 성공", studyGroupService.joinStudyGroup(studyGroupJoinReqDto, member));
+
+        StudyGroupJoinResDto studyGroupJoinResDto = studyGroupService.joinStudyGroup(studyGroupJoinReqDto, member);
+
+
+        return Response.create("스터디 그룹 멤버 가입 성공", studyGroupJoinResDto);
     }
+
+
 
     @Operation(summary = "스터디 그룹 사용자 요청 취소" , description = "스터디 그룹 사용자 요청 취소")
     @PutMapping("/private/study-group/cancel")
