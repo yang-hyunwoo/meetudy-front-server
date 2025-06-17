@@ -3,14 +3,13 @@ package front.meetudy.controller.chat;
 import front.meetudy.constant.chat.ChatMessageType;
 import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.domain.common.StompPrincipal;
+import front.meetudy.dto.chat.ChatDocumentDto;
 import front.meetudy.dto.chat.ChatLinkDto;
 import front.meetudy.dto.chat.ChatMessageDto;
 import front.meetudy.dto.chat.ChatNoticeDto;
 import front.meetudy.exception.CustomApiException;
-import front.meetudy.service.chat.ChatLinkService;
-import front.meetudy.service.chat.ChatMessageService;
-import front.meetudy.service.chat.ChatNoticeService;
-import front.meetudy.service.chat.ChatRoomService;
+import front.meetudy.service.chat.*;
+import front.meetudy.service.common.file.FilesService;
 import front.meetudy.service.study.StudyGroupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +47,12 @@ public class ChatController {
     private final ChatNoticeService chatNoticeService;
 
     private final ChatLinkService chatLinkService;
+
+    private final ChatDocumentService chatDocumentService;
+
+    private final FilesService filesService;
+
+
 
 
     @MessageMapping("/chat.send")
@@ -144,6 +149,32 @@ public class ChatController {
             messagingTemplate.convertAndSend("/topic/link." + user.getStudyGroupId(),
                     chatLinkDto);
             return chatLinkDto;
+        }
+        throw new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue());
+    }
+
+    @MessageMapping("/document.send")
+    public ChatDocumentDto sendDocument(ChatDocumentDto document , SimpMessageHeaderAccessor headerAccessor) {
+        StompPrincipal user = (StompPrincipal) headerAccessor.getUser();
+        if (Objects.equals(user.getStudyGroupId(), document.getStudyGroupId())) {
+            document.setMemberId(user.getUserId());
+            ChatDocumentDto chatDocumentDto = null;
+            if(document.getStatus().equals(CREATE)) {
+                chatDocumentDto = chatDocumentService.chatDocumentSave(document);
+            } else if(document.getStatus().equals(DELETE)) {
+                if (document.getFileDetailId() != null) {
+                    filesService.deleteFileDetail(user.getUserId(), document.getFileId(), List.of(document.getFileDetailId()));
+                }
+                chatDocumentDto = ChatDocumentDto.builder()
+                        .id(document.getId())
+                        .fileDetailId(document.getFileDetailId())
+                        .status(document.getStatus())
+                        .build();
+            } else {
+
+            }
+            messagingTemplate.convertAndSend("/topic/document." + user.getStudyGroupId(), chatDocumentDto);
+            return chatDocumentDto;
         }
         throw new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue());
     }

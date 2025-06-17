@@ -19,10 +19,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,6 +45,7 @@ public class FilesService {
 
     private final FilesDetailsRepository filesDetailsRepository;
 
+    private final S3Presigner s3Presigner;
 
     private final S3Client r2Client;
 
@@ -133,6 +138,7 @@ public class FilesService {
                     null ,
                     false);
             filesDetails.linkToFiles(group);
+            group.addFileDetail(filesDetails);
             filesDetailsRepository.save(filesDetails);
             // R2는 public endpoint 별도 세팅해야 함
         } catch (IOException e) {
@@ -146,11 +152,32 @@ public class FilesService {
      * @param fileId
      * @param delFileDetailsId
      */
-    public void deleteFileDetail(Member member, Long fileId, List<Long> delFileDetailsId) {
-        filesRepository.findByIdAndMemberId(fileId, member.getId())
+    public void deleteFileDetail(Long memberId, Long fileId, List<Long> delFileDetailsId) {
+        filesRepository.findByIdAndMemberId(fileId, memberId)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue()));
         for (Long fileDetailId : delFileDetailsId) {
             filesDetailsRepository.findById(fileDetailId).ifPresent(FilesDetails::updateFileDeleted);
         }
     }
+
+    public String generateSignedUrl(String key, Duration expiresIn) {
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .responseContentDisposition("attachment; filename=\"" + extractFilename(key).split("_")[1] + "\"")
+                .build();
+
+        GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                .signatureDuration(expiresIn)
+                .getObjectRequest(getObjectRequest)
+                .build();
+
+        return s3Presigner.presignGetObject(presignRequest).url().toString();
+    }
+
+    private String extractFilename(String key) {
+        int lastSlash = key.lastIndexOf("/");
+        return (lastSlash != -1) ? key.substring(lastSlash + 1) : key;
+    }
+
 }

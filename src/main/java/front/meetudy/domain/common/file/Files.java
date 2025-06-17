@@ -38,8 +38,10 @@ public class Files extends BaseEntity {
     private boolean deleted;
 
     @Builder
-    protected Files(Member member,
+    protected Files(Long id,
+                    Member member,
                     boolean deleted) {
+        this.id = id;
         this.member = member;
         this.deleted =deleted;
     }
@@ -64,6 +66,11 @@ public class Files extends BaseEntity {
     }
 
 
+    public static Files partialOf(Long id) {
+        return Files.builder()
+                .id(id)
+                .build();
+    }
 
     @Override
     public int hashCode() {
