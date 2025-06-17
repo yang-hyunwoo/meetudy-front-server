@@ -3,11 +3,13 @@ package front.meetudy.controller.chat;
 import front.meetudy.annotation.customannotation.CurrentMember;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.PageDto;
+import front.meetudy.dto.chat.ChatDocumentDto;
 import front.meetudy.dto.chat.ChatLinkDto;
 import front.meetudy.dto.chat.ChatNoticeDto;
 import front.meetudy.dto.response.chat.ChatMessageResDto;
 import front.meetudy.dto.response.study.operate.GroupOperateMemberResDto;
 import front.meetudy.exception.CustomApiException;
+import front.meetudy.service.chat.ChatDocumentService;
 import front.meetudy.service.chat.ChatLinkService;
 import front.meetudy.service.chat.ChatMessageService;
 import front.meetudy.service.chat.ChatNoticeService;
@@ -41,6 +43,8 @@ public class ChatMessageController {
     private final ChatNoticeService chatNoticeService;
 
     private final ChatLinkService chatLinkService;
+
+    private final ChatDocumentService chatDocumentService;
 
 
     @Operation(summary = "채팅 목록 조회", description = "채팅 목록 조회")
@@ -93,6 +97,14 @@ public class ChatMessageController {
             @CurrentMember Member member
     ) {
         return Response.ok("그룹 링크 리스트 조회 완료", chatLinkService.chatLinkList(studyGroupId, member));
+    }
 
+    @Operation(summary = "그룹 자료 리스트 조회" , description = "그룹 자료 리스트 조회")
+    @GetMapping("/{studyGroupId}/document/list")
+    public ResponseEntity<Response<List<ChatDocumentDto>>> groupDocumentList(
+            @PathVariable(value = "studyGroupId") Long studyGroupId,
+            @CurrentMember Member member
+    ) {
+        return Response.ok("그룹 자료 리스트 조회 완료", chatDocumentService.chatDocumentList(studyGroupId, member));
     }
 }
