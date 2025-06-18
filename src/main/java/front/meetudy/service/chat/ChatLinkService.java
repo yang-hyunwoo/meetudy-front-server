@@ -1,13 +1,13 @@
 package front.meetudy.service.chat;
 
 import front.meetudy.constant.chat.ChatMessageType;
-import front.meetudy.constant.study.JoinStatusEnum;
 import front.meetudy.domain.chat.ChatLink;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.chat.ChatLinkDto;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.chat.ChatLinkRepository;
 import front.meetudy.repository.study.StudyGroupMemberRepository;
+import front.meetudy.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +24,7 @@ public class ChatLinkService {
 
     private final ChatLinkRepository chatLinkRepository;
 
-    private final StudyGroupMemberRepository studyGroupMemberRepository;
+    private final AuthService authService;
 
     public ChatLinkDto chatLinkSave(ChatLinkDto chatLinkDto) {
         return ChatLinkDto.from(chatLinkRepository.save(chatLinkDto.toEntity()), ChatMessageType.CREATE);
@@ -33,8 +33,7 @@ public class ChatLinkService {
 
     public List<ChatLinkDto> chatLinkList(Long studyGroupId, Member member) {
         //1.그룹 사용자 참여 여부 확인
-        studyGroupMemberRepository.findByStudyGroupIdAndMemberIdAndJoinStatus(studyGroupId, member.getId(), JoinStatusEnum.APPROVED)
-                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_004, ERR_004.getValue()));
+        authService.studyGroupMemberJoinChk(studyGroupId, member.getId());
 
         return chatLinkRepository.findChatLinkList(studyGroupId)
                 .stream()

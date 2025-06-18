@@ -22,6 +22,5 @@ public interface StudyGroupDetailRepository extends JpaRepository<StudyGroupDeta
     int existsByGroupIdAndOtp(@Param("studyGroupId") Long studyGroupId,
                               @Param("optNumber") String optNumber);
 
-
     Optional<StudyGroupDetail> findByStudyGroupIdAndDeleted(Long studyGroupId, boolean deleted);
 }

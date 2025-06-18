@@ -1,6 +1,5 @@
 package front.meetudy.service.contact.qna;
 
-import front.meetudy.auth.LoginUser;
 import front.meetudy.domain.contact.Qna.QnaBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.contact.qna.QnaWriteReqDto;

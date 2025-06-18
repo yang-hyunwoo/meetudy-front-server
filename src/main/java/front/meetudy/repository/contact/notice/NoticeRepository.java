@@ -12,7 +12,6 @@ import java.util.Optional;
 
 public interface NoticeRepository extends JpaRepository<NoticeBoard, Long> {
 
-
     @Query(value= "SELECT * FROM notice_board " +
                     "WHERE visible=true " +
                     "AND deleted=false " +

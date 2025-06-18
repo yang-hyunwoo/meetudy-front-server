@@ -13,9 +13,9 @@ import front.meetudy.dto.response.study.operate.GroupOperateMemberListResDto;
 import front.meetudy.dto.response.study.operate.GroupOperateMemberResDto;
 import front.meetudy.dto.response.study.operate.GroupOperateResDto;
 import front.meetudy.exception.CustomApiException;
-import front.meetudy.repository.common.file.FilesRepository;
 import front.meetudy.repository.member.MemberRepository;
 import front.meetudy.repository.study.*;
+import front.meetudy.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -43,6 +43,8 @@ public class StudyGroupManageService {
     private final SimpMessagingTemplate messagingTemplate;
 
     private final MemberRepository memberRepository;
+
+    private final AuthService authService;
     /**
      * 운영 / 종료 스터디 그룹 조회
      * @param member
@@ -79,8 +81,8 @@ public class StudyGroupManageService {
      * @return
      */
     public GroupOperateMemberListResDto groupMemberList(Long studyGroupId , Member member) {
-        studyGroupMemberRepository.findGroupAuth(studyGroupId,member.getId())
-                .orElseThrow(()-> new CustomApiException(BAD_REQUEST,ERR_015,ERR_015.getValue()));
+
+        authService.findGroupAuth(studyGroupId, member.getId());
 
         List<GroupOperateMemberResDto> studyGroupMemberList = studyGroupMemberRepository.findStudyGroupMemberList(studyGroupId);
 
@@ -101,9 +103,7 @@ public class StudyGroupManageService {
      * @return
      */
     public Long groupStatusChange(Long studyGroupId , Member member) {
-        studyGroupMemberRepository.findGroupAuth(studyGroupId,member.getId())
-                .orElseThrow(()-> new CustomApiException(BAD_REQUEST,ERR_015,ERR_015.getValue()));
-
+        authService.findGroupAuth(studyGroupId, member.getId());
         StudyGroup studyGroup = studyGroupRepository.findById(studyGroupId)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
 
@@ -118,9 +118,7 @@ public class StudyGroupManageService {
      * @param member
      */
     public void groupDelete(Long studyGroupId , Member member) {
-        studyGroupMemberRepository.findGroupAuth(studyGroupId,member.getId())
-                .orElseThrow(()-> new CustomApiException(BAD_REQUEST,ERR_015,ERR_015.getValue()));
-
+        authService.findGroupAuth(studyGroupId,member.getId());
         StudyGroupDetail studyGroupDetail = studyGroupDetailRepository.findByStudyGroupIdAndDeleted(studyGroupId, false)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue()));
         studyGroupDetail.groupDelete();
@@ -133,17 +131,13 @@ public class StudyGroupManageService {
      */
     public void groupMemberKick(GroupMemberStatusReqDto groupMemberStatusReqDto, Member member) {
 
-        groupLeaderChk(groupMemberStatusReqDto, member);
+        authService.findGroupAuth(groupMemberStatusReqDto.getStudyGroupId(), member.getId());
+        StudyGroupMember studyGroupMember = authService.studyGroupMemberStatusRole(groupMemberStatusReqDto.getId(),
+                groupMemberStatusReqDto.getMemberId(),
+                JoinStatusEnum.APPROVED,
+                MemberRole.MEMBER);
 
-        StudyGroupMember studyGroupMember = studyGroupMemberRepository
-                                            .findByIdAndMemberIdAndJoinStatusAndRole(
-                                                    groupMemberStatusReqDto.getId(),
-                                                    groupMemberStatusReqDto.getMemberId() ,
-                                                    JoinStatusEnum.APPROVED ,
-                                                    MemberRole.MEMBER)
-                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
-
-        StudyGroup studyGroup = studyGroupRepository.findById(groupMemberStatusReqDto.getStudyGroupId())
+        studyGroupRepository.findById(groupMemberStatusReqDto.getStudyGroupId())
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
         studyGroupMember.kickMember(JoinStatusEnum.KICKED);
 
@@ -159,15 +153,11 @@ public class StudyGroupManageService {
      */
     public void groupMemberApproved(GroupMemberStatusReqDto groupMemberStatusReqDto, Member member) {
 
-        groupLeaderChk(groupMemberStatusReqDto, member);
-
-        StudyGroupMember studyGroupMember = studyGroupMemberRepository
-                .findByIdAndMemberIdAndJoinStatusAndRole(
-                        groupMemberStatusReqDto.getId(),
-                        groupMemberStatusReqDto.getMemberId(),
-                        JoinStatusEnum.PENDING,
-                        MemberRole.MEMBER)
-                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
+        authService.findGroupAuth(groupMemberStatusReqDto.getStudyGroupId(), member.getId());
+        StudyGroupMember studyGroupMember = authService.studyGroupMemberStatusRole(groupMemberStatusReqDto.getId(),
+                groupMemberStatusReqDto.getMemberId(),
+                JoinStatusEnum.PENDING,
+                MemberRole.MEMBER);
         StudyGroup studyGroup = studyGroupMember.getStudyGroup();
 
         if (studyGroup.getCurrentMemberCount() >= studyGroup.getMaxMemberCount()) {
@@ -186,23 +176,14 @@ public class StudyGroupManageService {
      * @param member
      */
     public void groupMemberReject(GroupMemberStatusReqDto groupMemberStatusReqDto,Member member) {
-
-        groupLeaderChk(groupMemberStatusReqDto, member);
-
-        StudyGroupMember studyGroupMember = studyGroupMemberRepository
-                .findByIdAndMemberIdAndJoinStatusAndRole(
-                        groupMemberStatusReqDto.getId(),
-                        groupMemberStatusReqDto.getMemberId(),
-                        JoinStatusEnum.PENDING,
-                        MemberRole.MEMBER)
-                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
+        authService.findGroupAuth(groupMemberStatusReqDto.getStudyGroupId(), member.getId());
+        StudyGroupMember studyGroupMember = authService.studyGroupMemberStatusRole(groupMemberStatusReqDto.getId(),
+                groupMemberStatusReqDto.getMemberId(),
+                JoinStatusEnum.PENDING,
+                MemberRole.MEMBER);
         studyGroupMember.rejectMember(JoinStatusEnum.REJECTED);
     }
 
-    private void groupLeaderChk(GroupMemberStatusReqDto groupMemberStatusReqDto, Member member) {
-        studyGroupMemberRepository.findGroupAuth(groupMemberStatusReqDto.getStudyGroupId(), member.getId())
-                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue()));
-    }
 
     /**
      * 채팅 그룹 사용자 추가/및 삭제
@@ -216,6 +197,5 @@ public class StudyGroupManageService {
                 chatMemberDto
         );
     }
-
 
 }

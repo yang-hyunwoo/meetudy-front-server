@@ -11,9 +11,7 @@ import front.meetudy.dto.response.board.FreePageResDto;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.board.FreeQueryDslRepository;
 import front.meetudy.repository.board.FreeRepository;
-import front.meetudy.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,8 +28,6 @@ public class FreeService {
 
     private final FreeRepository freeRepository;
 
-    private final MemberRepository memberRepository;
-
 
     /**
      * 자유 게시판 조회
@@ -41,8 +37,7 @@ public class FreeService {
      */
     @Transactional(readOnly = true)
     public PageDto<FreePageResDto> findFreePage(Pageable pageable , FreePageReqDto freePageReqDto) {
-        Page<FreeBoard> page = freeQueryDslRepository.findFreePage(pageable, freePageReqDto);
-        return PageDto.of(page, FreePageResDto::from);
+        return PageDto.of(freeQueryDslRepository.findFreePage(pageable, freePageReqDto), FreePageResDto::from);
     }
 
     public Long freeSave(Member member, FreeWriteReqDto freeWriteReqDto) {
@@ -51,20 +46,20 @@ public class FreeService {
 
     @Transactional(readOnly = true)
     public FreeDetailResDto freeDetail(Long id, Member member) {
-        FreeBoard freeBoard = freeRepository.findByIdAndDeleted(id, false)
-                .orElseThrow(() -> new CustomApiException(NOT_FOUND, ERR_012, ERR_012.getValue()));
-
-        return FreeDetailResDto.from(freeBoard, member);
+        return FreeDetailResDto.from(getFreeBoardPresent(id), member);
     }
+
+
 
     @Transactional(readOnly = true)
     public FreeDetailResDto freeUpdateDetail(Long id , Member member) {
-        FreeBoard freeBoard = freeRepository.findUpdateAuth(id, member.getId()).orElseThrow(() -> new CustomApiException(UNAUTHORIZED, ERR_015, ERR_015.getValue()));
+        FreeBoard freeBoard = freeRepository.findUpdateAuth(id, member.getId())
+                .orElseThrow(() -> new CustomApiException(UNAUTHORIZED, ERR_015, ERR_015.getValue()));
         return FreeDetailResDto.from(freeBoard, member);
     }
 
     public Long freeUpdate(Member member , FreeUpdateReqDto freeUpdateReqDto) {
-        FreeBoard freeBoard = freeRepository.findByIdAndDeleted(freeUpdateReqDto.getId(), false).orElseThrow(() -> new CustomApiException(NOT_FOUND, ERR_012, ERR_012.getValue()));
+        FreeBoard freeBoard = getFreeBoardPresent(freeUpdateReqDto.getId());
         if (memberNotEquals(freeBoard.getMember().getId(), member.getId())) {
             throw new CustomApiException(UNAUTHORIZED, ERR_014, ERR_014.getValue());
         }
@@ -73,7 +68,7 @@ public class FreeService {
     }
 
     public void freeDelete(Member member , Long id) {
-        FreeBoard freeBoard = freeRepository.findByIdAndDeleted(id, false).orElseThrow(() -> new CustomApiException(NOT_FOUND, ERR_012, ERR_012.getValue()));
+        FreeBoard freeBoard = getFreeBoardPresent(id);
         if (memberNotEquals(freeBoard.getMember().getId(), member.getId())) {
             throw new CustomApiException(UNAUTHORIZED, ERR_014, ERR_014.getValue());
         }
@@ -82,5 +77,11 @@ public class FreeService {
 
     private boolean memberNotEquals(Long boardMemberId, Long memberId) {
         return !boardMemberId.equals(memberId);
+    }
+
+    //게시판 존재 여부 확인
+    private FreeBoard getFreeBoardPresent(Long id) {
+        return freeRepository.findByIdAndDeleted(id, false)
+                .orElseThrow(() -> new CustomApiException(NOT_FOUND, ERR_012, ERR_012.getValue()));
     }
 }

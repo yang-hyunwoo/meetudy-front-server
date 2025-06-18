@@ -91,7 +91,6 @@ public class StudyGroupController {
     }
 
 
-
     @Operation(summary = "스터디 그룹 사용자 요청 취소" , description = "스터디 그룹 사용자 요청 취소")
     @PutMapping("/private/study-group/cancel")
     public ResponseEntity<Response<Void>> cancelStudyGroup(
@@ -109,15 +108,7 @@ public class StudyGroupController {
         return Response.ok("스터디 그룹 상세 조회 성공", studyGroupService.studyGroupDetail(studyGroupId));
     }
 
-    @Operation(summary = "스터디 그룹 출석 체크" , description = "스터디 그룹 출석 체크")
-    @PostMapping("/private/study-group/attendance")
-    public ResponseEntity<Response<Void>> studyGroupAttendanceCheck(
-            @RequestBody StudyGroupAttendanceReqDto studyGroupAttendanceReqDto,
-            @CurrentMember Member member
-    ) {
-        studyGroupService.studyGroupAttendanceCheck(studyGroupAttendanceReqDto, member);
-        return Response.create("스터디 그룹 출석 체크 완료", null);
-    }
+
 
 
 }

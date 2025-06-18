@@ -20,6 +20,7 @@ import front.meetudy.repository.contact.faq.QuerydslTestConfig;
 import front.meetudy.repository.study.AttendanceRepository;
 import front.meetudy.repository.study.StudyGroupMemberRepository;
 import front.meetudy.repository.study.StudyGroupRepository;
+import front.meetudy.service.attendance.AttendanceService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,6 +61,9 @@ class StudyGroupServiceTest {
 
     @Autowired
     private StudyGroupService studyGroupService;
+
+    @Autowired
+    private AttendanceService attendanceService;
 
     @Autowired
     private StudyGroupRepository studyGroupRepository;
@@ -415,7 +419,7 @@ class StudyGroupServiceTest {
         // given
         StudyGroupAttendanceReqDto studyGroupAttendanceReqDto = new StudyGroupAttendanceReqDto(studyGroup.getId());
         // when
-        studyGroupService.studyGroupAttendanceCheck(studyGroupAttendanceReqDto, member);
+        attendanceService.studyGroupAttendanceCheck(studyGroupAttendanceReqDto, member);
 
         // then
         assertThat(attendanceRepository.findAll().size()).isEqualTo(1);
@@ -451,7 +455,7 @@ class StudyGroupServiceTest {
 
         // given
         StudyGroupAttendanceReqDto studyGroupAttendanceReqDto = new StudyGroupAttendanceReqDto(l);
-        studyGroupService.studyGroupAttendanceCheck(studyGroupAttendanceReqDto, member);
+        attendanceService.studyGroupAttendanceCheck(studyGroupAttendanceReqDto, member);
         StudyGroupAttendanceRateReqDto studyGroupAttendanceRateReqDto = new StudyGroupAttendanceRateReqDto(studyGroupAttendanceReqDto.getStudyGroupId(), member.getId());
 
         // when

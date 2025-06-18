@@ -9,5 +9,4 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage , Long>
 
     Page<ChatMessage> findByStudyGroupIdOrderBySentAtDesc(Pageable pageable, Long studyGroupId);
 
-
 }

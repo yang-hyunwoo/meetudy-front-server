@@ -1,17 +1,13 @@
 package front.meetudy.service.mypage;
 
-import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.constant.study.MemberRole;
-import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.member.Member;
-import front.meetudy.domain.study.StudyGroup;
 import front.meetudy.domain.study.StudyGroupMember;
 import front.meetudy.dto.PageDto;
 import front.meetudy.dto.member.ChatMemberDto;
 import front.meetudy.dto.request.mypage.MypageDetailChgReqDto;
 import front.meetudy.dto.request.mypage.MypagePwdChgReqDto;
 import front.meetudy.dto.request.mypage.MypageWithdrawReqDto;
-import front.meetudy.dto.request.study.operate.GroupMemberStatusReqDto;
 import front.meetudy.dto.response.mypage.MyPageBoardWriteResDto;
 import front.meetudy.dto.response.mypage.MyPageGroupCountResDto;
 import front.meetudy.dto.response.mypage.MyPageMemberResDto;
@@ -20,11 +16,8 @@ import front.meetudy.repository.board.FreeRepository;
 import front.meetudy.repository.member.MemberRepository;
 import front.meetudy.repository.mypage.MypageQueryDslRepository;
 import front.meetudy.repository.study.StudyGroupMemberRepository;
-import front.meetudy.repository.study.StudyGroupRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -122,8 +115,7 @@ public class MyPageService {
     }
 
     public PageDto<MyPageBoardWriteResDto> memberBoardWriteList(Member member, Pageable pageable) {
-        Page<FreeBoard> page = freeRepository.findByMemberIdAndDeletedOrderByCreatedAtDesc(pageable, member.getId(), false);
-        return PageDto.of(page, MyPageBoardWriteResDto::from);
+        return PageDto.of(freeRepository.findByMemberIdAndDeletedOrderByCreatedAtDesc(pageable, member.getId(), false), MyPageBoardWriteResDto::from);
     }
 
     /**

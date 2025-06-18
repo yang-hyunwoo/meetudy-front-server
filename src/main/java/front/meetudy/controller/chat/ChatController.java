@@ -8,6 +8,7 @@ import front.meetudy.dto.chat.ChatLinkDto;
 import front.meetudy.dto.chat.ChatMessageDto;
 import front.meetudy.dto.chat.ChatNoticeDto;
 import front.meetudy.exception.CustomApiException;
+import front.meetudy.service.auth.AuthService;
 import front.meetudy.service.chat.*;
 import front.meetudy.service.common.file.FilesService;
 import front.meetudy.service.study.StudyGroupService;
@@ -42,7 +43,7 @@ public class ChatController {
 
     private final ChatRoomService chatRoomService;
 
-    private final StudyGroupService studyGroupService;
+    private final AuthService authService;
 
     private final ChatNoticeService chatNoticeService;
 
@@ -114,7 +115,7 @@ public class ChatController {
     public ChatNoticeDto sendNotice(ChatNoticeDto notice , SimpMessageHeaderAccessor headerAccessor) {
         StompPrincipal user = (StompPrincipal) headerAccessor.getUser();
         if (Objects.equals(user.getStudyGroupId(), notice.getStudyGroupId())) {
-            studyGroupService.findGroupAuth(notice.getStudyGroupId(), user.getUserId());
+            authService.findGroupAuth(notice.getStudyGroupId(), user.getUserId());
             notice.setSenderId(user.getUserId());
             ChatNoticeDto chatNoticeDto = null;
             if(notice.getStatus().equals(CREATE)) {

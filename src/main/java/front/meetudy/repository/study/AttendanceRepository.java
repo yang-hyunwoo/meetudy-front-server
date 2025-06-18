@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
+
 public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
     @Query(value = "SELECT COUNT(*)" +

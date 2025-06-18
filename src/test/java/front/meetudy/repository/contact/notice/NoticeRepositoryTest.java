@@ -62,7 +62,6 @@ class NoticeRepositoryTest {
     @DisplayName("공지사항 상세 조회")
     void notice_detail() {
         Optional<NoticeBoard> notice = noticeRepository.findNotice(id2);
-        System.out.println(":::"+notice.get().getId());
         assertThat(notice).isNotNull();
         assertThat(notice.get().getId()).isEqualTo(id2);
     }

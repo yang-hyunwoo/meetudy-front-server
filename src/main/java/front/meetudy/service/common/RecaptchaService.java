@@ -16,7 +16,6 @@ public class RecaptchaService {
     private String recaptchaSecret;
 
     private static final String VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
-
     public boolean verify(String token) {
         RestTemplate restTemplate = new RestTemplate();
         String url = VERIFY_URL + "?secret=" + recaptchaSecret + "&response=" + token;
@@ -27,4 +26,5 @@ public class RecaptchaService {
         log.info("reCAPTCHA 검증 결과: {}", result);
         return result;
     }
+
 }
