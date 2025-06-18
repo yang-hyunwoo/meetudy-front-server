@@ -18,4 +18,5 @@ public interface FilesRepository extends JpaRepository<Files, Long> {
             WHERE f.id = :id
                 """)
     Optional<Files> findWithDetailsAndMemberById(@Param("id") Long id);
+
 }

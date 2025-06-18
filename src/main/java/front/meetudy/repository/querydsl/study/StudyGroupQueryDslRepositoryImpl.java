@@ -67,12 +67,7 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
 
         BooleanBuilder builder = new BooleanBuilder();
         groupCondition(studyGroupPageReqDto, builder);
-        //groupDateCondition(builder);
 
-        BooleanExpression joinMember = member != null
-                ? studyGroupMember.studyGroup.id.eq(studyGroup.id)
-                .and(studyGroupMember.member.id.eq(member.getId()))
-                : Expressions.TRUE.isTrue();
         List<StudyGroupPageResDto> studyGroupList = queryFactory.select(new QStudyGroupPageResDto(
                         studyGroup.id,
                         filesDetails.fileUrl,

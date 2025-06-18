@@ -1,6 +1,5 @@
 package front.meetudy.service.comment;
 
-import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.comment.Comment;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.comment.CommentReqDto;
@@ -27,8 +26,6 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-
-    private final MemberRepository memberRepository;
 
     public List<CommentResDto> findCommentList(Member member, CommentReqDto commentReqDto) {
         List<Comment> commentList = commentRepository.findCommentBoardList(commentReqDto.getTargetType(), commentReqDto.getTargetId());

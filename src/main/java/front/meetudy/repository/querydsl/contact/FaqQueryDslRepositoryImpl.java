@@ -1,7 +1,6 @@
 package front.meetudy.repository.querydsl.contact;
 
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.dsl.EnumPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import front.meetudy.constant.contact.faq.FaqType;
 import front.meetudy.domain.contact.faq.FaqBoard;
@@ -48,6 +47,7 @@ public class FaqQueryDslRepositoryImpl implements FaqQueryDslRepository {
     private void faqCondition(FaqReqDto faqReqDto, BooleanBuilder builder) {
         builder.and(f.visible.isTrue());
         builder.and(f.deleted.isFalse());
+
         if (faqReqDto.getFaqType() != null && !faqReqDto.getFaqType().equals(FaqType.ALL.name())) {
             FaqType typeEnum = FaqType.valueOf(faqReqDto.getFaqType());
             builder.and(f.faqType.eq(typeEnum));

@@ -24,7 +24,6 @@ import static front.meetudy.constant.login.LoginErrorCode.*;
 @Transactional
 public class MemberService {
 
-
     private final PasswordEncoder passwordEncoder;
 
     private final MemberRepository memberRepository;

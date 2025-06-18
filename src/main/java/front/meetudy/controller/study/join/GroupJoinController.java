@@ -14,6 +14,7 @@ import front.meetudy.dto.response.study.operate.GroupOperateMemberResDto;
 import front.meetudy.dto.response.study.operate.GroupOperateResDto;
 import front.meetudy.dto.response.study.operate.StudyGroupAttendanceRateResDto;
 import front.meetudy.service.member.MemberService;
+import front.meetudy.service.study.StudyGroupManageService;
 import front.meetudy.service.study.StudyGroupService;
 import front.meetudy.util.response.Response;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,6 +35,8 @@ import java.util.List;
 public class GroupJoinController {
 
     private final StudyGroupService studyGroupService;
+
+    private final StudyGroupManageService studyGroupManageService;
 
     @Operation(summary = "참여 중인 스터디 그룹 캘린더 리스트", description = "참여 중인 스터디 그룹 캘린더 리스트")
     @GetMapping("/month/list")
@@ -67,7 +70,7 @@ public class GroupJoinController {
     public ResponseEntity<Response<GroupOperateListResDto>> studyGroupList(
             @CurrentMember Member member
     ) {
-        return Response.ok("스터디 그룹 운영 리스트 조회 완료", studyGroupService.groupJoinList(member));
+        return Response.ok("스터디 그룹 운영 리스트 조회 완료", studyGroupManageService.groupOperateList(member));
     }
 
     @Operation(summary = "참여 중인 스터디 그룹 멤버 리스트", description = "참여 중인 스터디 그룹 멤버 리스트")

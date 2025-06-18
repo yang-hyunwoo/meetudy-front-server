@@ -13,6 +13,7 @@ import front.meetudy.dto.response.chat.ChatMessageResDto;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.chat.ChatMessageRepository;
 import front.meetudy.repository.study.StudyGroupMemberRepository;
+import front.meetudy.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,18 +32,14 @@ public class ChatMessageService {
 
     private final ChatMessageRepository chatMessageRepository;
 
-    private final StudyGroupMemberRepository studyGroupMemberRepository;
-
     public void chatMessageSave(ChatMessageDto chatMessageDto) {
         chatMessageRepository.save(chatMessageDto.toEntity(MessageType.TEXT));
     }
 
-    public PageDto<ChatMessageResDto> chatList(Pageable pageable, Long studyGroupId, Member member) {
-        //1.그룹 사용자 참여 여부 확인
-        studyGroupMemberRepository.findByStudyGroupIdAndMemberIdAndJoinStatus(studyGroupId, member.getId(), JoinStatusEnum.APPROVED)
-                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_004, ERR_004.getValue()));
+    public PageDto<ChatMessageResDto> chatList(Pageable pageable, Long studyGroupId) {
         //2 채팅 내용 조회
-        Page<ChatMessage> page = chatMessageRepository.findByStudyGroupIdOrderBySentAtDesc(pageable, studyGroupId);
-        return PageDto.of(page, ChatMessageResDto::from);
+        return PageDto.of(chatMessageRepository.findByStudyGroupIdOrderBySentAtDesc(pageable, studyGroupId)
+                , ChatMessageResDto::from);
     }
+
 }

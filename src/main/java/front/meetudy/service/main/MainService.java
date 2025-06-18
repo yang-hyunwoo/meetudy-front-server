@@ -4,7 +4,6 @@ import front.meetudy.dto.response.main.MainNoticeResDto;
 import front.meetudy.dto.response.main.MainStudyGroupResDto;
 import front.meetudy.repository.Main.MainQueryDslRepository;
 import front.meetudy.repository.study.StudyGroupQueryDslRepository;
-import front.meetudy.repository.study.StudyGroupScheduleRepository;
 import front.meetudy.service.redis.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -40,7 +39,5 @@ public class MainService {
         }
         return mainNotice;
     }
-
-
 
 }

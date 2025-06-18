@@ -3,6 +3,7 @@ package front.meetudy.config.chatinterceptor;
 import front.meetudy.constant.study.JoinStatusEnum;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.study.StudyGroupMemberRepository;
+import front.meetudy.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,10 +17,9 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 public class StudyGroupAuthValidator {
 
     private final StudyGroupMemberRepository studyGroupMemberRepository;
+    private final AuthService authService;
 
     public void validateMemberInGroup(Long groupId, Long memberId) {
-        studyGroupMemberRepository.findByStudyGroupIdAndMemberIdAndJoinStatus(groupId, memberId, JoinStatusEnum.APPROVED)
-                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue()));
-
+        authService.studyGroupMemberJoinChk(groupId, memberId);
     }
 }

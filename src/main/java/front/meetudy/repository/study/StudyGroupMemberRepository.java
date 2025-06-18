@@ -30,7 +30,6 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
                                                              @Param("memberId") Long memberId ,
                                                              @Param("includeStatus") List<JoinStatusEnum> includeStatus);
 
-
     @Query(value = """
                     SELECT new front.meetudy.dto.response.study.operate.GroupOperateMemberResDto(
                     sgm.id,

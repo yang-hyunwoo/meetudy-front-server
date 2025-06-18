@@ -2,7 +2,6 @@ package front.meetudy.service.common.file;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.domain.common.file.Files;
 import front.meetudy.domain.common.file.FilesDetails;
 import front.meetudy.domain.member.Member;
@@ -13,7 +12,6 @@ import front.meetudy.repository.common.file.FilesRepository;
 import front.meetudy.service.common.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -64,17 +62,17 @@ public class FilesService {
         } else {
             filesGroup = filesRepository.findById(fileId).orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
         }
+
         for (MultipartFile file : files) {
             String contentType = file.getContentType();
 
             if (contentType != null && contentType.startsWith("image/")) {
-                //cloudinary 이미지 저장
-                uploadImageCloudinary(filesGroup, file);
+                uploadImageCloudinary(filesGroup, file); //cloudinary 이미지 저장
             } else {
-                //cloudFlare 이미지 제외 저장
-                uploadEtcCloudflare(filesGroup, file);
+                uploadEtcCloudflare(filesGroup, file);  //cloudFlare 이미지 제외 저장
             }
         }
+
         return FileResDto.from(filesGroup);
     }
 

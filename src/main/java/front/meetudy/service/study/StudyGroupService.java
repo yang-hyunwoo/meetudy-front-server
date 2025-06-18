@@ -25,11 +25,9 @@ import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.common.file.FilesRepository;
 import front.meetudy.repository.member.MemberRepository;
 import front.meetudy.repository.study.*;
+import front.meetudy.service.auth.AuthService;
 import front.meetudy.util.date.CustomDateUtil;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.validator.internal.util.stereotypes.Lazy;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -69,8 +67,8 @@ public class StudyGroupService {
 
     private final MemberRepository memberRepository;
 
+    private final AuthService authService;
     private static final String TODAY = "매일";
-
 
     /**
      * 그룹 생성
@@ -83,6 +81,7 @@ public class StudyGroupService {
         studyGroupCreatValidation(studyGroupCreateReqDto);
 
         Files files = null;
+
         if(getThumbnailFileChk(studyGroupCreateReqDto)) {
             files = filesRepository.findById(studyGroupCreateReqDto.getThumbnailFileId()).orElse(null);
         }
@@ -114,11 +113,13 @@ public class StudyGroupService {
         //1.studygroup 존재 여부 확인
         StudyGroup studyGroup = studyGroupRepository.findValidStudyGroupById(studyGroupJoinReqDto.getStudyGroupId())
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
+
         //2.db 멤버 확인 (추방 / 신청 중인 경우)
         List<JoinStatusEnum> includeStatus = new ArrayList<>();
         includeStatus.add(JoinStatusEnum.KICKED);
         includeStatus.add(JoinStatusEnum.PENDING);
         includeStatus.add(JoinStatusEnum.APPROVED);
+
         studyGroupMemberRepository.findByStudyGroupIdAndMemberId(studyGroup.getId(), member.getId(),includeStatus).ifPresent(
             user -> {
                 throw new CustomApiException(BAD_REQUEST, ERR_003, ERR_003.getValue());
@@ -153,8 +154,7 @@ public class StudyGroupService {
      */
     @Transactional(readOnly = true)
     public PageDto<StudyGroupPageResDto> findStudyGroupListPage(Pageable pageable, StudyGroupPageReqDto studyGroupPageReqDto, Member member) {
-        Page<StudyGroupPageResDto> studyGroupListPage = studyGroupQueryDslRepository.findStudyGroupListPage(pageable, studyGroupPageReqDto, member);
-        return PageDto.of(studyGroupListPage, Function.identity());
+        return PageDto.of(studyGroupQueryDslRepository.findStudyGroupListPage(pageable, studyGroupPageReqDto, member), Function.identity());
     }
 
     /**
@@ -202,38 +202,7 @@ public class StudyGroupService {
                 .orElseThrow(() -> new CustomApiException(BAD_GATEWAY, ERR_012, ERR_012.getValue()));
     }
 
-    /**
-     * 출석 체크
-     * @param studyGroupAttendanceReqDto
-     * @param member
-     */
-    public void studyGroupAttendanceCheck(StudyGroupAttendanceReqDto studyGroupAttendanceReqDto, Member member) {
-        int attendanceCount = attendanceRepository.findAttendanceCount(studyGroupAttendanceReqDto.getStudyGroupId(), member.getId());
-        if (attendanceCount >= 1) {
-            throw new CustomApiException(BAD_REQUEST, ERR_003, ERR_003.getValue());
-        }
-        //멤버 여부 확인
-        StudyGroupMember studyGroupMember = studyGroupMemberRepository
-                .findByStudyGroupIdAndMemberIdAndJoinStatus(
-                        studyGroupAttendanceReqDto.getStudyGroupId(),
-                        member.getId(),
-                        JoinStatusEnum.APPROVED)
-                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
 
-        //그룹 여부 확인
-        StudyGroupDetail studyGroupDetail = studyGroupDetailRepository.findByStudyGroupIdAndDeleted(studyGroupAttendanceReqDto.getStudyGroupId(), false)
-                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
-
-        //스케줄 여부 확인
-        StudyGroupSchedule studyGroupSchedule = studyGroupScheduleRepository.findScheduleDetail(studyGroupAttendanceReqDto.getStudyGroupId())
-                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
-
-        Attendance attendanceEntity = studyGroupAttendanceReqDto.toEntity(studyGroupDetail.getStudyGroup(),
-                studyGroupMember.getMember(),
-                getAttendanceLateEnumCheck(studyGroupSchedule));
-
-        attendanceRepository.save(attendanceEntity);
-    }
 
     /**
      * 출석률 및 출석 리스트 최근[10개]
@@ -242,15 +211,10 @@ public class StudyGroupService {
     public StudyGroupAttendanceRateResDto studyGroupAttendanceRateList(StudyGroupAttendanceRateReqDto studyGroupAttendanceRateReqDto,Member member) {
 
         //1.studygroup Leader 확인
-        studyGroupMemberRepository.findGroupAuth(studyGroupAttendanceRateReqDto.getStudyGroupId(), member.getId())
-                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue()));
+        authService.findGroupAuth(studyGroupAttendanceRateReqDto.getStudyGroupId(), member.getId());
 
         //2.studymember 조회
-        StudyGroupMember studyGroupMember = studyGroupMemberRepository.findByStudyGroupIdAndMemberIdAndJoinStatus(studyGroupAttendanceRateReqDto.getStudyGroupId(),
-                        studyGroupAttendanceRateReqDto.getMemberId(),
-                        JoinStatusEnum.APPROVED)
-                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
-
+        StudyGroupMember studyGroupMember = authService.studyGroupMemberJoinChk(studyGroupAttendanceRateReqDto.getStudyGroupId(), studyGroupAttendanceRateReqDto.getMemberId());
         //3.스케줄 갯수 조회
         double rate = attendanceRate(studyGroupAttendanceRateReqDto, studyGroupMember.getJoinApprovedAt());
         //최근 10개 참석 리스트 조회
@@ -273,12 +237,7 @@ public class StudyGroupService {
      */
     @Transactional(readOnly = true)
     public StudyGroupUpdateDetailResDto findGroupUpdateDetail(Long studyGroupId , Member member) {
-        studyGroupMemberRepository.findGroupAuth(studyGroupId, member.getId())
-                .ifPresentOrElse(
-                        v -> {},
-                        () -> {throw new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue());}
-                );
-
+        authService.findGroupAuth(studyGroupId, member.getId());
         return studyGroupQueryDslRepository.findGroupUpdateDetail(studyGroupId)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
 
@@ -292,11 +251,7 @@ public class StudyGroupService {
     public void studyGroupUpdate(StudyGroupUpdateReqDto studyGroupUpdateReqDto , Member member) {
 
         //권한 체크
-        studyGroupMemberRepository.findGroupAuth(studyGroupUpdateReqDto.getStudyGroupId(), member.getId())
-                .ifPresentOrElse(
-                        v -> {},
-                        () -> {throw new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue());}
-                );
+        authService.findGroupAuth(studyGroupUpdateReqDto.getStudyGroupId(),member.getId());
 
         //그룹 존재 확인
         StudyGroup studyGroup = studyGroupRepository.findById(studyGroupUpdateReqDto.getStudyGroupId())
@@ -394,9 +349,7 @@ public class StudyGroupService {
      */
     @Transactional(readOnly = true)
     public List<GroupOperateMemberResDto> studyGroupMemberList(Long studyGroupId , Member member) {
-        studyGroupMemberRepository.findByStudyGroupIdAndMemberIdAndJoinStatus(studyGroupId, member.getId(), JoinStatusEnum.APPROVED)
-                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue()));
-
+        authService.studyGroupMemberJoinChk(studyGroupId, member.getId());
         List<GroupOperateMemberResDto> studyGroupMemberList = studyGroupMemberRepository.findStudyGroupMemberList(studyGroupId);
 
         return studyGroupMemberList.stream()
@@ -415,10 +368,7 @@ public class StudyGroupService {
     public StudyGroupAttendanceRateResDto memberAttendanceRateList(Long studyGroupId, Member member) {
 
         //1.studymember 조회
-        StudyGroupMember studyGroupMember = studyGroupMemberRepository.findByStudyGroupIdAndMemberIdAndJoinStatus(studyGroupId,
-                        member.getId(),
-                        JoinStatusEnum.APPROVED)
-                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
+        StudyGroupMember studyGroupMember = authService.studyGroupMemberJoinChk(studyGroupId, member.getId());
 
         StudyGroupAttendanceRateReqDto studyGroupAttendanceRateReqDto = new StudyGroupAttendanceRateReqDto(studyGroupId, member.getId());
 
@@ -437,35 +387,6 @@ public class StudyGroupService {
     }
 
     /**
-     * 운영 / 종료 스터디 그룹 조회
-     * @param member
-     * @return
-     */
-    public GroupOperateListResDto groupJoinList(Member member) {
-        LocalDateTime now = LocalDateTime.now();
-        List<GroupOperateResDto> operateList = studyGroupQueryDslRepository.findJoinGroupList(member,JoinStatusEnum.APPROVED);
-
-        List<GroupOperateResDto> ongoing = operateList.stream()
-                .filter(dto -> {
-                    LocalDateTime endDateTime = LocalDateTime.of(dto.getEndDate(), dto.getMeetingEndTime());
-                    return endDateTime.isAfter(now) || endDateTime.isEqual(now);
-                })
-                .toList();
-
-        List<GroupOperateResDto> ended = operateList.stream()
-                .filter(dto -> {
-                    LocalDateTime endDateTime = LocalDateTime.of(dto.getEndDate(), dto.getMeetingEndTime());
-                    return endDateTime.isBefore(now);
-                })
-                .toList();
-
-        return GroupOperateListResDto.builder()
-                .ongoingGroup(ongoing)
-                .endGroup(ended)
-                .build();
-    }
-
-    /**
      * 요청중인 그룹 리스트
      * @param member
      * @return
@@ -480,49 +401,16 @@ public class StudyGroupService {
      * @param member
      */
     public void groupMemberWithdraw(Long studyGroupId , Member member) {
-        StudyGroupMember studyGroupMember = studyGroupMemberRepository
-                .findByStudyGroupIdAndMemberIdAndJoinStatus(
-                        studyGroupId,
-                        member.getId() ,
-                        JoinStatusEnum.APPROVED)
-                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
-
+        StudyGroupMember studyGroupMember = authService.studyGroupMemberJoinChk(studyGroupId, member.getId());
         if(studyGroupMember.getRole().equals(MemberRole.LEADER)) {
             throw new CustomApiException(BAD_REQUEST, ERR_021, ERR_021.getValue());
         }
 
-        StudyGroup studyGroup = studyGroupRepository.findById(studyGroupId)
+        studyGroupRepository.findById(studyGroupId)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
         studyGroupMember.kickMember(JoinStatusEnum.WITHDRAW);
 
-
         chatGroupMemberPM(member, studyGroupMember, "leave");
-    }
-
-
-
-    /**
-     * 참여 중인 스터디 그룹 멤버 여부 확인
-     * @param studyGroupId
-     * @param member
-     * @return
-     */
-    @Transactional(readOnly = true)
-    public void studyGroupMemberPresent(Long studyGroupId , Member member) {
-        studyGroupMemberRepository.findByStudyGroupIdAndMemberIdAndJoinStatus(studyGroupId, member.getId(), JoinStatusEnum.APPROVED)
-                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue()));
-    }
-
-    /**
-     * 그룹 리더 권한 체크
-     * @param studyGroupId
-     * @param memberId
-     */
-    @Transactional(readOnly = true)
-    public void findGroupAuth(Long studyGroupId , Long memberId) {
-        studyGroupMemberRepository.findGroupAuth(studyGroupId, memberId)
-                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue()));
-
     }
 
 
@@ -544,24 +432,7 @@ public class StudyGroupService {
         return Math.round(attendanceRate * 10) / 10.0;
     }
 
-    /**
-     * 지각 여부 ENUM 변환
-     * @param studyGroupSchedule
-     * @return
-     */
-    private static AttendanceEnum getAttendanceLateEnumCheck(StudyGroupSchedule studyGroupSchedule) {
-        AttendanceEnum attendanceEnum;
-        LocalDate meetingDate = studyGroupSchedule.getMeetingDate();
-        LocalTime meetingStartTime = studyGroupSchedule.getMeetingStartTime();
-        LocalDateTime meetingStartDateTime = LocalDateTime.of(meetingDate, meetingStartTime);
-        LocalDateTime now = LocalDateTime.now();
-        if(now.isAfter(meetingStartDateTime)) {
-            attendanceEnum = AttendanceEnum.LATE;
-        } else {
-            attendanceEnum = AttendanceEnum.PRESENT;
-        }
-        return attendanceEnum;
-    }
+
 
     /**
      * 그룹 생성 5개 체크
@@ -675,7 +546,5 @@ public class StudyGroupService {
             );
         }
     }
-
-
 
 }

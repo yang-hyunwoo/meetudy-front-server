@@ -9,6 +9,7 @@ import front.meetudy.dto.chat.ChatNoticeDto;
 import front.meetudy.dto.response.chat.ChatMessageResDto;
 import front.meetudy.dto.response.study.operate.GroupOperateMemberResDto;
 import front.meetudy.exception.CustomApiException;
+import front.meetudy.service.auth.AuthService;
 import front.meetudy.service.chat.ChatDocumentService;
 import front.meetudy.service.chat.ChatLinkService;
 import front.meetudy.service.chat.ChatMessageService;
@@ -46,6 +47,20 @@ public class ChatMessageController {
 
     private final ChatDocumentService chatDocumentService;
 
+    private final AuthService authService;
+
+    @Operation(summary = "채팅방 권한 체크" , description = "채팅방 권한 체크")
+    @GetMapping("/{studyGroupId}/detail/auth")
+    public ResponseEntity<Response<Boolean>> chatAuthChk(
+            @PathVariable(value = "studyGroupId") Long studyGroupId,
+            @CurrentMember Member member
+    ) {
+        authService.studyGroupMemberJoinChk(studyGroupId, member.getId());
+        return Response.ok("채팅 목록 조회 완료",true);
+
+    }
+
+
 
     @Operation(summary = "채팅 목록 조회", description = "채팅 목록 조회")
     @GetMapping("/{studyGroupId}/list")
@@ -82,7 +97,7 @@ public class ChatMessageController {
             @CurrentMember Member member
     ) {
         try {
-            chatNoticeService.chatNoticeAuth(studyGroupId, member);
+            authService.findGroupAuth(studyGroupId, member.getId());
             return Response.ok("공지 권한 체크 완료", true);
         } catch (CustomApiException e) {
             return Response.ok("공지 권한 체크 완료", false);
