@@ -57,6 +57,19 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
             """, nativeQuery = true)
     Optional<StudyGroupMember> findGroupAuth(@Param("studyGroupId") Long studyGroupId, @Param("memberId") Long memberId);
 
+
+    @Query(value = """
+                    SELECT *
+                    FROM study_group_member sgm
+                     where sgm.study_group_id =:studyGroupId
+                      and role='LEADER'
+            """, nativeQuery = true)
+    Optional<StudyGroupMember> findGroupLeader(@Param("studyGroupId") Long studyGroupId);
+
+
+
+
+
     @Query("""
                 SELECT m FROM StudyGroupMember m
                 JOIN FETCH m.studyGroup
