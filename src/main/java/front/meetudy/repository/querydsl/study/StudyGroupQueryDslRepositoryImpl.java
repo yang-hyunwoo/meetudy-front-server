@@ -169,8 +169,7 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                         studyGroupMember.joinStatus.stringValue()))
                 .from(studyGroupMember)
                 .innerJoin(studyGroup)
-                .on(studyGroup.id.eq(studyGroupMember.studyGroup.id)
-                        .and(studyGroupMember.role.eq(MemberRole.LEADER)))
+                .on(studyGroup.id.eq(studyGroupMember.studyGroup.id))
                 .innerJoin(memberq)
                 .on(studyGroupMember.member.id.eq(memberq.id)
                         .and(memberq.deleted.eq(false)))
@@ -423,7 +422,6 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
 
     private void groupOperateCondition(Member member, BooleanBuilder builder) {
         builder.and(studyGroupMember.member.id.eq(member.getId()));
-        builder.and(studyGroupMember.role.eq(MemberRole.LEADER));
         builder.and(studyGroupDetail.deleted.eq(false));
     }
 

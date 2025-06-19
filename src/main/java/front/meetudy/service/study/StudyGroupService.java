@@ -1,5 +1,6 @@
 package front.meetudy.service.study;
 
+import front.meetudy.constant.notification.NotificationType;
 import front.meetudy.constant.study.AttendanceEnum;
 import front.meetudy.constant.study.JoinStatusEnum;
 import front.meetudy.constant.study.MemberRole;
@@ -8,6 +9,7 @@ import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.*;
 import front.meetudy.dto.PageDto;
 import front.meetudy.dto.member.ChatMemberDto;
+import front.meetudy.dto.notification.NotificationDto;
 import front.meetudy.dto.request.study.group.*;
 import front.meetudy.dto.request.study.join.GroupScheduleDayListReqDto;
 import front.meetudy.dto.request.study.join.GroupScheduleMonthListReqDto;
@@ -26,8 +28,11 @@ import front.meetudy.repository.common.file.FilesRepository;
 import front.meetudy.repository.member.MemberRepository;
 import front.meetudy.repository.study.*;
 import front.meetudy.service.auth.AuthService;
+import front.meetudy.service.notification.NotificationService;
 import front.meetudy.util.date.CustomDateUtil;
+import front.meetudy.util.redis.RedisPublisher;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -42,11 +47,14 @@ import java.util.*;
 import java.util.function.Function;
 
 import static front.meetudy.constant.error.ErrorEnum.*;
+import static front.meetudy.constant.notification.NotificationType.*;
+import static front.meetudy.constant.study.JoinStatusEnum.*;
 import static org.springframework.http.HttpStatus.*;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class StudyGroupService {
 
     private final StudyGroupRepository studyGroupRepository;
@@ -68,6 +76,11 @@ public class StudyGroupService {
     private final MemberRepository memberRepository;
 
     private final AuthService authService;
+
+    private final RedisPublisher redisPublisher;
+
+    private final NotificationService notificationService;
+
     private static final String TODAY = "매일";
 
     /**
@@ -116,9 +129,9 @@ public class StudyGroupService {
 
         //2.db 멤버 확인 (추방 / 신청 중인 경우)
         List<JoinStatusEnum> includeStatus = new ArrayList<>();
-        includeStatus.add(JoinStatusEnum.KICKED);
-        includeStatus.add(JoinStatusEnum.PENDING);
-        includeStatus.add(JoinStatusEnum.APPROVED);
+        includeStatus.add(KICKED);
+        includeStatus.add(PENDING);
+        includeStatus.add(APPROVED);
 
         studyGroupMemberRepository.findByStudyGroupIdAndMemberId(studyGroup.getId(), member.getId(),includeStatus).ifPresent(
             user -> {
@@ -126,8 +139,8 @@ public class StudyGroupService {
         });
 
         List<JoinStatusEnum> includeStatusApprove = new ArrayList<>();
-        includeStatusApprove.add(JoinStatusEnum.REJECTED);
-        includeStatusApprove.add(JoinStatusEnum.WITHDRAW);
+        includeStatusApprove.add(REJECTED);
+        includeStatusApprove.add(WITHDRAW);
         Optional<StudyGroupMember> optional = studyGroupMemberRepository.findByStudyGroupIdAndMemberId(studyGroup.getId(), member.getId(), includeStatusApprove);
         StudyGroupMember studyGroupMember;
 
@@ -139,11 +152,12 @@ public class StudyGroupService {
         }
         chatGroupMemberPM(member, studyGroupMember, "join");
 
+        //redis 알림 전송
+        redisNotificationSave(studyGroupJoinReqDto.getStudyGroupId(), member, studyGroupMember, studyGroup.getTitle(),true);
+
         return StudyGroupJoinResDto.from(studyGroupMember);
 
     }
-
-
 
     /**
      * 그룹 리스트 조회
@@ -186,9 +200,11 @@ public class StudyGroupService {
      */
     public void joinGroupMemberCancel(StudyGroupCancelReqDto studyGroupCancelReqDto, Member member) {
 
-        StudyGroupMember studyGroupMember = studyGroupMemberRepository.findByStudyGroupIdAndMemberId(studyGroupCancelReqDto.getStudyGroupId(), member.getId(),List.of(JoinStatusEnum.PENDING))
+        StudyGroupMember studyGroupMember = studyGroupMemberRepository.findByStudyGroupIdAndMemberId(studyGroupCancelReqDto.getStudyGroupId(), member.getId(),List.of(PENDING))
                 .orElseThrow(() -> new CustomApiException(BAD_GATEWAY, ERR_012, ERR_012.getValue()));
+
         studyGroupMemberRepository.delete(studyGroupMember);
+        redisNotificationSave(studyGroupMember.getStudyGroup().getId(), member, studyGroupMember, studyGroupMember.getStudyGroup().getTitle(), false);
     }
 
     /**
@@ -203,7 +219,6 @@ public class StudyGroupService {
     }
 
 
-
     /**
      * 출석률 및 출석 리스트 최근[10개]
      */
@@ -214,7 +229,8 @@ public class StudyGroupService {
         authService.findGroupAuth(studyGroupAttendanceRateReqDto.getStudyGroupId(), member.getId());
 
         //2.studymember 조회
-        StudyGroupMember studyGroupMember = authService.studyGroupMemberJoinChk(studyGroupAttendanceRateReqDto.getStudyGroupId(), studyGroupAttendanceRateReqDto.getMemberId());
+        StudyGroupMember studyGroupMember = authService.studyGroupMemberJoinChk(studyGroupAttendanceRateReqDto.getStudyGroupId(),
+                studyGroupAttendanceRateReqDto.getMemberId());
         //3.스케줄 갯수 조회
         double rate = attendanceRate(studyGroupAttendanceRateReqDto, studyGroupMember.getJoinApprovedAt());
         //최근 10개 참석 리스트 조회
@@ -353,7 +369,7 @@ public class StudyGroupService {
         List<GroupOperateMemberResDto> studyGroupMemberList = studyGroupMemberRepository.findStudyGroupMemberList(studyGroupId);
 
         return studyGroupMemberList.stream()
-                .filter(dto -> dto.getJoinStatus().equals(JoinStatusEnum.APPROVED))
+                .filter(dto -> dto.getJoinStatus().equals(APPROVED))
                 .toList();
     }
 
@@ -392,7 +408,7 @@ public class StudyGroupService {
      * @return
      */
     public List<GroupOperateResDto> groupPendingJoinList(Member member) {
-        return studyGroupQueryDslRepository.findJoinGroupList(member,JoinStatusEnum.PENDING);
+        return studyGroupQueryDslRepository.findJoinGroupList(member, PENDING);
     }
 
     /**
@@ -401,14 +417,15 @@ public class StudyGroupService {
      * @param member
      */
     public void groupMemberWithdraw(Long studyGroupId , Member member) {
-        StudyGroupMember studyGroupMember = authService.studyGroupMemberJoinChk(studyGroupId, member.getId());
+         StudyGroupMember studyGroupMember = authService.studyGroupMemberJoinChk(studyGroupId, member.getId());
         if(studyGroupMember.getRole().equals(MemberRole.LEADER)) {
             throw new CustomApiException(BAD_REQUEST, ERR_021, ERR_021.getValue());
         }
 
         studyGroupRepository.findById(studyGroupId)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
-        studyGroupMember.kickMember(JoinStatusEnum.WITHDRAW);
+        studyGroupMember.kickMember(WITHDRAW);
+        redisNotificationSave(studyGroupId, member, studyGroupMember, studyGroupMember.getStudyGroup().getTitle(),true);
 
         chatGroupMemberPM(member, studyGroupMember, "leave");
     }
@@ -536,7 +553,7 @@ public class StudyGroupService {
      * @param studyGroupMember
      */
     private void chatGroupMemberPM(Member member, StudyGroupMember studyGroupMember, String endUrl) {
-        if (!endUrl.equals("join") || studyGroupMember.getJoinStatus().equals(JoinStatusEnum.APPROVED)) {
+        if (!endUrl.equals("join") || studyGroupMember.getJoinStatus().equals(APPROVED)) {
             ChatMemberDto chatMemberDto = memberRepository.findChatMember(member.getId())
                     .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_013, ERR_013.getValue()));
 
@@ -544,6 +561,24 @@ public class StudyGroupService {
                     "/topic/group." + studyGroupMember.getStudyGroup().getId() + ".member." + endUrl,
                     chatMemberDto
             );
+        }
+    }
+
+    //redis 알림 전송
+    private void redisNotificationSave(Long studyGroupId, Member member, StudyGroupMember studyGroupMember, String groupTitle,boolean creUpd) {
+        StudyGroupMember leaderMember = studyGroupMemberRepository.findGroupLeader(studyGroupId)
+                .orElseThrow(() -> new CustomApiException(SERVICE_UNAVAILABLE, ERR_012, ERR_012.getValue()));
+        if(creUpd) {
+            if (studyGroupMember.getJoinStatus().equals(PENDING)) {
+                notificationService.notificationGroupSave(GROUP_PENDING, leaderMember.getMember().getId(), member.getId(), studyGroupId, groupTitle, member.getNickname());
+            } else if (studyGroupMember.getJoinStatus().equals(APPROVED)) {
+                notificationService.notificationGroupSave(GROUP_APPROVE, leaderMember.getMember().getId(), member.getId(), studyGroupId, groupTitle, member.getNickname());
+            } else if(studyGroupMember.getJoinStatus().equals(WITHDRAW)) {
+                notificationService.notificationGroupSave(GROUP_WITHDRAW, leaderMember.getMember().getId(), member.getId(), studyGroupId, groupTitle, member.getNickname());
+            }
+        } else {
+            notificationService.notificationGroupUpdate(leaderMember.getMember().getId(), member.getId(), studyGroupId, groupTitle, member.getNickname());
+
         }
     }
 

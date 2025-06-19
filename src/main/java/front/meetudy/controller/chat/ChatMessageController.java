@@ -69,7 +69,7 @@ public class ChatMessageController {
             @PageableDefault(size = 30, page = 0) Pageable pageable,
             @CurrentMember Member member
     ) {
-        return Response.ok("채팅 목록 조회 완료", chatMessageService.chatList(pageable, studyGroupId, member));
+        return Response.ok("채팅 목록 조회 완료", chatMessageService.chatList(pageable, studyGroupId));
     }
 
     @Operation(summary = "채팅 그룹 인원 조회", description = "채팅 그룹 인원 조회")

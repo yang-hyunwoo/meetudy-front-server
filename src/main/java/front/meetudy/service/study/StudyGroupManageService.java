@@ -1,5 +1,6 @@
 package front.meetudy.service.study;
 
+import front.meetudy.constant.notification.NotificationType;
 import front.meetudy.constant.study.JoinStatusEnum;
 import front.meetudy.constant.study.MemberRole;
 import front.meetudy.domain.member.Member;
@@ -7,6 +8,7 @@ import front.meetudy.domain.study.StudyGroup;
 import front.meetudy.domain.study.StudyGroupDetail;
 import front.meetudy.domain.study.StudyGroupMember;
 import front.meetudy.dto.member.ChatMemberDto;
+import front.meetudy.dto.notification.NotificationDto;
 import front.meetudy.dto.request.study.operate.GroupMemberStatusReqDto;
 import front.meetudy.dto.response.study.operate.GroupOperateListResDto;
 import front.meetudy.dto.response.study.operate.GroupOperateMemberListResDto;
@@ -16,7 +18,10 @@ import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.member.MemberRepository;
 import front.meetudy.repository.study.*;
 import front.meetudy.service.auth.AuthService;
+import front.meetudy.service.notification.NotificationService;
+import front.meetudy.util.redis.RedisPublisher;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,11 +30,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static front.meetudy.constant.error.ErrorEnum.*;
+import static front.meetudy.constant.notification.NotificationType.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class StudyGroupManageService {
 
     private final StudyGroupRepository studyGroupRepository;
@@ -45,6 +52,10 @@ public class StudyGroupManageService {
     private final MemberRepository memberRepository;
 
     private final AuthService authService;
+
+    private final RedisPublisher redisPublisher;
+
+    private final NotificationService notificationService;
     /**
      * 운영 / 종료 스터디 그룹 조회
      * @param member
@@ -165,7 +176,6 @@ public class StudyGroupManageService {
         }
 
         studyGroupMember.approvedMember(JoinStatusEnum.APPROVED);
-
         chatGroupMemberPM(groupMemberStatusReqDto,"join");
 
     }
