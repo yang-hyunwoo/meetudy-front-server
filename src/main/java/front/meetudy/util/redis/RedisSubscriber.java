@@ -2,6 +2,7 @@ package front.meetudy.util.redis;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import front.meetudy.dto.notification.NotificationDto;
+import front.meetudy.dto.response.notification.NotificationResDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.Message;
@@ -26,13 +27,13 @@ public class RedisSubscriber implements MessageListener {
         int maxRetry = 5;
         try{
             String body = new String(message.getBody(), UTF_8);
-            NotificationDto notificationDto = objectMapper.readValue(body, NotificationDto.class);
+            NotificationResDto notificationResDto = objectMapper.readValue(body, NotificationResDto.class);
             while(attempt < maxRetry) {
                 try{
                     messagingTemplate.convertAndSendToUser(
-                            String.valueOf(notificationDto.getReceiverId()),
+                            String.valueOf(notificationResDto.getReceiverId()),
                             "/queue/notification",
-                            notificationDto
+                            notificationResDto
                     );
 
                     break;

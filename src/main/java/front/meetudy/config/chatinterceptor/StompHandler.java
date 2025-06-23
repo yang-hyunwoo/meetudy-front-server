@@ -24,12 +24,17 @@ public class StompHandler implements ChannelInterceptor {
         //연결 시
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
+            String uri = (String) sessionAttributes.get("handshakeUri");
             LoginUser loginUser = (LoginUser) sessionAttributes.get("loginUser");
-            Long studyGroupId = (Long) sessionAttributes.get("studyGroupId");
-            StompPrincipal stompPrincipal = new StompPrincipal(loginUser.getMember().getId(), loginUser.getMember().getNickname(), studyGroupId);
+            StompPrincipal stompPrincipal = null;
+            if (uri.contains("ws-chat")) { //채팅일 경우
+                Long studyGroupId = (Long) sessionAttributes.get("studyGroupId");
+                stompPrincipal = new StompPrincipal(loginUser.getMember().getId(), loginUser.getMember().getNickname(), studyGroupId);
+            } else {
+                stompPrincipal = new StompPrincipal(loginUser.getMember().getId(), loginUser.getMember().getNickname());
+            }
             accessor.setUser(stompPrincipal);
         }
-
         return message;
 
     }

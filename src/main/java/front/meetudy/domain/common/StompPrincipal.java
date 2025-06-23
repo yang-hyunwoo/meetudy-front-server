@@ -14,6 +14,12 @@ public class StompPrincipal implements Principal {
     private final String username;
     private final Long studyGroupId;
 
+    public StompPrincipal(Long userId , String username) {
+        this.userId = userId;
+        this.username = username;
+        this.studyGroupId = null;
+    }
+
 
     @Override
     public String getName() {

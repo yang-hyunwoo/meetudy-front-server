@@ -23,9 +23,14 @@ public class CustomHandshakeHandler extends DefaultHandshakeHandler {
      */
     @Override
     protected Principal determineUser(ServerHttpRequest request, WebSocketHandler wsHandler, Map<String, Object> attributes) {
+        String uri = (String) attributes.get("handshakeUri");
         LoginUser loginUser = (LoginUser) attributes.get("loginUser");
-        Long studyGroupId = (Long) attributes.get("studyGroupId");
         Member member = loginUser.getMember();
-        return new StompPrincipal(member.getId(), member.getNickname(), studyGroupId);
+        if(uri.contains("/ws-chat")) {
+            Long studyGroupId = (Long) attributes.get("studyGroupId");
+            return new StompPrincipal(member.getId(), member.getNickname(), studyGroupId);
+        } else {
+            return new StompPrincipal(member.getId(), member.getNickname());
+        }
     }
 }
