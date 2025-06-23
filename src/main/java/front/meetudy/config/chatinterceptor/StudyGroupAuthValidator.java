@@ -16,7 +16,6 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @Transactional(readOnly = true)
 public class StudyGroupAuthValidator {
 
-    private final StudyGroupMemberRepository studyGroupMemberRepository;
     private final AuthService authService;
 
     public void validateMemberInGroup(Long groupId, Long memberId) {

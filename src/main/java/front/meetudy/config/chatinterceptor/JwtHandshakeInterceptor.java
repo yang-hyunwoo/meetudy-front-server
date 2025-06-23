@@ -53,11 +53,10 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
         if(request instanceof ServletServerHttpRequest servletRequest) {
             HttpServletRequest httpRequest = servletRequest.getServletRequest();
             String token = extractTokenFromCookieOrHeader(httpRequest.getParameter("accessToken"));
-
+            String uri = httpRequest.getRequestURI();
             LoginUser loginUser = jwtProcess.verifyAccessToken(token);      //accessToken 검증
             HttpServletRequest serRequest = ((ServletServerHttpRequest) request).getServletRequest();
-            String studyGroupId = serRequest.getParameter("studyGroupId");
-            long longStudyGroupId = Long.parseLong(studyGroupId);
+
             Member member = memberRepository.findByIdAndDeleted(loginUser.getMember().getId(), false)
                     .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_013, ERR_013.getValue()));
             Member member1 = Member.builder()
@@ -66,8 +65,13 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
                     .nickname(member.getNickname())
                     .build();
              ;
-            authValidator.validateMemberInGroup(Long.parseLong(studyGroupId), member.getId());
-            attributes.put("studyGroupId", longStudyGroupId);
+            if(uri.contains("ws-chat")) {
+                String studyGroupId = serRequest.getParameter("studyGroupId");
+                long longStudyGroupId = Long.parseLong(studyGroupId);
+                authValidator.validateMemberInGroup(Long.parseLong(studyGroupId), member.getId());
+                attributes.put("studyGroupId", longStudyGroupId);
+            }
+            attributes.put("handshakeUri",uri);
             attributes.put("loginUser", new LoginUser(member1));
             return true;
         }

@@ -100,7 +100,7 @@ public class JwtProcess {
                     );
             return new LoginUser(member);
         } catch (TokenExpiredException e) {
-            log.error("TokenExpiredException : {0}", e);
+            log.error("TokenExpiredException : {토큰 만료}");
             throw e;
         } catch (JWTVerificationException e) {
             log.error("JWTVerificationException : {0}", e);
