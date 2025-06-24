@@ -30,7 +30,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws-chat", "ws-notification")
+        registry.addEndpoint("/ws-chat", "/ws-notification","/ws-message")
                 .addInterceptors(jwtHandshakeInterceptor)
                 .setHandshakeHandler(new CustomHandshakeHandler())
                 .setAllowedOriginPatterns("*")

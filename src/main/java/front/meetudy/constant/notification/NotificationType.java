@@ -13,6 +13,7 @@ public enum NotificationType {
     GROUP_START(" 시작 될 예정 입니다.", "/group/manage/joined"),
     GROUP_WITHDRAW(" 님이 그룹을 탈퇴 하였습니다.","/group/manage/operating"),
     GROUP_CANCEL(" 님이 그룹 요청을 취소 하였습니다.","/group/manage/operating"),
+    MESSAGE_SEND(" 님에게 쪽지가 왔습니다.", "/mypage"),
     ;
 
     private final String value;

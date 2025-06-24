@@ -43,7 +43,7 @@ public class Notification extends BaseEntity {
     @Column(nullable = false)
     private NotificationType notificationType;
 
-    @Column(length = 500,nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String message;
 
     @Column(length = 2000)

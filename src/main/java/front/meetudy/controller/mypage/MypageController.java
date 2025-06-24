@@ -4,11 +4,11 @@ import front.meetudy.annotation.customannotation.CurrentMember;
 import front.meetudy.constant.security.CookieEnum;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.PageDto;
-import front.meetudy.dto.request.board.FreePageReqDto;
 import front.meetudy.dto.request.mypage.MypageDetailChgReqDto;
+import front.meetudy.dto.request.mypage.MypageMessageWriteReqDto;
 import front.meetudy.dto.request.mypage.MypagePwdChgReqDto;
 import front.meetudy.dto.request.mypage.MypageWithdrawReqDto;
-import front.meetudy.dto.response.board.FreePageResDto;
+import front.meetudy.dto.response.mypage.MyPageMessageResDto;
 import front.meetudy.dto.response.mypage.MyPageBoardWriteResDto;
 import front.meetudy.dto.response.mypage.MyPageGroupCountResDto;
 import front.meetudy.dto.response.mypage.MyPageMemberResDto;
@@ -95,4 +95,51 @@ public class MypageController {
         return Response.ok("멤버가 작성한 게시판 리스트 조회 성공", myPageService.memberBoardWriteList(member, pageable));
     }
 
+    @Operation(summary = "받은 쪽지함 리스트 조회" , description = "쪽지함 리스트 조회")
+    @GetMapping("/message/receive/list")
+    public ResponseEntity<Response<PageDto<MyPageMessageResDto>>> receiveMessageList(
+            @PageableDefault(size = 5, page = 0) Pageable pageable,
+            @CurrentMember Member member
+    ) {
+        return Response.ok("쪽지함 리스트 조회 완료", myPageService.receiveMessageList(member, pageable));
+    }
+
+    @Operation(summary = "보낸 쪽지함 리스트 조회" , description = "쪽지함 리스트 조회")
+    @GetMapping("/message/send/list")
+    public ResponseEntity<Response<PageDto<MyPageMessageResDto>>> sendMessageList(
+            @PageableDefault(size = 5, page = 0) Pageable pageable,
+            @CurrentMember Member member
+    ) {
+        return Response.ok("쪽지함 리스트 조회 완료", myPageService.sendMessageList(member, pageable));
+    }
+
+    @Operation(summary = "쪽지 전송", description = "쪽지 전송")
+    @PostMapping("/message/send")
+    public ResponseEntity<Response<Void>> messageSend(
+            @RequestBody MypageMessageWriteReqDto mypageMessageWriteReqDto,
+            @CurrentMember Member member
+    ) {
+        myPageService.messageSend(mypageMessageWriteReqDto, member);
+        return Response.create("쪽지 전송 완료", null);
+    }
+
+    @Operation(summary = "쪽지 읽음" , description = "쪽지 읽음")
+    @PutMapping("/message/{id}/read")
+    public ResponseEntity<Response<Void>> messageRead(
+            @PathVariable("id") Long messageId,
+            @CurrentMember Member member
+    ) {
+        myPageService.messageRead(messageId, member);
+        return Response.update("쪽지 읽음 완료", null);
+    }
+
+    @Operation(summary = "쪽지 삭제" , description = "쪽지 삭제")
+    @PutMapping("/message/{id}/delete")
+    public ResponseEntity<Response<Void>> messageDelete(
+            @PathVariable("id") Long messageId,
+            @CurrentMember Member member
+    ) {
+        myPageService.messageDelete(messageId, member);
+        return Response.update("쪽지 삭제 완료", null);
+    }
 }
