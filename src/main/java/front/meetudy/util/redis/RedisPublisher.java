@@ -12,7 +12,7 @@ public class RedisPublisher {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    public void publish(String topic , NotificationResDto notificationResDto) {
-        redisTemplate.convertAndSend(topic, notificationResDto);
+    public <T> void publish(String topic, T message) {
+        redisTemplate.convertAndSend(topic, message);
     }
 }
