@@ -10,4 +10,5 @@ public class securityUtil {
         }
         return bearerToken.substring(7).trim();
     }
+
 }

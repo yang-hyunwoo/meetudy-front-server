@@ -8,6 +8,12 @@ import java.util.List;
 
 public interface ChatDocumentRepository extends JpaRepository<ChatDocument, Long> {
 
+    /**
+     * 채팅방 자료 리스트 조회
+     *
+     * @param studyGroupId 스터디 그룹 id
+     * @return 채팅방 자료 리스트 객체
+     */
     @Query("""
                 SELECT cd
                 FROM ChatDocument cd
@@ -19,6 +25,5 @@ public interface ChatDocumentRepository extends JpaRepository<ChatDocument, Long
                   ORDER BY cd.id DESC
             """)
     List<ChatDocument> findChatDocumentList(Long studyGroupId);
-
 
 }

@@ -7,8 +7,8 @@ import jakarta.validation.Payload;
 import java.lang.annotation.*;
 
 /**
- * 휴대폰번호 커스텀 어노테이션
- * @PhoneNumber
+ * 휴대폰번호  annotation
+ * PhoneNumber(message=메시지,group= 단일 에러 리턴시 순서)
  */
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)

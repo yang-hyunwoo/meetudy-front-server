@@ -28,5 +28,4 @@ public class NotificationReqDto {
 
     private String message;
 
-
 }

@@ -12,13 +12,16 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+/**
+ * stomp 연결시 검증
+ */
 @RequiredArgsConstructor
 @Component
 public class StompHandler implements ChannelInterceptor {
 
-
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
+
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
 
         //연결 시

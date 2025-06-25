@@ -10,7 +10,7 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 
 /**
- * 한글 / 영문 커스텀 어노테이션
+ * 한글 / 영문 검증 validator
  * 1 정규식 검사
  * 2.자릿수 검사
  */
@@ -39,6 +39,7 @@ public class KoreanEnglishValidator implements ConstraintValidator<KoreanEnglish
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
+
         if (value == null || value.trim().isEmpty()) {
             return true;
         }

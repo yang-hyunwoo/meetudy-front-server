@@ -14,10 +14,16 @@ import java.util.List;
 @RequiredArgsConstructor
 @Repository
 public class MainQueryDslRepositoryImpl implements MainQueryDslRepository {
+
     private final JPAQueryFactory queryFactory;
     QNoticeBoard noticeBoard = QNoticeBoard.noticeBoard;
     QFilesDetails filesDetails = QFilesDetails.filesDetails;
 
+    /**
+     * 메인 공지 사항 리스트 조회
+     *
+     * @return 메인 공지 사항 리스트 객체
+     */
     @Override
     public List<MainNoticeResDto> findMainNotice() {
       return  queryFactory.select(new QMainNoticeResDto(
@@ -36,4 +42,5 @@ public class MainQueryDslRepositoryImpl implements MainQueryDslRepository {
                 .limit(5)
                 .fetch();
     }
+
 }

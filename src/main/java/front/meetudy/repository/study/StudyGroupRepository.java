@@ -11,8 +11,9 @@ public interface StudyGroupRepository extends JpaRepository<StudyGroup, Long> {
 
     /**
      * 그룹 가입 존재 여부 확인
-     * @param id
-     * @return
+     *
+     * @param id 그룹 id
+     * @return 그룹 객체
      */
     @Query("""
             SELECT sg

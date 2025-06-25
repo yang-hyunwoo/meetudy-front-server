@@ -1,7 +1,6 @@
 package front.meetudy.dto.response.study.operate;
 
 import front.meetudy.constant.study.JoinStatusEnum;
-import front.meetudy.domain.study.StudyGroupMember;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,6 +31,5 @@ public class GroupOperateMemberResDto {
 
     @Schema(description = "가입일 ", example = "2025-10-11 11:11:111")
     private LocalDateTime joinApprovedAt;
-
 
 }

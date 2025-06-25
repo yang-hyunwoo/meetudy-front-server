@@ -3,7 +3,6 @@ package front.meetudy.dto.request.board;
 import front.meetudy.annotation.customannotation.EnumValidation;
 import front.meetudy.annotation.customannotation.Sanitize;
 import front.meetudy.constant.search.SearchType;
-import front.meetudy.constant.study.RegionEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,7 +17,7 @@ import static front.meetudy.annotation.ValidationGroups.*;
 @AllArgsConstructor
 public class FreePageReqDto {
 
-    @Schema(description ="자유게시판 검색 조건" , example = "ALL")
+    @Schema(description ="자유 게시판 검색 조건" , example = "ALL")
     @EnumValidation(enumClass = SearchType.class, message = "{free.searchKeyword}", groups = Step1.class)
     private String searchType;
 

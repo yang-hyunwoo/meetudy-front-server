@@ -30,7 +30,6 @@ public class MemberService {
 
     private final RecaptchaService recaptchaService;
 
-
     /**
      * 회원가입
      * @param joinReqDto
@@ -68,4 +67,5 @@ public class MemberService {
              .orElseThrow(() -> new CustomApiException(LG_MEMBER_ID_PW_INVALID.getStatus(), ERR_007, LG_MEMBER_ID_PW_INVALID.getMessage()))
              .initLoginCount();
     }
+
 }

@@ -3,7 +3,6 @@ package front.meetudy.domain.study;
 import front.meetudy.constant.study.RegionEnum;
 import front.meetudy.domain.common.BaseEntity;
 import front.meetudy.domain.common.file.Files;
-import front.meetudy.dto.request.study.operate.StudyGroupUpdateReqDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -22,7 +21,7 @@ import java.util.Objects;
                 @Index(name = "idx_study_group_region", columnList = "region"),
                 @Index(name = "idx_study_group_joinType", columnList = "joinType"),
                 @Index(name = "idx_study_group_status", columnList = "status"),
-})
+        })
 public class StudyGroup extends BaseEntity {
 
     @Id
@@ -33,13 +32,13 @@ public class StudyGroup extends BaseEntity {
     @JoinColumn(name = "thumbnail_file_id")
     private Files thumbnailFile;
 
-    @Column(length = 100 , nullable = false)
+    @Column(length = 100, nullable = false)
     private String title;
 
     private String summary;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 10 , nullable = false)
+    @Column(length = 10, nullable = false)
     private RegionEnum region;
 
     @Column(nullable = false)
@@ -60,18 +59,18 @@ public class StudyGroup extends BaseEntity {
 
     @Builder
     protected StudyGroup(Long id,
-                        Files thumbnailFile,
-                        String title,
-                        String summary,
-                        RegionEnum region,
-                        boolean joinType,
-                        String status,
-                        int currentMemberCount,
-                        int maxMemberCount
-                        ) {
+                         Files thumbnailFile,
+                         String title,
+                         String summary,
+                         RegionEnum region,
+                         boolean joinType,
+                         String status,
+                         int currentMemberCount,
+                         int maxMemberCount
+    ) {
         this.id = id;
         this.thumbnailFile = thumbnailFile;
-        this.title =title;
+        this.title = title;
         this.summary = summary;
         this.region = region;
         this.joinType = joinType;
@@ -85,7 +84,8 @@ public class StudyGroup extends BaseEntity {
                                               String summary,
                                               RegionEnum region,
                                               boolean joinType,
-                                              int maxMemberCount) {
+                                              int maxMemberCount
+    ) {
         return StudyGroup.builder()
                 .thumbnailFile(thumbnailFile)
                 .title(title)
@@ -98,21 +98,25 @@ public class StudyGroup extends BaseEntity {
                 .build();
     }
 
-
-
     /**
      * 멤버 인원수 증가
      */
     public void memberCountIncrease() {
-        if(!this.joinType) {
+        if (!this.joinType) {
             this.currentMemberCount++;
         }
     }
 
+    /**
+     * 멤버 인원수 증가
+     */
     public void memberCountApproveIncrease() {
         this.currentMemberCount++;
     }
 
+    /**
+     * 멤버 인원수 감소
+     */
     public void memberCountDecrease() {
         this.currentMemberCount--;
     }
@@ -121,14 +125,17 @@ public class StudyGroup extends BaseEntity {
      * 상태값 변경
      */
     public void statusChange() {
-        if(this.status.equals("active")) {
+        if (this.status.equals("active")) {
             this.status = "closed";
         } else {
             this.status = "active";
         }
     }
 
-
+    /**
+     * 그룹 수정
+     * @param studyGroupUpdateCommand
+     */
     public void studyGroupUpdate(StudyGroupUpdateCommand studyGroupUpdateCommand) {
         this.title = studyGroupUpdateCommand.getTitle();
         this.summary = studyGroupUpdateCommand.getSummary();
@@ -137,8 +144,6 @@ public class StudyGroup extends BaseEntity {
         this.maxMemberCount = studyGroupUpdateCommand.getMaxMemberCount();
         this.studyGroupDetail.studyGroupDetailUpdate(studyGroupUpdateCommand);
     }
-
-
 
     @Override
     public boolean equals(Object o) {
@@ -167,6 +172,5 @@ public class StudyGroup extends BaseEntity {
                 ", maxMemberCount=" + maxMemberCount +
                 '}';
     }
-
 
 }

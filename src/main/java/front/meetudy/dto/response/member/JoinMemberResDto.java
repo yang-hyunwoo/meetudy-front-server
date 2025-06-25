@@ -1,7 +1,6 @@
 package front.meetudy.dto.response.member;
 
 import front.meetudy.constant.member.MemberProviderTypeEnum;
-import front.meetudy.domain.member.Member;
 import front.meetudy.dto.member.MemberDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -23,7 +22,6 @@ public class JoinMemberResDto {
     private MemberProviderTypeEnum provider;
 
 
-
     public static JoinMemberResDto from(MemberDto memberDto) {
         return JoinMemberResDto.builder()
                 .id(memberDto.getId())
@@ -32,4 +30,5 @@ public class JoinMemberResDto {
                 .provider(memberDto.getProvider())
                 .build();
     }
+
 }

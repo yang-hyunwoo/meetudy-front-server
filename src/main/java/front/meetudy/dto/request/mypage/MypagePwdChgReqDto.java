@@ -1,6 +1,5 @@
 package front.meetudy.dto.request.mypage;
 
-import front.meetudy.annotation.ValidationGroups;
 import front.meetudy.annotation.ValidationMode;
 import front.meetudy.annotation.customannotation.Password;
 import front.meetudy.constant.error.ValidationType;
@@ -22,8 +21,10 @@ public class MypagePwdChgReqDto {
     @NotBlank(message = "{password.notBlank}",groups = Step1.class)
     @Password(message = "{password.pattern}", groups = Step1.class)
     private String currentPw;
+
     @Schema(description = "비밀번호", example = "xxx")
     @NotBlank(message = "{password.notBlank}",groups = Step2.class)
     @Password(message = "{password.pattern}", groups = Step2.class)
     private String newPw;
+
 }

@@ -27,4 +27,5 @@ public class XssSanitizer {
                 // ✅ iframe 막기 (기본 막혀 있음, 혹시 있을 경우 대비)
                 .removeTags("iframe", "script", "object", "embed");
     }
+
 }

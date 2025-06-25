@@ -29,7 +29,6 @@ public class ChatNotice extends BaseEntity {
     @Column(name = "study_group_id", nullable = false)
     private Long studyGroupId;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
@@ -39,6 +38,7 @@ public class ChatNotice extends BaseEntity {
 
     @Column(nullable = false)
     private boolean deleted;
+
 
     @Builder
     protected ChatNotice(Long id,
@@ -66,10 +66,17 @@ public class ChatNotice extends BaseEntity {
                 .build();
     }
 
+    /**
+     * 채팅방 공지 수정
+     * @param chatNoticeDto
+     */
     public void updateChatNotice(ChatNoticeDto chatNoticeDto) {
         this.message = chatNoticeDto.getMessage();
     }
 
+    /**
+     * 태칭방 공지 삭제
+     */
     public void deleteChatNoitce() {
         this.deleted = true;
     }
@@ -96,4 +103,5 @@ public class ChatNotice extends BaseEntity {
                 ", message='" + message + '\'' +
                 '}';
     }
+
 }

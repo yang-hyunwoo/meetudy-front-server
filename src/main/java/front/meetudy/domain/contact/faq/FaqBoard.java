@@ -58,7 +58,8 @@ public class FaqBoard extends BaseEntity {
                        FaqType faqType,
                        int sort,
                        boolean visible,
-                       boolean deleted) {
+                       boolean deleted
+    ) {
         this.id = id;
         this.member = member;
         this.question = question;
@@ -101,7 +102,6 @@ public class FaqBoard extends BaseEntity {
         return Objects.hash(id);
     }
 
-
     @Override
     public String toString() {
         return "FaqBoard{" +
@@ -115,4 +115,5 @@ public class FaqBoard extends BaseEntity {
                 ", deleted=" + deleted +
                 '}';
     }
+
 }

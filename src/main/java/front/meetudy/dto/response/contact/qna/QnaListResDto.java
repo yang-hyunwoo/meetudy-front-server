@@ -33,6 +33,7 @@ public class QnaListResDto {
     @Schema(description = "qna유형" , example = "SERVICE")
     private FaqType qnaType;
 
+
     public static QnaListResDto from(QnaBoard qnaBoard) {
         return QnaListResDto.builder()
                 .id(qnaBoard.getId())
@@ -44,6 +45,5 @@ public class QnaListResDto {
                 .qnaType(qnaBoard.getQnaType())
                 .build();
     }
-
 
 }

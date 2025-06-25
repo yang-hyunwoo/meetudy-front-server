@@ -12,7 +12,10 @@ import static front.meetudy.constant.login.LoginErrorCode.*;
 @Slf4j
 public class LoginErrorResolver {
 
-    public static LoginErrorCode resolve(Throwable failed, LoginReqDto loginReqDto, MemberService memberService) {
+    public static LoginErrorCode resolve(Throwable failed,
+                                         LoginReqDto loginReqDto,
+                                         MemberService memberService
+    ) {
         if (failed == null) {
             log.warn("resolve()에 전달된 예외가 null입니다.");
             return LG_ANOTHER_ERROR;
@@ -54,4 +57,5 @@ public class LoginErrorResolver {
 
         return errorCode;
     }
+
 }

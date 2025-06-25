@@ -1,7 +1,6 @@
 package front.meetudy.config;
 
 import front.meetudy.config.chatinterceptor.CustomHandshakeHandler;
-import front.meetudy.config.chatinterceptor.JwtHandshakeInterceptor;
 import front.meetudy.config.chatinterceptor.StompHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;

@@ -7,7 +7,6 @@ import front.meetudy.exception.CustomApiException;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
@@ -25,6 +24,7 @@ import static org.springframework.http.HttpStatus.*;
 @Table(name = "member", uniqueConstraints = {
         @UniqueConstraint(name = "UK_member_email_nickname", columnNames = {"email", "provider"})
 })
+
 public class Member extends BaseEntity {
 
     @Id
@@ -33,14 +33,14 @@ public class Member extends BaseEntity {
 
     private Long profileImageId;
 
-    @Column(nullable = false ,length = 100)
+    @Column(nullable = false, length = 100)
 
     private String email;
 
-    @Column(nullable = false ,length = 50)
+    @Column(nullable = false, length = 50)
     private String name;
 
-    @Column(nullable = false , length = 30)
+    @Column(nullable = false, length = 30)
     private String nickname;
 
     @Column(length = 8)
@@ -76,6 +76,7 @@ public class Member extends BaseEntity {
 
     private LocalDateTime passwordChangeAt;
 
+
     @Builder
     protected Member(Long id,
                      Long profileImageId,
@@ -90,9 +91,10 @@ public class Member extends BaseEntity {
                      MemberProviderTypeEnum provider,
                      String providerId,
                      int failLoginCount,
-                     boolean  deleted,
+                     boolean deleted,
                      LocalDateTime deletedAt,
-                     LocalDateTime passwordChangeAt) {
+                     LocalDateTime passwordChangeAt
+    ) {
         this.id = id;
         this.profileImageId = profileImageId;
         this.email = email;
@@ -113,6 +115,7 @@ public class Member extends BaseEntity {
 
     /**
      * 일반 사용자 생성 메서드
+     *
      * @param profileImageId
      * @param email
      * @param name
@@ -123,14 +126,15 @@ public class Member extends BaseEntity {
      * @param isEmailAgreed
      * @return
      */
-    public static Member createMember( Long profileImageId,
-                                       String email,
-                                       String name,
-                                       String nickname,
-                                       String birth,
-                                       String phoneNumber,
-                                       String password,
-                                       boolean isEmailAgreed) {
+    public static Member createMember(Long profileImageId,
+                                      String email,
+                                      String name,
+                                      String nickname,
+                                      String birth,
+                                      String phoneNumber,
+                                      String password,
+                                      boolean isEmailAgreed
+    ) {
         return Member.builder()
                 .profileImageId(profileImageId)
                 .email(email)
@@ -146,11 +150,11 @@ public class Member extends BaseEntity {
                 .deleted(false)
                 .passwordChangeAt(LocalDateTime.now())
                 .build();
-
     }
 
     /**
      * oauth 사용자 생성 메서드
+     *
      * @param email
      * @param name
      * @param nickname
@@ -159,13 +163,13 @@ public class Member extends BaseEntity {
      * @param providerId
      * @return
      */
-    public static Member createOauthMember(
-                                       String email,
-                                       String name,
-                                       String nickname,
-                                       String password,
-                                       MemberProviderTypeEnum provider,
-                                       String providerId) {
+    public static Member createOauthMember(String email,
+                                           String name,
+                                           String nickname,
+                                           String password,
+                                           MemberProviderTypeEnum provider,
+                                           String providerId
+    ) {
         return Member.builder()
                 .email(email)
                 .name(name)
@@ -179,23 +183,23 @@ public class Member extends BaseEntity {
                 .deleted(false)
                 .passwordChangeAt(LocalDateTime.now())
                 .build();
-
     }
 
     /**
      * 사용자 인증 메서드
+     *
      * @param id
      * @param role
      * @return
      */
-    public static Member partialOf(Long id, MemberEnum role) {
+    public static Member partialOf(Long id,
+                                   MemberEnum role
+    ) {
         return Member.builder()
                 .id(id)
                 .role(role)
                 .build();
     }
-
-
 
     /**
      * 비밀번호 오류 횟수 증가
@@ -204,7 +208,7 @@ public class Member extends BaseEntity {
         if (this.failLoginCount < 5) {
             this.failLoginCount++;
         } else {
-            throw new CustomApiException(LG_PASSWORD_WRONG_LOCKED.getStatus(), ERR_007,LG_PASSWORD_WRONG_LOCKED.getMessage());
+            throw new CustomApiException(LG_PASSWORD_WRONG_LOCKED.getStatus(), ERR_007, LG_PASSWORD_WRONG_LOCKED.getMessage());
         }
     }
 
@@ -215,18 +219,21 @@ public class Member extends BaseEntity {
         this.failLoginCount = 0;
     }
 
-
     /**
      * 비밀번호 변경 이벤트
+     *
      * @param currentPw
      * @param newPw
      * @param passwordEncoder
      */
-    public void passwordChange(String currentPw , String newPw , PasswordEncoder passwordEncoder) {
-        if(!passwordEncoder.matches(currentPw,this.password)) {
+    public void passwordChange(String currentPw,
+                               String newPw,
+                               PasswordEncoder passwordEncoder
+    ) {
+        if (!passwordEncoder.matches(currentPw, this.password)) {
             throw new CustomApiException(BAD_REQUEST, ERR_022, ERR_022.getValue());
         }
-        if(currentPw.equals(newPw)) {
+        if (currentPw.equals(newPw)) {
             throw new CustomApiException(BAD_REQUEST, ERR_023, ERR_023.getValue());
         }
         this.password = passwordEncoder.encode(newPw);
@@ -234,21 +241,26 @@ public class Member extends BaseEntity {
 
     /**
      * 멤버 상세 수정
+     *
      * @param nickname
      * @param phoneNumber
      * @param profileImageId
      */
-    public void memberDetailChange(String nickname, String phoneNumber, Long profileImageId) {
+    public void memberDetailChange(String nickname,
+                                   String phoneNumber,
+                                   Long profileImageId
+    ) {
         this.nickname = nickname;
         this.phoneNumber = phoneNumber;
         this.profileImageId = profileImageId;
     }
 
-    public void withdrawValid(String currentPw , PasswordEncoder passwordEncoder){
-        if(!passwordEncoder.matches(currentPw,this.password)) {
+    public void withdrawValid(String currentPw,
+                              PasswordEncoder passwordEncoder
+    ) {
+        if (!passwordEncoder.matches(currentPw, this.password)) {
             throw new CustomApiException(BAD_REQUEST, ERR_022, ERR_022.getValue());
         }
-
     }
 
     /**
@@ -258,7 +270,6 @@ public class Member extends BaseEntity {
         this.deleted = true;
         this.deletedAt = LocalDateTime.now();
     }
-
 
     @Override
     public boolean equals(Object o) {
@@ -271,5 +282,6 @@ public class Member extends BaseEntity {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
 }
 

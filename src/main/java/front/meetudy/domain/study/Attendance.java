@@ -53,7 +53,8 @@ public class Attendance extends BaseEntity {
                          Member member,
                          LocalDate attendanceDate,
                          LocalDateTime attendanceAt,
-                         AttendanceEnum status) {
+                         AttendanceEnum status
+    ) {
         this.id = id;
         this.studyGroup = studyGroup;
         this.member = member;
@@ -66,7 +67,8 @@ public class Attendance extends BaseEntity {
                                               Member member,
                                               LocalDate attendanceDate,
                                               LocalDateTime attendanceAt,
-                                              AttendanceEnum status) {
+                                              AttendanceEnum status
+    ) {
         return Attendance.builder()
                 .studyGroup(studyGroup)
                 .member(member)

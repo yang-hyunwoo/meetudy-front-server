@@ -2,7 +2,6 @@ package front.meetudy.dto.response.mypage;
 
 import com.querydsl.core.annotations.QueryProjection;
 import front.meetudy.constant.member.MemberProviderTypeEnum;
-import front.meetudy.domain.member.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,7 +31,9 @@ public class MyPageMemberResDto {
     @Schema(description = "닉네임", example = "야")
     private String nickname;
 
+    @Schema(description = "멤버 로그인 타입" , example = "NORMAL")
     private MemberProviderTypeEnum providerType;
+
 
     @QueryProjection
     public MyPageMemberResDto(Long id,
@@ -52,4 +53,5 @@ public class MyPageMemberResDto {
         this.nickname = nickname;
         this.providerType = providerType;
     }
+
 }

@@ -41,4 +41,5 @@ public class CustomResponseUtil {
             log.error("서버 실패 응답 직렬화 실패", e);
         }
     }
+
 }

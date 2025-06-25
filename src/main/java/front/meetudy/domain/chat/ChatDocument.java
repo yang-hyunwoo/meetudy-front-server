@@ -29,7 +29,6 @@ public class ChatDocument extends BaseEntity {
     @Column(name = "study_group_id", nullable = false)
     private Long studyGroupId;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
@@ -38,11 +37,13 @@ public class ChatDocument extends BaseEntity {
     @JoinColumn(name = "document_file_id", nullable = false)
     private Files files;
 
+
     @Builder
     protected ChatDocument(Long id,
                            Long studyGroupId,
                            Member member,
-                           Files files) {
+                           Files files
+    ) {
         this.id = id;
         this.studyGroupId = studyGroupId;
         this.member = member;
@@ -82,4 +83,5 @@ public class ChatDocument extends BaseEntity {
                 ", files=" + files +
                 '}';
     }
+
 }

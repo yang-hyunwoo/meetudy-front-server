@@ -24,6 +24,7 @@ public class NoticePageResDto {
     @Schema(description = "등록일" ,example = "yyyy-mm-dd:HH:24MM:SSS")
     private LocalDateTime createdAt;
 
+
     public static NoticePageResDto from(NoticeBoard noticeBoard) {
         return NoticePageResDto.builder()
                 .id(noticeBoard.getId())
@@ -32,4 +33,5 @@ public class NoticePageResDto {
                 .createdAt(noticeBoard.getCreatedAt())
                 .build();
     }
+
 }

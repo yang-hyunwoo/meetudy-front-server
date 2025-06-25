@@ -3,19 +3,16 @@ package front.meetudy.config.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import front.meetudy.auth.LoginUser;
-import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.constant.member.MemberEnum;
 import front.meetudy.constant.security.CookieEnum;
 import front.meetudy.domain.member.Member;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.property.JwtProperty;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
@@ -24,7 +21,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.UUID;
 
@@ -52,7 +48,6 @@ public class JwtProcess {
     }
 
 
-
     /**
      * 액세스 토큰 생성
      * @param loginUser
@@ -74,10 +69,9 @@ public class JwtProcess {
      * @return
      */
     public String createRefreshToken(LoginUser loginUser,Duration ttl) {
-        Date expiry = Date.from(Instant.now().plus(ttl));
         return JWT.create()
                 .withSubject(SUBJECT)
-                .withExpiresAt(expiry)
+                .withExpiresAt(Date.from(Instant.now().plus(ttl)))
                 .withClaim(CLAIM_ID, loginUser.getMember().getId().toString())
                 .withClaim(refreshToken.getValue(), UUID.randomUUID().toString())
                 .sign(algorithm());
@@ -116,7 +110,6 @@ public class JwtProcess {
     public Long verifyRefreshToken(String token) {
         try {
             DecodedJWT decodedJWT = JWT.require(algorithm()).build().verify(token);
-
             return Long.parseLong(decodedJWT.getClaim(CLAIM_ID).asString());
         } catch (JWTVerificationException e) {
             throw new CustomApiException(UNAUTHORIZED, ERR_004,SC_REFRESH_TOKEN_INVALID.getValue());
@@ -145,7 +138,7 @@ public class JwtProcess {
         try {
              decodedJWT = jwtVerifier.verify(refreshToken);
         } catch (JWTVerificationException e) {
-            log.warn("❌ Refresh token 검증 실패: {}", e.getMessage());
+            log.warn("Refresh token 검증 실패: {}", e.getMessage());
             throw e;
         }
         return decodedJWT.getClaim(CookieEnum.refreshToken.getValue()).asString();
@@ -193,11 +186,6 @@ public class JwtProcess {
                 .path("/")
                 .build();
     }
-
-    public static byte[] returnByte(String secretKey) {
-        return secretKey.getBytes(UTF_8);
-    }
-
 
     private Algorithm algorithm() {
         return Algorithm.HMAC512(jwtProperty.getSecretKey().getBytes(StandardCharsets.UTF_8));

@@ -23,9 +23,17 @@ public class FaqQueryDslRepositoryImpl implements FaqQueryDslRepository {
 
     QFaqBoard f = QFaqBoard.faqBoard;
 
+    /**
+     * faq 페이징 조회
+     *
+     * @param pageable  페이징 정보
+     * @param faqReqDto 검색 조건
+     * @return faq 페이지 객체
+     */
     @Override
-    public Page<FaqBoard> findFaqListPage(Pageable pageable, FaqReqDto faqReqDto) {
-
+    public Page<FaqBoard> findFaqListPage(Pageable pageable,
+                                          FaqReqDto faqReqDto
+    ) {
         BooleanBuilder builder = new BooleanBuilder();
         faqCondition(faqReqDto, builder);
 
@@ -44,7 +52,9 @@ public class FaqQueryDslRepositoryImpl implements FaqQueryDslRepository {
         return new PageImpl<>(faqList, pageable, count);
     }
 
-    private void faqCondition(FaqReqDto faqReqDto, BooleanBuilder builder) {
+    private void faqCondition(FaqReqDto faqReqDto,
+                              BooleanBuilder builder
+    ) {
         builder.and(f.visible.isTrue());
         builder.and(f.deleted.isFalse());
 
@@ -56,5 +66,7 @@ public class FaqQueryDslRepositoryImpl implements FaqQueryDslRepository {
         if (faqReqDto.getQuestion() != null && !faqReqDto.getQuestion().isBlank()) {
             builder.and(f.question.containsIgnoreCase(faqReqDto.getQuestion()));
         }
+
     }
+
 }

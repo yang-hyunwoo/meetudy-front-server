@@ -14,11 +14,12 @@ import java.util.Optional;
 public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMember, Long> {
 
     /**
-     * 멤버 확인
-     * @param studyGroupId
-     * @param memberId
-     * @param includeStatus
-     * @return
+     * 그룹 멤버 확인
+     *
+     * @param studyGroupId  그룹 id
+     * @param memberId      멤버 id
+     * @param includeStatus 멤버 상태
+     * @return 그룹 멤버 객체
      */
     @Query("""
                 SELECT m FROM StudyGroupMember m
@@ -26,10 +27,16 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
                   AND m.member.id = :memberId
                   AND m.joinStatus in(:includeStatus)
             """)
-    Optional<StudyGroupMember> findByStudyGroupIdAndMemberId(@Param("studyGroupId") Long studyGroupId ,
-                                                             @Param("memberId") Long memberId ,
+    Optional<StudyGroupMember> findByStudyGroupIdAndMemberId(@Param("studyGroupId") Long studyGroupId,
+                                                             @Param("memberId") Long memberId,
                                                              @Param("includeStatus") List<JoinStatusEnum> includeStatus);
 
+    /**
+     * 그룹 멤버 리스트 조회
+     *
+     * @param studyGroupId 그룹 id
+     * @return 그룹 멤버 리스트 객체
+     */
     @Query(value = """
                     SELECT new front.meetudy.dto.response.study.operate.GroupOperateMemberResDto(
                     sgm.id,
@@ -48,6 +55,13 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
             """)
     List<GroupOperateMemberResDto> findStudyGroupMemberList(Long studyGroupId);
 
+    /**
+     * 그룹 권한 조회
+     *
+     * @param studyGroupId 그룹 id
+     * @param memberId     멤버 id
+     * @return 리더인 그룹 멤버 객체
+     */
     @Query(value = """
                     SELECT *
                     FROM study_group_member sgm
@@ -55,21 +69,32 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
                       and sgm.study_group_id =:studyGroupId
                       and role='LEADER'
             """, nativeQuery = true)
-    Optional<StudyGroupMember> findGroupAuth(@Param("studyGroupId") Long studyGroupId, @Param("memberId") Long memberId);
+    Optional<StudyGroupMember> findGroupAuthNative(@Param("studyGroupId") Long studyGroupId,
+                                                   @Param("memberId") Long memberId);
 
-
+    /**
+     * 그룹 리더 조회
+     *
+     * @param studyGroupId 그룹 id
+     * @return 그룹 멤버 리더 객체
+     */
     @Query(value = """
                     SELECT *
                     FROM study_group_member sgm
                      where sgm.study_group_id =:studyGroupId
                       and role='LEADER'
             """, nativeQuery = true)
-    Optional<StudyGroupMember> findGroupLeader(@Param("studyGroupId") Long studyGroupId);
+    Optional<StudyGroupMember> findGroupLeaderNative(@Param("studyGroupId") Long studyGroupId);
 
-
-
-
-
+    /**
+     * 그룹 멤버 조회
+     *
+     * @param id         그룹 id
+     * @param memberId   멤버 id
+     * @param joinStatus 상태
+     * @param role       권한
+     * @return 그룹 멤버 객체
+     */
     @Query("""
                 SELECT m FROM StudyGroupMember m
                 JOIN FETCH m.studyGroup
@@ -83,6 +108,14 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
                                                                        JoinStatusEnum joinStatus,
                                                                        MemberRole role);
 
+    /**
+     * 그룹 멤버 존재 여부 조회
+     *
+     * @param StudyGroupId 그룹 id
+     * @param memberId     멤버 id
+     * @param joinStatus   상태
+     * @return 그룹 멤버 존재 객체
+     */
     @Query("""
                 SELECT m FROM StudyGroupMember m
                 JOIN FETCH m.studyGroup
@@ -92,9 +125,15 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
                   AND m.joinStatus = :joinStatus
             """)
     Optional<StudyGroupMember> findByStudyGroupIdAndMemberIdAndJoinStatus(Long StudyGroupId,
-                                                                       Long memberId,
-                                                                       JoinStatusEnum joinStatus);
+                                                                          Long memberId,
+                                                                          JoinStatusEnum joinStatus);
 
+    /**
+     * 그룹 멤버 존재 여부
+     *
+     * @param memberId 멤버 id
+     * @return 그룹 멤버 존재 객체
+     */
     @Query("""
                 SELECT m FROM StudyGroupMember m
                 JOIN FETCH m.studyGroup sg
@@ -109,9 +148,9 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
     /**
      * 멤버 그룹 카운트
      *
-     * @param memberId
-     * @param role
-     * @return
+     * @param memberId 멤버 id
+     * @param role     권한
+     * @return 멤버 그룹 갯수
      */
     @Query(value = """
                 SELECT COUNT(*)
@@ -124,5 +163,7 @@ public interface StudyGroupMemberRepository extends JpaRepository<StudyGroupMemb
                   AND sd.deleted = false
                   AND (sd.end_date + sd.meeting_end_time) >= NOW()
             """, nativeQuery = true)
-    int findMemberCount(@Param("memberId") Long memberId, @Param("role") List<String> role);
+    int findMemberCountNative(@Param("memberId") Long memberId,
+                              @Param("role") List<String> role);
+
 }

@@ -7,7 +7,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
-import java.util.Optional;
 
 public class SecurityAuditorAware implements AuditorAware<Long> {
     @Override

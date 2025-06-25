@@ -28,9 +28,14 @@ public class ChatDocumentService {
 
     private final FilesRepository filesRepository;
 
-
     private final AuthService authService;
 
+    /**
+     * 채팅방 문서 저장
+     *
+     * @param chatDocumentDto
+     * @return 채팅방 문서 객체
+     */
     public ChatDocumentDto chatDocumentSave(ChatDocumentDto chatDocumentDto) {
         Files files = filesRepository.findWithDetailsAndMemberById(chatDocumentDto.getFileId())
                 .orElseThrow(() -> new CustomApiException(HttpStatus.BAD_REQUEST, ERR_012, ERR_012.getValue()));
@@ -40,12 +45,22 @@ public class ChatDocumentService {
                 Member.partialOf(chatDocumentDto.getMemberId(), MemberEnum.USER),
                 files
         );
-        ChatDocument save = chatDocumentRepository.save(chatDocument);
 
+        ChatDocument save = chatDocumentRepository.save(chatDocument);
         return ChatDocumentDto.from(save, CREATE);
     }
 
-    public List<ChatDocumentDto> chatDocumentList(Long studyGroupId , Member member) {
+    /**
+     * 채팅방 문서 리스트 조회
+     *
+     * @param studyGroupId  그룹 id
+     * @param member 멤버
+     * @return 채팅방 문서 리스트 객체
+     */
+    @Transactional(readOnly = true)
+    public List<ChatDocumentDto> chatDocumentList(Long studyGroupId,
+                                                  Member member
+    ) {
         //1.그룹 사용자 참여 여부 확인
         authService.studyGroupMemberJoinChk(studyGroupId, member.getId());
 

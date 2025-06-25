@@ -2,9 +2,9 @@ package front.meetudy.controller.notification;
 
 import front.meetudy.annotation.customannotation.CurrentMember;
 import front.meetudy.domain.member.Member;
-import front.meetudy.dto.request.notification.NotificationReqDto;
 import front.meetudy.dto.response.notification.NotificationResDto;
 import front.meetudy.service.notification.NotificationService;
+import front.meetudy.util.MessageUtil;
 import front.meetudy.util.response.Response;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,10 +24,15 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
+    private final MessageUtil messageUtil;
+
     @Operation(summary = "알림 리스트 조회", description = "알림 리스트 조회")
     @GetMapping("/list")
-    public ResponseEntity<Response<List<NotificationResDto>>> notificationList(@CurrentMember Member member) {
-        return Response.ok("알림 리스트 조회 완료", notificationService.notificationList(member));
+    public ResponseEntity<Response<List<NotificationResDto>>> notificationList(
+            @CurrentMember Member member
+    ) {
+        return Response.ok(messageUtil.getMessage("notification.list.read.ok"),
+                notificationService.notificationList(member));
     }
 
     @Operation(summary = "알림 읽음" , description = "알림 읽음")
@@ -37,6 +42,8 @@ public class NotificationController {
             @CurrentMember Member member
     ) {
         notificationService.notificationRead(notificationId,member);
-        return Response.update("알림 읽음", null);
+        return Response.update(messageUtil.getMessage("notification.read.ok"),
+                null);
     }
+
 }

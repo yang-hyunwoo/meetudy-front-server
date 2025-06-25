@@ -13,7 +13,6 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -34,7 +33,7 @@ public class RedisConfig {
         objectMapper.registerModule(new JavaTimeModule()); // LocalDateTime 지원
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); // ISO 포맷 ("2025-06-19T12:00:00")
 
-        // 2. Jackson2JsonRedisSerializer로 깔끔한 JSON 직렬화
+        // 2. Jackson2JsonRedisSerializer로 JSON 직렬화
         Jackson2JsonRedisSerializer<Object> serializer =
                 new Jackson2JsonRedisSerializer<>(objectMapper, Object.class);
 

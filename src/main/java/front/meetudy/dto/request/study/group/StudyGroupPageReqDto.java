@@ -24,4 +24,5 @@ public class StudyGroupPageReqDto {
     @Schema(description = "검색 키워드" , example = "출석은 어떻게")
     @Sanitize(groups = Step2.class)
     private String searchKeyword;
+
 }

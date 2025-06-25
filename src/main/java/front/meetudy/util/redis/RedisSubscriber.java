@@ -1,7 +1,6 @@
 package front.meetudy.util.redis;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import front.meetudy.dto.notification.NotificationDto;
 import front.meetudy.dto.response.mypage.MyPageMessageResDto;
 import front.meetudy.dto.response.notification.NotificationResDto;
 import lombok.RequiredArgsConstructor;
@@ -10,8 +9,6 @@ import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
-
-import java.nio.charset.StandardCharsets;
 
 import static java.nio.charset.StandardCharsets.*;
 
@@ -25,7 +22,9 @@ public class RedisSubscriber implements MessageListener {
     private final SimpMessagingTemplate messagingTemplate;
 
     @Override
-    public void onMessage(Message message, byte[] pattern) {
+    public void onMessage(Message message,
+                          byte[] pattern
+    ) {
         String topic = new String(pattern, UTF_8);
         String body = new String(message.getBody(), UTF_8);
         if("notification".equals(topic)) {
@@ -52,7 +51,6 @@ public class RedisSubscriber implements MessageListener {
                 }
             } catch (Exception e) {
                 log.error("Redis 알림 처리 실패");
-
             }
         } else {
             int attempt = 0;
@@ -81,7 +79,6 @@ public class RedisSubscriber implements MessageListener {
 
             }
         }
-
-
     }
+
 }

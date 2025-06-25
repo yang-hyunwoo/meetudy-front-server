@@ -5,7 +5,6 @@ import front.meetudy.annotation.ValidationMode;
 import front.meetudy.constant.error.ValidationType;
 import front.meetudy.annotation.customannotation.*;
 import front.meetudy.constant.member.MemberProviderTypeEnum;
-import front.meetudy.constant.study.RegionEnum;
 import front.meetudy.domain.member.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -74,6 +73,7 @@ public class JoinMemberReqDto {
     @Schema(description = "소셜ID", example = "asdf")
     private String providerId;
 
+    @Schema(description = "리캡차token",example = "asdf")
     private String recaptchaToken;
 
     public Member toEntity(PasswordEncoder passwordEncoder) {
@@ -101,7 +101,5 @@ public class JoinMemberReqDto {
                 ", isEmailAgreed=" + isEmailAgreed +
                 '}';
     }
+
 }
-
-
-

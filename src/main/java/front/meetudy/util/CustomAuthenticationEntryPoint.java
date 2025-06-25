@@ -7,7 +7,6 @@ import front.meetudy.constant.login.LoginErrorCode;
 import front.meetudy.property.JwtProperty;
 import front.meetudy.util.response.Response;
 import front.meetudy.util.response.ResponseBuilder;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -30,7 +29,10 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     }
 
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+    public void commence(HttpServletRequest request,
+                         HttpServletResponse response,
+                         AuthenticationException authException
+    ) throws IOException {
         //인증이 필요 없는 url 에서는 작동 하지 않는다.
         String exception = (String)request.getAttribute("exception");
         if(exception==null) {
@@ -56,7 +58,9 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         responseWrite(response,exception);
     }
 
-    private static void responseWrite(HttpServletResponse response , String msg) throws IOException {
+    private static void responseWrite(HttpServletResponse response,
+                                      String msg
+    ) throws IOException {
         ObjectMapper om = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -67,4 +71,5 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.getWriter().println(responseBody);
     }
+
 }

@@ -74,7 +74,8 @@ public class Notification extends BaseEntity {
                            String importance,
                            LocalDateTime deliveredAt,
                            LocalDateTime readAt,
-                           LocalDateTime expiredAt) {
+                           LocalDateTime expiredAt
+    ) {
         this.id = id;
         this.receiver = receiver;
         this.sender = sender;
@@ -95,7 +96,8 @@ public class Notification extends BaseEntity {
                                                   NotificationType notificationType,
                                                   String message,
                                                   String linkUrl,
-                                                  String importance) {
+                                                  String importance
+    ) {
         return Notification.builder()
                 .receiver(receiver)
                 .sender(sender)
@@ -118,11 +120,17 @@ public class Notification extends BaseEntity {
         this.readAt = LocalDateTime.now();
     }
 
-    public void notificationMessageChg(String message , NotificationType notificationType) {
+    /**
+     * 알림 메시지 수정
+     * @param message
+     * @param notificationType
+     */
+    public void notificationMessageChg(String message,
+                                       NotificationType notificationType
+    ) {
         this.message = message;
         this.notificationType = notificationType;
     }
-
 
     @Override
     public boolean equals(Object o) {
@@ -153,4 +161,5 @@ public class Notification extends BaseEntity {
                 ", expiredAt=" + expiredAt +
                 '}';
     }
+
 }

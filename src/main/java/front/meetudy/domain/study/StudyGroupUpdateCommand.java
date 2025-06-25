@@ -59,8 +59,8 @@ public class StudyGroupUpdateCommand {
                                       String meetingEndTime,
                                       String secretPassword,
                                       boolean secret,
-                                      boolean allowComment) {
-
+                                      boolean allowComment
+    ) {
         this.studyGroupId = studyGroupId;
         this.studyGroupDetailId = studyGroupDetailId;
         this.region = region;
@@ -103,4 +103,5 @@ public class StudyGroupUpdateCommand {
                 studyGroupUpdateReqDto.isAllowComment()
         );
     }
+
 }

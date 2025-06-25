@@ -2,21 +2,14 @@ package front.meetudy.config.chatinterceptor;
 
 import front.meetudy.auth.LoginUser;
 import front.meetudy.config.jwt.JwtProcess;
-import front.meetudy.constant.error.ErrorEnum;
-import front.meetudy.constant.member.MemberEnum;
-import front.meetudy.domain.common.StompPrincipal;
 import front.meetudy.domain.member.Member;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.member.MemberRepository;
-import front.meetudy.repository.study.StudyGroupMemberRepository;
-import front.meetudy.service.study.StudyGroupService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
@@ -38,7 +31,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
     /**
      * WebSocket 통신이 시작되기 전에 실행되는 연결 사전 검증 단계
-     * 및 채탕방 입장 여부 검증
+     * 채팅 / 알림 / 쪽지
      * @param request the current request
      * @param response the current response
      * @param wsHandler the target WebSocket handler
@@ -59,20 +52,23 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
             Member member = memberRepository.findByIdAndDeleted(loginUser.getMember().getId(), false)
                     .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_013, ERR_013.getValue()));
-            Member member1 = Member.builder()
+
+            Member creMember = Member.builder()
                     .id(member.getId())
                     .role(member.getRole())
                     .nickname(member.getNickname())
                     .build();
-             ;
+
+            //채팅일 경우만 studyGroupId 분기 처리
             if(uri.contains("ws-chat")) {
-                String studyGroupId = serRequest.getParameter("studyGroupId");
-                long longStudyGroupId = Long.parseLong(studyGroupId);
-                authValidator.validateMemberInGroup(Long.parseLong(studyGroupId), member.getId());
+                long longStudyGroupId = Long.parseLong(serRequest.getParameter("studyGroupId"));
+                authValidator.validateMemberInGroup(longStudyGroupId, member.getId());
                 attributes.put("studyGroupId", longStudyGroupId);
             }
+
             attributes.put("handshakeUri",uri);
-            attributes.put("loginUser", new LoginUser(member1));
+            attributes.put("loginUser", new LoginUser(creMember));
+
             return true;
         }
 
@@ -88,6 +84,6 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
     @Override
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Exception exception) {
-
     }
+
 }

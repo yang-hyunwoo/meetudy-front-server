@@ -40,7 +40,9 @@ public class FreeDetailResDto {
         그래서 프록시 초기화 실패 → null
      */
 
-    public static FreeDetailResDto from(FreeBoard freeBoard, Member member) {
+    public static FreeDetailResDto from(FreeBoard freeBoard,
+                                        Member member
+    ) {
         return FreeDetailResDto.builder()
                 .id(freeBoard.getId())
                 .title(freeBoard.getTitle())
@@ -51,4 +53,5 @@ public class FreeDetailResDto {
                 .modifyChk(member != null && Objects.equals(freeBoard.getMember().getId(), member.getId()))
                 .build();
     }
+
 }

@@ -1,6 +1,5 @@
 package front.meetudy.service.study;
 
-import front.meetudy.constant.notification.NotificationType;
 import front.meetudy.constant.study.JoinStatusEnum;
 import front.meetudy.constant.study.MemberRole;
 import front.meetudy.domain.member.Member;
@@ -8,7 +7,6 @@ import front.meetudy.domain.study.StudyGroup;
 import front.meetudy.domain.study.StudyGroupDetail;
 import front.meetudy.domain.study.StudyGroupMember;
 import front.meetudy.dto.member.ChatMemberDto;
-import front.meetudy.dto.notification.NotificationDto;
 import front.meetudy.dto.request.study.operate.GroupMemberStatusReqDto;
 import front.meetudy.dto.response.study.operate.GroupOperateListResDto;
 import front.meetudy.dto.response.study.operate.GroupOperateMemberListResDto;
@@ -18,8 +16,6 @@ import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.member.MemberRepository;
 import front.meetudy.repository.study.*;
 import front.meetudy.service.auth.AuthService;
-import front.meetudy.service.notification.NotificationService;
-import front.meetudy.util.redis.RedisPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -30,7 +26,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static front.meetudy.constant.error.ErrorEnum.*;
-import static front.meetudy.constant.notification.NotificationType.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Service
@@ -53,14 +48,12 @@ public class StudyGroupManageService {
 
     private final AuthService authService;
 
-    private final RedisPublisher redisPublisher;
-
-    private final NotificationService notificationService;
     /**
      * 운영 / 종료 스터디 그룹 조회
      * @param member
      * @return
      */
+    @Transactional(readOnly = true)
     public GroupOperateListResDto groupOperateList(Member member) {
         LocalDateTime now = LocalDateTime.now();
         List<GroupOperateResDto> operateList = studyGroupQueryDslRepository.findOperateList(member);
@@ -91,8 +84,10 @@ public class StudyGroupManageService {
      * @param member
      * @return
      */
-    public GroupOperateMemberListResDto groupMemberList(Long studyGroupId , Member member) {
-
+    @Transactional(readOnly = true)
+    public GroupOperateMemberListResDto groupMemberList(Long studyGroupId,
+                                                        Member member
+    ) {
         authService.findGroupAuth(studyGroupId, member.getId());
 
         List<GroupOperateMemberResDto> studyGroupMemberList = studyGroupMemberRepository.findStudyGroupMemberList(studyGroupId);
@@ -113,7 +108,9 @@ public class StudyGroupManageService {
      * @param member
      * @return
      */
-    public Long groupStatusChange(Long studyGroupId , Member member) {
+    public Long groupStatusChange(Long studyGroupId,
+                                  Member member
+    ) {
         authService.findGroupAuth(studyGroupId, member.getId());
         StudyGroup studyGroup = studyGroupRepository.findById(studyGroupId)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
@@ -128,7 +125,9 @@ public class StudyGroupManageService {
      * @param studyGroupId
      * @param member
      */
-    public void groupDelete(Long studyGroupId , Member member) {
+    public void groupDelete(Long studyGroupId,
+                            Member member
+    ) {
         authService.findGroupAuth(studyGroupId,member.getId());
         StudyGroupDetail studyGroupDetail = studyGroupDetailRepository.findByStudyGroupIdAndDeleted(studyGroupId, false)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue()));
@@ -140,8 +139,9 @@ public class StudyGroupManageService {
      * @param groupMemberStatusReqDto
      * @param member
      */
-    public void groupMemberKick(GroupMemberStatusReqDto groupMemberStatusReqDto, Member member) {
-
+    public void groupMemberKick(GroupMemberStatusReqDto groupMemberStatusReqDto,
+                                Member member
+    ) {
         authService.findGroupAuth(groupMemberStatusReqDto.getStudyGroupId(), member.getId());
         StudyGroupMember studyGroupMember = authService.studyGroupMemberStatusRole(groupMemberStatusReqDto.getId(),
                 groupMemberStatusReqDto.getMemberId(),
@@ -155,15 +155,14 @@ public class StudyGroupManageService {
         chatGroupMemberPM(groupMemberStatusReqDto,"leave");
     }
 
-
-
     /**
      * 그룹 사용자 승인
      * @param groupMemberStatusReqDto
      * @param member
      */
-    public void groupMemberApproved(GroupMemberStatusReqDto groupMemberStatusReqDto, Member member) {
-
+    public void groupMemberApproved(GroupMemberStatusReqDto groupMemberStatusReqDto,
+                                    Member member
+    ) {
         authService.findGroupAuth(groupMemberStatusReqDto.getStudyGroupId(), member.getId());
         StudyGroupMember studyGroupMember = authService.studyGroupMemberStatusRole(groupMemberStatusReqDto.getId(),
                 groupMemberStatusReqDto.getMemberId(),
@@ -177,7 +176,6 @@ public class StudyGroupManageService {
 
         studyGroupMember.approvedMember(JoinStatusEnum.APPROVED);
         chatGroupMemberPM(groupMemberStatusReqDto,"join");
-
     }
 
     /**
@@ -185,7 +183,9 @@ public class StudyGroupManageService {
      * @param groupMemberStatusReqDto
      * @param member
      */
-    public void groupMemberReject(GroupMemberStatusReqDto groupMemberStatusReqDto,Member member) {
+    public void groupMemberReject(GroupMemberStatusReqDto groupMemberStatusReqDto,
+                                  Member member
+    ) {
         authService.findGroupAuth(groupMemberStatusReqDto.getStudyGroupId(), member.getId());
         StudyGroupMember studyGroupMember = authService.studyGroupMemberStatusRole(groupMemberStatusReqDto.getId(),
                 groupMemberStatusReqDto.getMemberId(),
@@ -199,8 +199,10 @@ public class StudyGroupManageService {
      * 채팅 그룹 사용자 추가/및 삭제
      * @param groupMemberStatusReqDto
      */
-    private void chatGroupMemberPM(GroupMemberStatusReqDto groupMemberStatusReqDto,String endUrl) {
-        ChatMemberDto chatMemberDto = memberRepository.findChatMember(groupMemberStatusReqDto.getMemberId())
+    private void chatGroupMemberPM(GroupMemberStatusReqDto groupMemberStatusReqDto,
+                                   String endUrl
+    ) {
+        ChatMemberDto chatMemberDto = memberRepository.findChatMemberNative(groupMemberStatusReqDto.getMemberId())
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_013, ERR_013.getValue()));
         messagingTemplate.convertAndSend(
                 "/topic/group." + groupMemberStatusReqDto.getStudyGroupId() + ".member."+endUrl,

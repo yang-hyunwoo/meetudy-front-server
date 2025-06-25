@@ -16,6 +16,7 @@ public class CustomHandshakeHandler extends DefaultHandshakeHandler {
      * SimpMessageHeaderAccessor 에 user를 넣기 위해
      * beforeHandshake 에서 loginUser 넣은 후
      * Principal에 값을 넣기 위해 stompPrincipal 생성
+     * attributes에 studyGroupId 체크 후 반환값 분기
      * @param request the handshake request
      * @param wsHandler the WebSocket handler that will handle messages
      * @param attributes handshake attributes to pass to the WebSocket session
@@ -23,14 +24,15 @@ public class CustomHandshakeHandler extends DefaultHandshakeHandler {
      */
     @Override
     protected Principal determineUser(ServerHttpRequest request, WebSocketHandler wsHandler, Map<String, Object> attributes) {
-        String uri = (String) attributes.get("handshakeUri");
+
         LoginUser loginUser = (LoginUser) attributes.get("loginUser");
         Member member = loginUser.getMember();
-        if(uri.contains("/ws-chat")) {
-            Long studyGroupId = (Long) attributes.get("studyGroupId");
+        Object o = attributes.get("studyGroupId");
+
+        if(o instanceof Long studyGroupId) {
             return new StompPrincipal(member.getId(), member.getNickname(), studyGroupId);
-        } else {
-            return new StompPrincipal(member.getId(), member.getNickname());
         }
+
+        return new StompPrincipal(member.getId(), member.getNickname());
     }
 }

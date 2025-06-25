@@ -20,10 +20,13 @@ public class FaqService {
      * FAQ 페이징 조회
      * @param pageable
      * @param faqReqDto
-     * @return
+     * @return faq 페이지 객체
      */
     @Transactional(readOnly = true)
-    public PageDto<FaqResDto> findFaqListPage(Pageable pageable , FaqReqDto faqReqDto) {
+    public PageDto<FaqResDto> findFaqListPage(Pageable pageable,
+                                              FaqReqDto faqReqDto
+    ) {
         return PageDto.of(faqQueryDslRepository.findFaqListPage(pageable, faqReqDto), FaqResDto::from);
     }
+
 }

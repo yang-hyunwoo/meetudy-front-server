@@ -1,12 +1,10 @@
 package front.meetudy.dto.request.contact.qna;
 
-import front.meetudy.annotation.ValidationGroups;
 import front.meetudy.annotation.ValidationMode;
 import front.meetudy.annotation.customannotation.EnumValidation;
 import front.meetudy.annotation.customannotation.Sanitize;
 import front.meetudy.constant.contact.faq.FaqType;
 import front.meetudy.constant.error.ValidationType;
-import front.meetudy.constant.study.RegionEnum;
 import front.meetudy.domain.contact.Qna.QnaBoard;
 import front.meetudy.domain.member.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,7 +13,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
-import java.time.LocalDateTime;
 
 import static front.meetudy.annotation.ValidationGroups.*;
 
@@ -63,4 +60,5 @@ public class QnaWriteReqDto {
                 ", questionContent='" + questionContent + '\'' +
                 '}';
     }
+
 }

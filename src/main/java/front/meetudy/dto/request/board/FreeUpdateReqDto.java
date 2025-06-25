@@ -1,8 +1,6 @@
 package front.meetudy.dto.request.board;
 
 import front.meetudy.annotation.customannotation.Sanitize;
-import front.meetudy.domain.board.FreeBoard;
-import front.meetudy.domain.member.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -28,10 +26,8 @@ public class FreeUpdateReqDto {
     private String title;
 
     @Schema(description = "자유게시판 내용", example = "ㄴㅇㅁㄹ")
-    @NotBlank(message = "{free.cotent}", groups = Step2.class)
+    @NotBlank(message = "{free.content}", groups = Step2.class)
     @Sanitize(groups = Step2.class)
     private String content;
-
-
 
 }

@@ -13,7 +13,6 @@ import front.meetudy.dto.request.mypage.MypageDetailChgReqDto;
 import front.meetudy.dto.request.mypage.MypageMessageWriteReqDto;
 import front.meetudy.dto.request.mypage.MypagePwdChgReqDto;
 import front.meetudy.dto.request.mypage.MypageWithdrawReqDto;
-import front.meetudy.dto.response.chat.ChatMessageResDto;
 import front.meetudy.dto.response.mypage.MyPageBoardWriteResDto;
 import front.meetudy.dto.response.mypage.MyPageGroupCountResDto;
 import front.meetudy.dto.response.mypage.MyPageMemberResDto;
@@ -28,7 +27,6 @@ import front.meetudy.repository.notification.NotificationRepository;
 import front.meetudy.repository.study.StudyGroupMemberRepository;
 import front.meetudy.util.redis.RedisPublisher;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -79,8 +77,9 @@ public class MyPageService {
      * @param member
      * @param mypagePwdChgReqDto
      */
-    public void changePassword(Member member , MypagePwdChgReqDto mypagePwdChgReqDto) {
-
+    public void changePassword(Member member,
+                               MypagePwdChgReqDto mypagePwdChgReqDto
+    ) {
         Member memberDb = memberRepository.findByIdAndDeleted(member.getId(), false)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_013, ERR_013.getValue()));
 
@@ -92,7 +91,9 @@ public class MyPageService {
      * @param member
      * @param mypageDetailChgReqDto
      */
-    public void memberDetailChange(Member member , MypageDetailChgReqDto mypageDetailChgReqDto) {
+    public void memberDetailChange(Member member,
+                                   MypageDetailChgReqDto mypageDetailChgReqDto
+    ) {
         Member memberDb = memberRepository.findByIdAndDeleted(member.getId(), false)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_013, ERR_013.getValue()));
 
@@ -106,8 +107,9 @@ public class MyPageService {
      * @param member
      * @param mypageWithdrawReqDto
      */
-    public void memberWithdraw(Member member, MypageWithdrawReqDto mypageWithdrawReqDto) {
-
+    public void memberWithdraw(Member member,
+                               MypageWithdrawReqDto mypageWithdrawReqDto
+    ) {
         Member memberDb = memberRepository.findByIdAndDeleted(member.getId(), false)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_013, ERR_013.getValue()));
         memberDb.withdrawValid(mypageWithdrawReqDto.getCurrentPw(), passwordEncoder);
@@ -116,7 +118,6 @@ public class MyPageService {
             studyGroupMember.getStudyGroup().memberCountDecrease();
             chatGroupMemberPM(member.getId(), studyGroupMember.getStudyGroup().getId(), "leave");
         }
-
         memberDb.memberWithdraw();
     }
 
@@ -125,14 +126,24 @@ public class MyPageService {
      * @param member
      * @return
      */
+    @Transactional(readOnly = true)
     public MyPageGroupCountResDto memberGroupCount(Member member) {
         return MyPageGroupCountResDto.builder()
-                .operationCount(studyGroupMemberRepository.findMemberCount(member.getId(), List.of(MemberRole.LEADER.name())))
-                .joinCount(studyGroupMemberRepository.findMemberCount(member.getId(), List.of(MemberRole.MEMBER.name(),MemberRole.LEADER.name())))
+                .operationCount(studyGroupMemberRepository.findMemberCountNative(member.getId(), List.of(MemberRole.LEADER.name())))
+                .joinCount(studyGroupMemberRepository.findMemberCountNative(member.getId(), List.of(MemberRole.MEMBER.name(),MemberRole.LEADER.name())))
                 .build();
     }
 
-    public PageDto<MyPageBoardWriteResDto> memberBoardWriteList(Member member, Pageable pageable) {
+    /**
+     * 마이페이지 자유 게시판 멤버 목록 조회
+     * @param member
+     * @param pageable
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public PageDto<MyPageBoardWriteResDto> memberBoardWriteList(Member member,
+                                                                Pageable pageable
+    ) {
         return PageDto.of(freeRepository.findByMemberIdAndDeletedOrderByCreatedAtDesc(pageable, member.getId(), false), MyPageBoardWriteResDto::from);
     }
 
@@ -142,7 +153,10 @@ public class MyPageService {
      * @param pageable
      * @return
      */
-    public PageDto<MyPageMessageResDto> receiveMessageList(Member member , Pageable pageable) {
+    @Transactional(readOnly = true)
+    public PageDto<MyPageMessageResDto> receiveMessageList(Member member,
+                                                           Pageable pageable
+    ) {
         return PageDto.of(messageRepository.findByReceiverIdAndDeletedOrderByCreatedAtDesc(pageable, member.getId(),false),
                 MyPageMessageResDto::from);
     }
@@ -153,7 +167,10 @@ public class MyPageService {
      * @param pageable
      * @return
      */
-    public PageDto<MyPageMessageResDto> sendMessageList(Member member, Pageable pageable) {
+    @Transactional(readOnly = true)
+    public PageDto<MyPageMessageResDto> sendMessageList(Member member,
+                                                        Pageable pageable
+    ) {
         return PageDto.of(messageRepository.findBySenderIdAndDeletedOrderByCreatedAtDesc(pageable, member.getId(), false),
                 MyPageMessageResDto::from);
     }
@@ -163,7 +180,9 @@ public class MyPageService {
      * @param mypageMessageWriteReqDto
      * @param member
      */
-    public void messageSend(MypageMessageWriteReqDto mypageMessageWriteReqDto, Member member) {
+    public void messageSend(MypageMessageWriteReqDto mypageMessageWriteReqDto,
+                            Member member
+    ) {
         Message messageEntity = messageRepository.save(mypageMessageWriteReqDto.toEntity(member));
         NotificationDto notificationDto = NotificationDto.builder()
                 .notificationType(NotificationType.MESSAGE_SEND)
@@ -184,7 +203,9 @@ public class MyPageService {
      * @param messageId
      * @param member
      */
-    public void messageRead(Long messageId, Member member) {
+    public void messageRead(Long messageId,
+                            Member member
+    ) {
         Message message = messageRepository.findByIdAndReceiverId(messageId,member.getId())
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
         message.messageRead();
@@ -195,7 +216,9 @@ public class MyPageService {
      * @param messageId
      * @param member
      */
-    public void messageDelete(Long messageId , Member member) {
+    public void messageDelete(Long messageId,
+                              Member member
+    ) {
         Message message = messageRepository.findByIdAndReceiverId(messageId,member.getId())
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
         message.messageDelete();
@@ -204,14 +227,16 @@ public class MyPageService {
     /**
      * 채팅 그룹 사용자 전체 탈퇴
      */
-    private void chatGroupMemberPM(Long memberId , Long studyGroupId, String endUrl) {
-        ChatMemberDto chatMemberDto = memberRepository.findChatMember(memberId)
+    private void chatGroupMemberPM(Long memberId,
+                                   Long studyGroupId,
+                                   String endUrl
+    ) {
+        ChatMemberDto chatMemberDto = memberRepository.findChatMemberNative(memberId)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_013, ERR_013.getValue()));
         messagingTemplate.convertAndSend(
                 "/topic/group." + studyGroupId + ".member." + endUrl,
                 chatMemberDto
         );
     }
-
 
 }

@@ -1,6 +1,5 @@
 package front.meetudy.service.notification;
 
-import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.constant.notification.NotificationType;
 import front.meetudy.domain.member.Member;
 import front.meetudy.domain.notification.Notification;
@@ -11,7 +10,6 @@ import front.meetudy.repository.notification.NotificationRepository;
 import front.meetudy.util.redis.RedisPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +31,6 @@ public class NotificationService {
 
     private final RedisPublisher redisPublisher;
 
-
     /**
      * 알림 저장
      * @param notificationType
@@ -48,7 +45,6 @@ public class NotificationService {
                                       Long senderId,
                                       Long tableId,
                                       String studyGroupTitle , String memberNickname) {
-
         NotificationDto notificationDto = NotificationDto.builder()
                 .notificationType(notificationType)
                 .receiverId(receiverId) //LEADER에게 전송
@@ -93,6 +89,7 @@ public class NotificationService {
      * @param member
      * @return
      */
+    @Transactional(readOnly = true)
     public List<NotificationResDto> notificationList(Member member){
         return notificationRepository.findNotificationList(member.getId(), LocalDateTime.now())
                 .stream()
@@ -101,6 +98,11 @@ public class NotificationService {
 
     }
 
+    /**
+     * 알림 읽음 처리
+     * @param notificationId
+     * @param member
+     */
     public void notificationRead(Long notificationId , Member member) {
         Notification notification = notificationRepository.findByIdAndReceiverId(notificationId, member.getId())
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));

@@ -1,6 +1,5 @@
 package front.meetudy.dto.request.mypage;
 
-import front.meetudy.annotation.ValidationGroups;
 import front.meetudy.annotation.ValidationMode;
 import front.meetudy.annotation.customannotation.KoreanEnglish;
 import front.meetudy.annotation.customannotation.PhoneNumber;
@@ -20,7 +19,6 @@ import static front.meetudy.annotation.ValidationGroups.*;
 @Builder
 public class MypageDetailChgReqDto {
 
-
     @Schema(description = "닉네임", example = "홍길동")
     @NotBlank(message = "{nickname.notBlank}", groups = Step1.class)
     @KoreanEnglish(min = 1, max = 30, message = "{nickname.pattern}",messageKey = "nickname.range", groups = Step1.class)
@@ -34,4 +32,5 @@ public class MypageDetailChgReqDto {
 
     @Schema(description = "프로필 id" ,example = "1")
     private Long profileImageId;
+
 }

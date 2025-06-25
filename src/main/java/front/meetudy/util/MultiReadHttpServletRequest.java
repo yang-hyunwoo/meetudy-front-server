@@ -12,7 +12,6 @@ import java.io.*;
 
 import static java.nio.charset.StandardCharsets.*;
 
-
 /**
  * HttpServletRequest의 요청 바디(InputStream)를 캐싱해서
  * 여러 번 읽을 수 있도록 허용하는 유틸 클래스
@@ -105,4 +104,5 @@ public class MultiReadHttpServletRequest extends HttpServletRequestWrapper {
             log.warn("setReadListener() is not supported in MultiReadHttpServletRequest.");
         }
     }
+
 }

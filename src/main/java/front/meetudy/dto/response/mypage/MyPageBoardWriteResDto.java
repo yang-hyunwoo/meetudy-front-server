@@ -20,6 +20,7 @@ public class MyPageBoardWriteResDto {
     @Schema(description = "등록일" ,example = "yyyy-mm-dd:HH:24MM:SSS")
     private LocalDateTime createdAt;
 
+
     public static MyPageBoardWriteResDto from(FreeBoard freeBoard) {
         return MyPageBoardWriteResDto.builder()
                 .id(freeBoard.getId())

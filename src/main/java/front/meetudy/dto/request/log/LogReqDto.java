@@ -25,12 +25,13 @@ public class LogReqDto {
     private String errorMsg;
 
     public static LogReqDto of(String uuid,
-                     boolean sucesStts,
-                     String methodName,
-                     String httpMethod,
-                     String response,
-                     String request,
-                     String errorMsg) {
+                               boolean sucesStts,
+                               String methodName,
+                               String httpMethod,
+                               String response,
+                               String request,
+                               String errorMsg
+    ) {
         return new LogReqDto(uuid,
                 sucesStts,
                 methodName,
@@ -46,7 +47,8 @@ public class LogReqDto {
                       String httpMethod,
                       String response,
                       String request,
-                      String errorMsg) {
+                      String errorMsg
+    ) {
         this.uuid = uuid;
         this.sucesStts = sucesStts;
         this.methodName = methodName;

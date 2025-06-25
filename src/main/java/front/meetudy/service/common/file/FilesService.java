@@ -55,7 +55,10 @@ public class FilesService {
      * @param fileId
      * @return
      */
-    public FileResDto createFilesGroup(Member member, Long fileId, List<MultipartFile> files) {
+    public FileResDto createFilesGroup(Member member,
+                                       Long fileId,
+                                       List<MultipartFile> files
+    ) {
         Files filesGroup;
         if(fileId == null) {
             filesGroup = filesRepository.save(Files.createFiles(member, false));
@@ -72,7 +75,6 @@ public class FilesService {
                 uploadEtcCloudflare(filesGroup, file);  //cloudFlare 이미지 제외 저장
             }
         }
-
         return FileResDto.from(filesGroup);
     }
 
@@ -82,7 +84,9 @@ public class FilesService {
      * @param file
      */
     @Transactional
-    public void uploadImageCloudinary(Files group , MultipartFile file) {
+    public void uploadImageCloudinary(Files group,
+                                      MultipartFile file
+    ) {
         Cloudinary cloudinary = cloudinaryService.connectCloudinary();
         String fileUrl;
         try {
@@ -117,7 +121,9 @@ public class FilesService {
      * @param group
      * @param file
      */
-    public void uploadEtcCloudflare(Files group , MultipartFile file) {
+    public void uploadEtcCloudflare(Files group,
+                                    MultipartFile file
+    ) {
         try {
             String uniqueName = UUID.randomUUID() + "_" + file.getOriginalFilename();
             r2Client.putObject(
@@ -150,7 +156,10 @@ public class FilesService {
      * @param fileId
      * @param delFileDetailsId
      */
-    public void deleteFileDetail(Long memberId, Long fileId, List<Long> delFileDetailsId) {
+    public void deleteFileDetail(Long memberId,
+                                 Long fileId,
+                                 List<Long> delFileDetailsId
+    ) {
         filesRepository.findByIdAndMemberId(fileId, memberId)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue()));
         for (Long fileDetailId : delFileDetailsId) {
@@ -158,7 +167,9 @@ public class FilesService {
         }
     }
 
-    public String generateSignedUrl(String key, Duration expiresIn) {
+    public String generateSignedUrl(String key,
+                                    Duration expiresIn
+    ) {
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                 .bucket(bucketName)
                 .key(key)

@@ -1,8 +1,6 @@
 package front.meetudy.dto.request.member;
 
-import front.meetudy.annotation.ValidationGroups;
 import front.meetudy.annotation.customannotation.Email;
-import front.meetudy.annotation.customannotation.Password;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -25,4 +23,5 @@ public class LoginReqDto {
     private String password;
 
     private boolean chk;
+
 }

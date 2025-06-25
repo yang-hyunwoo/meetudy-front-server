@@ -13,18 +13,23 @@ public class ChatRoomService {
 
     /**
      * 멤버 추가
-     * @param studyGroupId
-     * @param sessionId
-     * @param memberId
+     *
+     * @param studyGroupId 그룹 id
+     * @param sessionId 세션 id
+     * @param memberId 멤버 id
      */
-    public void addMember(Long studyGroupId , String sessionId , Long memberId) {
+    public void addMember(Long studyGroupId,
+                          String sessionId,
+                          Long memberId
+    ) {
         roomSessionMap.computeIfAbsent(studyGroupId, k -> new ConcurrentHashMap<>())
                 .put(sessionId, memberId);
     }
 
     /**
      * 멤버 삭제
-     * @param sessionId
+     *
+     * @param sessionId 세션 id
      */
     public void removeUser(String sessionId) {
         for(Map<String , Long> sessionMap : roomSessionMap.values()) {
@@ -34,7 +39,8 @@ public class ChatRoomService {
 
     /**
      * 접속중인 멤버 조회
-     * @param studyGroupId
+     *
+     * @param studyGroupId 그룹 id
      * @return
      */
     public List<Long> getOnlineUserIds(Long studyGroupId) {
@@ -46,11 +52,7 @@ public class ChatRoomService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 멤버 조회
-     * @param sessionId
-     * @return
-     */
+    @Deprecated
     public Optional<Long> findStudyGroupIdBySessionId(String sessionId) {
         return roomSessionMap.entrySet().stream()
                 .filter(entry -> entry.getValue().containsKey(sessionId))
@@ -58,9 +60,10 @@ public class ChatRoomService {
                 .findFirst();
     }
 
-    //완벽히 오프라인 처리
+    @Deprecated
     public boolean isUserCompletelyOffline(Long memberId, Long studyGroupId) {
         Map<String, Long> sessionMap = roomSessionMap.getOrDefault(studyGroupId, Collections.emptyMap());
         return sessionMap.values().stream().noneMatch(id -> id.equals(memberId));
     }
+
 }

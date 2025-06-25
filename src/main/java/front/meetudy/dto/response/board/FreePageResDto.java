@@ -23,6 +23,7 @@ public class FreePageResDto {
     @Schema(description = "등록일" ,example = "yyyy-mm-dd:HH:24MM:SSS")
     private LocalDateTime createdAt;
 
+
     public static FreePageResDto from(FreeBoard freeBoard) {
         return FreePageResDto.builder()
                 .id(freeBoard.getId())
@@ -31,4 +32,5 @@ public class FreePageResDto {
                 .createdAt(freeBoard.getCreatedAt())
                 .build();
     }
+
 }

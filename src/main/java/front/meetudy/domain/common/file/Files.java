@@ -37,39 +37,42 @@ public class Files extends BaseEntity {
     @Column(nullable = false)
     private boolean deleted;
 
+
     @Builder
     protected Files(Long id,
                     Member member,
-                    boolean deleted) {
+                    boolean deleted
+    ) {
         this.id = id;
         this.member = member;
         this.deleted =deleted;
     }
 
     public static Files createFiles(Member member ,
-                                    boolean deleted) {
-
+                                    boolean deleted
+    ) {
         return Files.builder()
                 .member(member)
                 .deleted(deleted)
                 .build();
     }
+
     public void addFileDetail(FilesDetails fileDetail) {
         this.filesDetails.add(fileDetail);
         fileDetail.linkToFiles(this);
     }
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Files files = (Files) o;
-        return Objects.equals(id, files.id);
-    }
-
 
     public static Files partialOf(Long id) {
         return Files.builder()
                 .id(id)
                 .build();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Files files = (Files) o;
+        return Objects.equals(id, files.id);
     }
 
     @Override
@@ -85,4 +88,5 @@ public class Files extends BaseEntity {
                 ", deleted=" + deleted +
                 '}';
     }
+
 }

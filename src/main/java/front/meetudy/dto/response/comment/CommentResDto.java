@@ -31,6 +31,7 @@ public class CommentResDto {
     @Schema(description = "등록일" , example = "2025-01-01 11:11:111")
     private LocalDateTime createdAt;
 
+
     public static CommentResDto from(Comment comment, Member member) {
         return CommentResDto.builder()
                 .id(comment.getId())

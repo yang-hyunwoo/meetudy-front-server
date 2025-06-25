@@ -15,4 +15,5 @@ public class StudyGroupCancelReqDto {
 
     @Schema(description = "스터드 그룹 ID PK", example = "1")
     private Long studyGroupId;
+
 }

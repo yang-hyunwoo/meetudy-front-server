@@ -1,12 +1,10 @@
 package front.meetudy.controller.main;
 
 
-import front.meetudy.annotation.customannotation.CurrentMember;
-import front.meetudy.domain.member.Member;
 import front.meetudy.dto.response.main.MainNoticeResDto;
 import front.meetudy.dto.response.main.MainStudyGroupResDto;
-import front.meetudy.dto.response.mypage.MyPageMemberResDto;
 import front.meetudy.service.main.MainService;
+import front.meetudy.util.MessageUtil;
 import front.meetudy.util.response.Response;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,15 +26,22 @@ public class MainController {
 
     private final MainService mainService;
 
-    @Operation(summary = "추천 그룹 조회 ", description = "추천 그룹 조회")
+    private final MessageUtil messageUtil;
+
+    @Operation(summary = "추천 그룹 조회", description = "추천 그룹 조회")
     @GetMapping("/study-group/list")
-    public ResponseEntity<Response<List<MainStudyGroupResDto>>> mainStudyGroupList() {
-        return Response.ok("추천 그룹 조회 완료", mainService.mainStudyGroupList());
+    public ResponseEntity<Response<List<MainStudyGroupResDto>>> mainStudyGroupList(
+    ) {
+        return Response.ok(messageUtil.getMessage("main.group.list.read.ok"),
+                mainService.mainStudyGroupList());
     }
 
-    @Operation(summary = "메인 공지 사항 조회 ", description = "메인 공지사항 조회")
+    @Operation(summary = "메인 공지 사항 조회", description = "메인 공지 사항 조회")
     @GetMapping("/notice/list")
-    public ResponseEntity<Response<List<MainNoticeResDto>>> mainNoticeList() {
-        return Response.ok("추천 그룹 조회 완료", mainService.mainNoticeList());
+    public ResponseEntity<Response<List<MainNoticeResDto>>> mainNoticeList(
+    ) {
+        return Response.ok(messageUtil.getMessage("main.notice.list.read.ok"),
+                mainService.mainNoticeList());
     }
+
 }

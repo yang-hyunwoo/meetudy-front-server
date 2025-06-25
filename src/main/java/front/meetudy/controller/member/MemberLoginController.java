@@ -10,6 +10,7 @@ import front.meetudy.dto.response.member.LoginResDto;
 import front.meetudy.property.JwtProperty;
 import front.meetudy.service.member.MemberService;
 import front.meetudy.service.redis.RedisService;
+import front.meetudy.util.MessageUtil;
 import front.meetudy.util.response.CustomResponseUtil;
 import front.meetudy.util.security.LoginErrorResolver;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,20 +38,24 @@ import static front.meetudy.constant.security.CookieEnum.isAutoLogin;
 public class MemberLoginController {
 
     private final AuthenticationManager authenticationManager;
+
     private final JwtProcess jwtProcess;
+
     private final MemberService memberService;
+
     private final RedisService redisService;
+
     private final JwtProperty jwtProperty;
 
-    /**
-     * 로그인 컨트롤러
-     * @param response
-     * @param loginReqDto
-     */
-    @PostMapping("/login")
+    private final MessageUtil messageUtil;
+
     @Operation(summary = "로그인", description = "로그인 API 성공 시 Bearer 토큰 생성 / 리프래시 토큰 생성")
     @LoginValidationErrorExample
-    public void login(HttpServletResponse response, @RequestBody LoginReqDto loginReqDto) {
+    @PostMapping("/login")
+    public void login(
+            HttpServletResponse response,
+            @RequestBody LoginReqDto loginReqDto
+    ) {
         try {
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(loginReqDto.getEmail(), loginReqDto.getPassword());
             authToken.setDetails(loginReqDto);
@@ -73,8 +78,8 @@ public class MemberLoginController {
 
             String refreshUuid = jwtProcess.extractRefreshUuid(refreshToken);
             redisService.saveRefreshToken(refreshUuid, loginUser.getMember().getId(), loginReqDto.isChk(), ttl);
-            response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken,ttl ).toString());
-            CustomResponseUtil.success(response, loginRespDto, "로그인 성공");
+//            response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken,ttl ).toString());
+            CustomResponseUtil.success(response, loginRespDto, messageUtil.getMessage("member.login.ok"));
 
         } catch (AuthenticationException e) {
             log.warn("로그인 실패: {}", e.getMessage());
@@ -83,7 +88,12 @@ public class MemberLoginController {
         }
     }
 
-    private void jetGenerated(HttpServletResponse response, String accessToken, String refreshToken, Duration ttl, LoginReqDto loginReqDtoAuth) {
+    private void jetGenerated(HttpServletResponse response,
+                              String accessToken,
+                              String refreshToken,
+                              Duration ttl,
+                              LoginReqDto loginReqDtoAuth
+    ) {
         if (jwtProperty.isUseCookie()) {
             response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(accessToken, CookieEnum.accessToken).toString());
             response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken, ttl).toString());

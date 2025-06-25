@@ -45,26 +45,34 @@ import java.util.Optional;
 public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepository {
 
     private final JPAQueryFactory queryFactory;
+
     QStudyGroup studyGroup = QStudyGroup.studyGroup;
+
     QFilesDetails filesDetails = QFilesDetails.filesDetails;
 
     QMember memberq = QMember.member;
 
     QStudyGroupDetail studyGroupDetail = QStudyGroupDetail.studyGroupDetail;
+
     QStudyGroupMember studyGroupMember = QStudyGroupMember.studyGroupMember;
+
     QStudyGroupSchedule studyGroupSchedule = QStudyGroupSchedule.studyGroupSchedule;
+
     QAttendance attendance = QAttendance.attendance;
 
     /**
-     * 그룹 리스트 조회
-     * @param pageable
-     * @param studyGroupPageReqDto
-     * @param member
-     * @return
+     * 그룹 목록 페이징 조회
+     *
+     * @param pageable 페이징 정보
+     * @param studyGroupPageReqDto 검색 조건
+     * @param member 멤버
+     * @return 그룹 목록 페이지 객체
      */
     @Override
-    public Page<StudyGroupPageResDto> findStudyGroupListPage(Pageable pageable, StudyGroupPageReqDto studyGroupPageReqDto, Member member) {
-
+    public Page<StudyGroupPageResDto> findStudyGroupListPage(Pageable pageable,
+                                                             StudyGroupPageReqDto studyGroupPageReqDto,
+                                                             Member member
+    ) {
         BooleanBuilder builder = new BooleanBuilder();
         groupCondition(studyGroupPageReqDto, builder);
 
@@ -113,13 +121,15 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                         .and(memberq.deleted.eq(false)))
                 .where(builder)
                 .fetchOne();
+
         return new PageImpl<>(studyGroupList, pageable, count);
     }
 
     /**
      * 그룹 상세 조회
-     * @param studyGroupId
-     * @return
+     *
+     * @param studyGroupId 그룹id
+     * @return 그룹 상세 객체
      */
     @Override
     public Optional<StudyGroupDetailResDto> findStudyGroupDetail(Long studyGroupId) {
@@ -157,12 +167,19 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .fetchOne();
 
         return Optional.ofNullable(studyGroupDetailResDto);
-
     }
 
-
+    /**
+     * 그룹 리스트 상태 리스트 조회
+     *
+     * @param groupIds 그룹 id
+     * @param member 멤버
+     * @return 그룹 리스트 상태 리스트 객체
+     */
     @Override
-    public List<StudyGroupStatusResDto> findStudyGroupStatus(List<Long> groupIds, Member member) {
+    public List<StudyGroupStatusResDto> findStudyGroupStatus(List<Long> groupIds,
+                                                             Member member
+    ) {
         return queryFactory.select(Projections.constructor(
                         StudyGroupStatusResDto.class,
                         studyGroupMember.studyGroup.id,
@@ -178,6 +195,12 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .fetch();
     }
 
+    /**
+     * 사용자 그룹 생성 갯수 조회
+     *
+     * @param member 멤버
+     * @return 사용자 그룹 생성 갯수
+     */
     @Override
     public int findStudyGroupCreateCount(Member member) {
         BooleanBuilder builder = new BooleanBuilder();
@@ -193,6 +216,12 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
         return count != null ? count.intValue() : 0;
     }
 
+    /**
+     * 멤버가 운영 중인 그룹 리스트 조회
+     *
+     * @param member 멤버
+     * @return 멤버가 운영 중인 그룹 리스트 객체
+     */
     @Override
     public List<GroupOperateResDto> findOperateList(Member member) {
         BooleanBuilder builder = new BooleanBuilder();
@@ -221,8 +250,17 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .fetch();
     }
 
+    /**
+     * 멤버가 가입한 그룹 리스트 조회
+     *
+     * @param member 멤버
+     * @param joinStatusEnum 그룹 가입 상태
+     * @return 멤버가 가입한 그룹 리스트 객체
+     */
     @Override
-    public List<GroupOperateResDto> findJoinGroupList(Member member,JoinStatusEnum joinStatusEnum) {
+    public List<GroupOperateResDto> findJoinGroupList(Member member,
+                                                      JoinStatusEnum joinStatusEnum
+    ) {
         BooleanBuilder builder = new BooleanBuilder();
         groupJoinCondition(member,builder,joinStatusEnum);
         return queryFactory.select(new QGroupOperateResDto(
@@ -249,6 +287,12 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .fetch();
     }
 
+    /**
+     * 메인 그룹 리스트 조회
+     *
+     * @return
+     * 메인 그룹 리스트 객체
+     */
     @Override
     public List<MainStudyGroupResDto> findMainStudyGroupList() {
         return queryFactory.select(new QMainStudyGroupResDto(
@@ -277,7 +321,12 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .fetch();
     }
 
-
+    /**
+     * 그룹 수정 상세 조회
+     *
+     * @param studyGroupId 그룹id
+     * @return 그룹 수정 상세 객체
+     */
     @Override
     public Optional<StudyGroupUpdateDetailResDto> findGroupUpdateDetail(Long studyGroupId) {
         StudyGroupUpdateDetailResDto studyGroupUpdateDetailResDto = queryFactory.select(new QStudyGroupUpdateDetailResDto(
@@ -315,13 +364,15 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
     }
 
     /**
-     * 캘린더 그룹 조회
-     * @param studyGroupId
-     * @param date
-     * @return
+     * 캘린더 그룹 리스트 조회
+     * @param studyGroupId 그룹 id
+     * @param date 기간
+     * @return 캘린더 그룹 리스트 객체
      */
     @Override
-    public List<GroupScheduleMonthResDto> findScheduleMonth(List<Long> studyGroupId, String date) {
+    public List<GroupScheduleMonthResDto> findScheduleMonth(List<Long> studyGroupId,
+                                                            String date
+    ) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
         YearMonth yearMonth = YearMonth.parse(date, formatter);
         LocalDate startOfMonth = yearMonth.atDay(1);
@@ -332,7 +383,6 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                         studyGroupSchedule.meetingDate,
                         studyGroupSchedule.meetingStartTime,
                         studyGroupSchedule.meetingEndTime
-
                 ))
                 .from(studyGroup)
                 .innerJoin(studyGroupSchedule)
@@ -349,13 +399,15 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
     }
 
     /**
-     * 스케줄 하루 조회
-     * @param studyGroupId
-     * @param date
-     * @return
+     * 스케줄 하루 리스트 조회
+     * @param studyGroupId 그룹 id
+     * @param date 기간
+     * @return 스케줄 하루 리스트 객체
      */
     @Override
-    public List<GroupScheduleDayResDto> findScheduleDay(List<Long> studyGroupId, String date) {
+    public List<GroupScheduleDayResDto> findScheduleDay(List<Long> studyGroupId,
+                                                        String date
+    ) {
         return queryFactory.select(new QGroupScheduleDayResDto(
                         studyGroup.id,
                         studyGroup.title,
@@ -384,14 +436,17 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
     }
 
     /**
-     * 스케줄 1주 조회
-     * @param studyGroupId
-     * @param startDate
-     * @param endDate
-     * @return
+     * 스케줄 1주 리스트 조회
+     * @param studyGroupId 그룹 id
+     * @param startDate 시작일
+     * @param endDate 종료일
+     * @return 스케줄 1주 리스트 객체
      */
     @Override
-    public List<GroupScheduleDayResDto> findScheduleWeek(List<Long> studyGroupId, String startDate, String endDate) {
+    public List<GroupScheduleDayResDto> findScheduleWeek(List<Long> studyGroupId,
+                                                         String startDate,
+                                                         String endDate
+    ) {
         return queryFactory.select(new QGroupScheduleDayResDto(
                         studyGroup.id,
                         studyGroup.title,
@@ -420,18 +475,25 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .fetch();
     }
 
-    private void groupOperateCondition(Member member, BooleanBuilder builder) {
+    private void groupOperateCondition(Member member,
+                                       BooleanBuilder builder
+    ) {
         builder.and(studyGroupMember.member.id.eq(member.getId()));
         builder.and(studyGroupDetail.deleted.eq(false));
     }
 
-    private void groupJoinCondition(Member member, BooleanBuilder builder,JoinStatusEnum joinStatusEnum) {
+    private void groupJoinCondition(Member member,
+                                    BooleanBuilder builder,
+                                    JoinStatusEnum joinStatusEnum
+    ) {
         builder.and(studyGroupMember.member.id.eq(member.getId()));
         builder.and(studyGroupMember.joinStatus.eq(joinStatusEnum));
         builder.and(studyGroupDetail.deleted.eq(false));
     }
 
-    private void groupCondition(StudyGroupPageReqDto studyGroupPageReqDto, BooleanBuilder builder) {
+    private void groupCondition(StudyGroupPageReqDto studyGroupPageReqDto,
+                                BooleanBuilder builder
+    ) {
         builder.and(studyGroup.region.eq(RegionEnum.valueOf(studyGroupPageReqDto.getRegion())));
         builder.and(studyGroupDetail.deleted.eq(false));
         if(studyGroupPageReqDto.getSearchKeyword() != null && !studyGroupPageReqDto.getSearchKeyword().isBlank()) {
@@ -439,7 +501,9 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
         }
     }
 
-    private void groupCountCondition(Member member,BooleanBuilder builder) {
+    private void groupCountCondition(Member member,
+                                     BooleanBuilder builder
+    ) {
         LocalDate nowDate = LocalDate.now();
         LocalTime nowTime = LocalTime.now();
 
@@ -447,10 +511,9 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
         builder.and(studyGroupMember.role.eq(MemberRole.LEADER));
         builder.and(studyGroupDetail.deleted.eq(false));
         builder.and(studyGroupDetail.endDate.gt(nowDate)
-                        .or(studyGroupDetail.endDate.eq(nowDate)
-                            .and(studyGroupDetail.meetingEndTime.goe(nowTime)))
-                    );
-
+                .or(studyGroupDetail.endDate.eq(nowDate)
+                        .and(studyGroupDetail.meetingEndTime.goe(nowTime)))
+        );
     }
 
     private void groupDateCondition(BooleanBuilder builder) {
@@ -458,4 +521,5 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
         builder.and(studyGroupDetail.startDate.loe(today));
         builder.and(studyGroupDetail.endDate.goe(today));
     }
+
 }

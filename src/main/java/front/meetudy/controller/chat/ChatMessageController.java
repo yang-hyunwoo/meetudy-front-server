@@ -15,6 +15,7 @@ import front.meetudy.service.chat.ChatLinkService;
 import front.meetudy.service.chat.ChatMessageService;
 import front.meetudy.service.chat.ChatNoticeService;
 import front.meetudy.service.study.StudyGroupService;
+import front.meetudy.util.MessageUtil;
 import front.meetudy.util.response.Response;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -49,27 +50,27 @@ public class ChatMessageController {
 
     private final AuthService authService;
 
-    @Operation(summary = "채팅방 권한 체크" , description = "채팅방 권한 체크")
+    private final MessageUtil messageUtil;
+
+    @Operation(summary = "채팅 그룹 권한 체크" , description = "채팅 그룹 권한 체크")
     @GetMapping("/{studyGroupId}/detail/auth")
     public ResponseEntity<Response<Boolean>> chatAuthChk(
             @PathVariable(value = "studyGroupId") Long studyGroupId,
             @CurrentMember Member member
     ) {
         authService.studyGroupMemberJoinChk(studyGroupId, member.getId());
-        return Response.ok("채팅 목록 조회 완료",true);
+        return Response.ok(messageUtil.getMessage("chat.auth.read.ok"),true);
 
     }
 
-
-
-    @Operation(summary = "채팅 목록 조회", description = "채팅 목록 조회")
+    @Operation(summary = "채팅 그룹 채팅 목록 조회", description = "채팅 그룹 채팅 목록 조회")
     @GetMapping("/{studyGroupId}/list")
     public ResponseEntity<Response<PageDto<ChatMessageResDto>>> chatList(
             @PathVariable(value = "studyGroupId") Long studyGroupId,
-            @PageableDefault(size = 30, page = 0) Pageable pageable,
-            @CurrentMember Member member
+            @PageableDefault(size = 30, page = 0) Pageable pageable
     ) {
-        return Response.ok("채팅 목록 조회 완료", chatMessageService.chatList(pageable, studyGroupId));
+        return Response.ok(messageUtil.getMessage("chat.list.read.ok"),
+                chatMessageService.chatList(pageable, studyGroupId));
     }
 
     @Operation(summary = "채팅 그룹 인원 조회", description = "채팅 그룹 인원 조회")
@@ -78,19 +79,21 @@ public class ChatMessageController {
             @PathVariable(value = "studyGroupId") Long studyGroupId,
             @CurrentMember Member member
     ) {
-        return Response.ok("채팅 그룹 인원 조회 완료", studyGroupService.studyGroupMemberList(studyGroupId, member));
+        return Response.ok(messageUtil.getMessage("chat.member.list.read.ok"),
+                studyGroupService.studyGroupMemberList(studyGroupId, member));
     }
 
-    @Operation(summary = "그룹 공지 사항 조회", description = "그룹 공지 사항 조회")
+    @Operation(summary = "채팅 그룹 공지 사항 조회", description = "채팅 그룹 공지 사항 조회")
     @GetMapping("/{studyGroupId}/notice/list")
     public ResponseEntity<Response<List<ChatNoticeDto>>> groupNoticeList(
             @PathVariable(value = "studyGroupId") Long studyGroupId,
             @CurrentMember Member member
     ) {
-        return Response.ok("그룹 공지사항 조회 완료", chatNoticeService.chatNoticeList(studyGroupId, member));
+        return Response.ok(messageUtil.getMessage("chat.notice.list.read.ok"),
+                chatNoticeService.chatNoticeList(studyGroupId, member));
     }
 
-    @Operation(summary = "그룹 공지 권한 사용 체크", description = "그룹 공지 권한 사용 체크")
+    @Operation(summary = "채팅 그룹 공지 권한 사용 체크", description = "채팅 그룹 공지 권한 사용 체크")
     @GetMapping("/{studyGroupId}/notice/auth")
     public ResponseEntity<Response<Boolean>> groupNoticeAuth(
             @PathVariable(value = "studyGroupId") Long studyGroupId,
@@ -98,28 +101,32 @@ public class ChatMessageController {
     ) {
         try {
             authService.findGroupAuth(studyGroupId, member.getId());
-            return Response.ok("공지 권한 체크 완료", true);
+            return Response.ok(messageUtil.getMessage("chat.notice.auth.read.ok"),
+                    true);
         } catch (CustomApiException e) {
-            return Response.ok("공지 권한 체크 완료", false);
-
+            return Response.ok(messageUtil.getMessage("chat.notice.auth.read.ok"),
+                    false);
         }
     }
 
-    @Operation(summary = "그룹 링크 리스트 조회", description = "그룹 링크 리스트 조회")
+    @Operation(summary = "채팅 그룹 링크 리스트 조회", description = "채팅 그룹 링크 리스트 조회")
     @GetMapping("/{studyGroupId}/link/list")
     public ResponseEntity<Response<List<ChatLinkDto>>> groupLinkList(
             @PathVariable(value = "studyGroupId") Long studyGroupId,
             @CurrentMember Member member
     ) {
-        return Response.ok("그룹 링크 리스트 조회 완료", chatLinkService.chatLinkList(studyGroupId, member));
+        return Response.ok(messageUtil.getMessage("chat.link.list.read.ok"),
+                chatLinkService.chatLinkList(studyGroupId, member));
     }
 
-    @Operation(summary = "그룹 자료 리스트 조회" , description = "그룹 자료 리스트 조회")
+    @Operation(summary = "채팅 그룹 자료 리스트 조회" , description = "채팅 그룹 자료 리스트 조회")
     @GetMapping("/{studyGroupId}/document/list")
     public ResponseEntity<Response<List<ChatDocumentDto>>> groupDocumentList(
             @PathVariable(value = "studyGroupId") Long studyGroupId,
             @CurrentMember Member member
     ) {
-        return Response.ok("그룹 자료 리스트 조회 완료", chatDocumentService.chatDocumentList(studyGroupId, member));
+        return Response.ok(messageUtil.getMessage("chat.document.list.read.ok"),
+                chatDocumentService.chatDocumentList(studyGroupId, member));
     }
+
 }

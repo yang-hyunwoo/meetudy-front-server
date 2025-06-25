@@ -34,4 +34,5 @@ public class FileDetailResDto {
                 .publicId(filesDetails.getPublicId())
                 .build();
     }
+
 }
