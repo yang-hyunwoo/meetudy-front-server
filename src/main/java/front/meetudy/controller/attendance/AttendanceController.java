@@ -4,6 +4,7 @@ import front.meetudy.annotation.customannotation.CurrentMember;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.study.group.StudyGroupAttendanceReqDto;
 import front.meetudy.service.attendance.AttendanceService;
+import front.meetudy.util.MessageUtil;
 import front.meetudy.util.response.Response;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,14 +24,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class AttendanceController {
 
     private final AttendanceService attendanceService;
+    private final MessageUtil messageUtil;
 
-    @Operation(summary = "스터디 그룹 출석 체크" , description = "스터디 그룹 출석 체크")
+    @Operation(summary = "스터디 그룹 출석 체크", description = "스터디 그룹 출석 체크")
     @PostMapping("/chk")
-    public ResponseEntity<Response<Void>> studyGroupAttendanceCheck(
-            @RequestBody StudyGroupAttendanceReqDto studyGroupAttendanceReqDto,
-            @CurrentMember Member member
+    public ResponseEntity<Response<Void>> studyGroupAttendanceCheck(@RequestBody StudyGroupAttendanceReqDto studyGroupAttendanceReqDto,
+                                                                    @CurrentMember Member member
     ) {
         attendanceService.studyGroupAttendanceCheck(studyGroupAttendanceReqDto, member);
-        return Response.create("스터디 그룹 출석 체크 완료", null);
+        return Response.create(messageUtil.getMessage("attendance.check.insert.ok"),
+                null);
     }
+
 }

@@ -33,7 +33,11 @@ public class NoticeDetailResDto {
     @Schema(description = "공지사항 다음글 ID",example = "1")
     private Long nextId;
 
-    public static NoticeDetailResDto from(NoticeBoard noticeBoard,Long prevId , Long nextId) {
+
+    public static NoticeDetailResDto from(NoticeBoard noticeBoard,
+                                          Long prevId,
+                                          Long nextId
+    ) {
         return NoticeDetailResDto.builder()
                 .id(noticeBoard.getId())
                 .title(noticeBoard.getTitle())

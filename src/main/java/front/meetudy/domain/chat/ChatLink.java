@@ -1,7 +1,6 @@
 package front.meetudy.domain.chat;
 
 import front.meetudy.domain.common.BaseEntity;
-import front.meetudy.domain.common.file.Files;
 import front.meetudy.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -29,7 +28,6 @@ public class ChatLink extends BaseEntity {
     @Column(name = "study_group_id", nullable = false)
     private Long studyGroupId;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
@@ -39,12 +37,15 @@ public class ChatLink extends BaseEntity {
 
     @Column(nullable = false)
     private boolean deleted;
+
+
     @Builder
     protected ChatLink(Long id,
                        Long studyGroupId,
                        Member member,
                        String linkUrl,
-                       boolean deleted) {
+                       boolean deleted
+    ) {
         this.id = id;
         this.studyGroupId = studyGroupId;
         this.member = member;
@@ -64,6 +65,9 @@ public class ChatLink extends BaseEntity {
                 .build();
     }
 
+    /**
+     * 채팅방 링크 삭제
+     */
     public void deleteChatLink() {
         this.deleted = true;
     }

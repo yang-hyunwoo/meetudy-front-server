@@ -106,7 +106,8 @@ public class StudyGroupUpdateDetailResDto {
                                         boolean joinType,
                                         boolean secret,
                                         String secretPassword,
-                                        boolean allowComment) {
+                                        boolean allowComment
+    ) {
         this.studyGroupId = studyGroupId;
         this.studyGroupDetailId = studyGroupDetailId;
         this.thumbnailFileUrl = thumbnailFileUrl;
@@ -131,4 +132,5 @@ public class StudyGroupUpdateDetailResDto {
         this.secretPassword = secretPassword;
         this.allowComment = allowComment;
     }
+
 }

@@ -53,7 +53,6 @@ public class CloudinaryService {
 
             String publicId = uploadResult.get("public_id").toString();
             log.info("Cloudinary 연결 성공: uploaded sample file public_id = {}", publicId);
-
             // 업로드 직후 삭제
             cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
 
@@ -69,4 +68,5 @@ public class CloudinaryService {
     public Cloudinary connectCloudinary() {
         return cloudinary;
     }
+
 }

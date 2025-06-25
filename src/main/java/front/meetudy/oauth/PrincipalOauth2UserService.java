@@ -25,8 +25,8 @@ import java.util.UUID;
 public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
 
     private final PasswordEncoder encoder;
-    private final MemberRepository memberRepository;
 
+    private final MemberRepository memberRepository;
 
     /**
      * 함수 종료시 @AuthenticationPrincipal 어노테이션이 만들어진다.
@@ -56,12 +56,15 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
         } else if(userRequest.getClientRegistration().getRegistrationId().equals("naver")) {
             log.info("네이버 로그인 요청");
             oAuth2UserInfo = new NaverUserInfo((Map) oAuth2User.getAttributes().get("response"));
+
         } else if(userRequest.getClientRegistration().getRegistrationId().equals("kakao")){
             log.info("카카오 로그인 요청");
             oAuth2UserInfo = new KakaoUserInfo((Map) oAuth2User.getAttributes().get("response"));
+
         }else {
             log.error("오류");
         }
+
         MemberProviderTypeEnum providerType = oAuth2UserInfo.getProvider(); //google 계정
         String providerId = oAuth2UserInfo.getProviderId();
 //        String username = provider + "_" + providerId;  //google_sub
@@ -87,4 +90,5 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
 
         return new LoginUser(oauthMember, oAuth2User.getAttributes());
     }
+
 }

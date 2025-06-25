@@ -13,6 +13,7 @@ public class MyPageMessageResDto {
 
     @Schema(description = "메시지 ID PK", example = "1")
     private Long id;
+
     @Schema(description = "메시지", example = "우루루")
     private String content;
 
@@ -30,6 +31,7 @@ public class MyPageMessageResDto {
 
     @Schema(description = "읽음 여부" , example = "false")
     private boolean read;
+
 
     public static MyPageMessageResDto from(Message message) {
         return MyPageMessageResDto.builder()

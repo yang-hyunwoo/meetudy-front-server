@@ -4,7 +4,6 @@ import front.meetudy.constant.chat.ChatMessageType;
 import front.meetudy.constant.member.MemberEnum;
 import front.meetudy.domain.chat.ChatDocument;
 import front.meetudy.domain.common.file.Files;
-import front.meetudy.domain.common.file.FilesDetails;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.common.FilesDetailsDto;
 import lombok.*;
@@ -16,12 +15,19 @@ import java.util.List;
 public class ChatDocumentDto {
 
     private Long id;
+
     private Long studyGroupId;
+
     private Long memberId;
+
     private Long fileId;
+
     private Long fileDetailId;
+
     private Long senderId;
+
     private ChatMessageType status;
+
     private FileMessage file;
 
     public ChatDocument toEntity(Files files) {
@@ -32,7 +38,9 @@ public class ChatDocumentDto {
         );
     }
 
-    public static ChatDocumentDto from(ChatDocument chatDocument , ChatMessageType status) {
+    public static ChatDocumentDto from(ChatDocument chatDocument,
+                                       ChatMessageType status
+    ) {
         List<FilesDetailsDto> fileDetailsDtos = chatDocument.getFiles()
                 .getFilesDetails()
                 .stream()
@@ -63,6 +71,5 @@ public class ChatDocumentDto {
                     .build();
         }
     }
+
 }
-
-

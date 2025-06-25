@@ -11,7 +11,6 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 @Getter
 @Setter
@@ -24,7 +23,10 @@ public class StudyGroupAttendanceReqDto {
     @Schema(description = "스터디 그룹 ID PK", example = "1")
     private Long studyGroupId;
 
-    public Attendance toEntity(StudyGroup studyGroup , Member member ,AttendanceEnum attendanceEnum) {
+    public Attendance toEntity(StudyGroup studyGroup,
+                               Member member,
+                               AttendanceEnum attendanceEnum
+    ) {
         return Attendance.createAttendance(
                 studyGroup,
                 member,
@@ -33,4 +35,5 @@ public class StudyGroupAttendanceReqDto {
                 attendanceEnum
         );
     }
+
 }

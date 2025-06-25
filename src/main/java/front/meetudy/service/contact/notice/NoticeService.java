@@ -25,7 +25,7 @@ public class NoticeService {
     /**
      * 공지사항 페이징 조회
      * @param pageable
-     * @return
+     * @return 공지사항 페이지 객체
      */
     @Transactional(readOnly = true)
     public PageDto<NoticePageResDto> noticeList(Pageable pageable) {
@@ -39,10 +39,12 @@ public class NoticeService {
      */
     @Transactional(readOnly = true)
     public NoticeDetailResDto noticeDetail(Long id) {
-        NoticeBoard noticeBoard = noticeRepository.findNotice(id).orElseThrow(() -> new CustomApiException(HttpStatus.BAD_REQUEST, ERR_008, ERR_008.getValue()));
+        NoticeBoard noticeBoard = noticeRepository.findNoticeNative(id)
+                .orElseThrow(() -> new CustomApiException(HttpStatus.BAD_REQUEST, ERR_008, ERR_008.getValue()));
         int sort = noticeBoard.getSort();
         return NoticeDetailResDto.from(noticeBoard,
-                noticeRepository.findPrevNotice(sort).orElse(null),
-                noticeRepository.findNextNotice(sort).orElse(null));
+                noticeRepository.findPrevNoticeNative(sort).orElse(null),
+                noticeRepository.findNextNoticeNative(sort).orElse(null));
     }
+
 }

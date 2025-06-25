@@ -27,5 +27,4 @@ public abstract class BaseTimeEntity {
         if (updatedAt == null) this.updatedAt = LocalDateTime.now();
     }
 
-
 }

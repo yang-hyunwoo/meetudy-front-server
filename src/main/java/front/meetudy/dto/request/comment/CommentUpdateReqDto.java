@@ -1,16 +1,12 @@
 package front.meetudy.dto.request.comment;
 
-import front.meetudy.annotation.ValidationGroups;
 import front.meetudy.annotation.ValidationMode;
 import front.meetudy.annotation.customannotation.Sanitize;
 import front.meetudy.constant.error.ValidationType;
-import front.meetudy.domain.comment.Comment;
-import front.meetudy.domain.member.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.hibernate.validator.constraints.Length;
 
 import static front.meetudy.annotation.ValidationGroups.*;
 
@@ -27,17 +23,16 @@ public class CommentUpdateReqDto {
     private Long id;
 
     @Schema(description = "댓글 게시판 유형", example = "freeboard")
-    @NotBlank(message = "{free.targetType}", groups = Step1.class)
+    @NotBlank(message = "{comment.targetType}", groups = Step1.class)
     private String targetType;
 
     @Schema(description = "댓글 게시판 id_pk" , example = "1")
-    @NotNull(message = "{free.targetId}", groups = Step2.class)
+    @NotNull(message = "{comment.targetId}", groups = Step2.class)
     private Long targetId;
 
     @Schema(description = "댓글 내용",example = "test")
     @NotBlank(message = "{comment.content}", groups = Step3.class)
     @Sanitize(groups = Step3.class)
     private String content;
-
 
 }

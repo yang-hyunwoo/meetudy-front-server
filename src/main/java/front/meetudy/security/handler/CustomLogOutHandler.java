@@ -23,6 +23,7 @@ import static front.meetudy.util.cookie.CustomCookie.deleteCookie;
 public class CustomLogOutHandler implements LogoutSuccessHandler {
 
     private final JwtProcess jwtProcess;
+
     private final RedisService redisService;
 
     /**
@@ -34,7 +35,10 @@ public class CustomLogOutHandler implements LogoutSuccessHandler {
      * @throws ServletException
      */
     @Override
-    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+    public void onLogoutSuccess(HttpServletRequest request,
+                                HttpServletResponse response,
+                                Authentication authentication
+    ) {
         String refreshToken = extractTokenFromCookie(request, CookieEnum.refreshToken.getValue());
         if (refreshToken != null) {
             try {
@@ -50,7 +54,9 @@ public class CustomLogOutHandler implements LogoutSuccessHandler {
         CustomResponseUtil.success(response, null, "로그아웃 완료");
     }
 
-    private String extractTokenFromCookie(HttpServletRequest request, String name) {
+    private String extractTokenFromCookie(HttpServletRequest request,
+                                          String name
+    ) {
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if (name.equals(cookie.getName())) {
@@ -60,4 +66,5 @@ public class CustomLogOutHandler implements LogoutSuccessHandler {
         }
         return null;
     }
+
 }

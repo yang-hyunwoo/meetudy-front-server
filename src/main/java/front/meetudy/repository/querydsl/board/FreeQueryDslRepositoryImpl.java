@@ -21,9 +21,18 @@ public class FreeQueryDslRepositoryImpl implements FreeQueryDslRepository {
     private final JPAQueryFactory queryFactory;
 
     QFreeBoard f = QFreeBoard.freeBoard;
-    @Override
-    public Page<FreeBoard> findFreePage(Pageable pageable, FreePageReqDto freePageReqDto) {
 
+    /**
+     * 자유 게시판 페이징 조회
+     *
+     * @param pageable       페이징 정보
+     * @param freePageReqDto 검색 조건
+     * @return 자유 게시판 페이지 객체
+     */
+    @Override
+    public Page<FreeBoard> findFreePage(Pageable pageable,
+                                        FreePageReqDto freePageReqDto
+    ) {
         BooleanBuilder builder = new BooleanBuilder();
         freeCondition(freePageReqDto, builder);
 
@@ -41,7 +50,9 @@ public class FreeQueryDslRepositoryImpl implements FreeQueryDslRepository {
         return new PageImpl<>(freeList, pageable, count);
     }
 
-    private void freeCondition(FreePageReqDto freePageReqDto, BooleanBuilder builder) {
+    private void freeCondition(FreePageReqDto freePageReqDto,
+                               BooleanBuilder builder
+    ) {
         builder.and(f.deleted.isFalse());
         String searchKeyword = freePageReqDto.getSearchKeyword();
         if(freePageReqDto.getSearchKeyword() != null) {
@@ -52,6 +63,6 @@ public class FreeQueryDslRepositoryImpl implements FreeQueryDslRepository {
                 case "NICKNAME" -> builder.and(f.writeNickname.containsIgnoreCase(searchKeyword));
             }
         }
-
     }
+
 }

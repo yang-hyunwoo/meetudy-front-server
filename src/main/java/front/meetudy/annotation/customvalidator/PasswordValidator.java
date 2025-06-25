@@ -7,7 +7,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import java.util.regex.Pattern;
 
 /**
- * 비밀번호 커스텀 어노테이션
+ * 비밀번호 검증 validator
  * 정규식 검사
  */
 public class PasswordValidator implements ConstraintValidator<Password, String> {

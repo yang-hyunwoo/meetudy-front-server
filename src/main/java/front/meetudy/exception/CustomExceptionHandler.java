@@ -1,11 +1,9 @@
 package front.meetudy.exception;
 
-import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.util.response.Response;
 import front.meetudy.util.response.ValidationErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

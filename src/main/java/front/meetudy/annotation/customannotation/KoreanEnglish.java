@@ -7,14 +7,15 @@ import jakarta.validation.Payload;
 import java.lang.annotation.*;
 
 /**
- * 한글 / 영문 커스텀 어노테이션
- * @KoreanEnglish(min = 최소 자릿수, max = 최대 자릿수, message = "정규식메시지",messageKey = "범위메시지")
+ * 한글 / 영문 annotation
+ * KoreanEnglish(min = 최소 자릿수, max = 최대 자릿수, message = "정규식메시지",messageKey = "범위메시지",group= 단일 에러 리턴시 순서)
  */
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = KoreanEnglishValidator.class)
 @Documented
 public @interface KoreanEnglish {
+
     String message() default "default.koEnPermit";
     String messageKey() default "default.range";
     int min() default 0;

@@ -27,6 +27,7 @@ public class MainNoticeResDto {
     @Schema(description = "공지사항 썸네일", example = "https://~~")
     private String thumbnailFileUrl;
 
+
     @QueryProjection
     public MainNoticeResDto(Long id,
                             NoticeType noticeType,
@@ -39,4 +40,5 @@ public class MainNoticeResDto {
         this.summary = summary;
         this.thumbnailFileUrl = thumbnailFileUrl;
     }
+
 }

@@ -7,7 +7,9 @@ import org.springframework.stereotype.Component;
 public class AesProperty {
 
     private static String aesBody;
+
     private static String aesCreate;
+
     private static String aesRefresh;
 
     @Value("${aes.body}")
@@ -36,4 +38,5 @@ public class AesProperty {
     public static String getAesRefresh() {
         return aesRefresh;
     }
+
 }

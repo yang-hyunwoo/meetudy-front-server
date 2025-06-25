@@ -10,7 +10,6 @@ import front.meetudy.dto.request.study.group.StudyGroupAttendanceReqDto;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.study.AttendanceRepository;
 import front.meetudy.repository.study.StudyGroupDetailRepository;
-import front.meetudy.repository.study.StudyGroupMemberRepository;
 import front.meetudy.repository.study.StudyGroupScheduleRepository;
 import front.meetudy.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -39,11 +38,14 @@ public class AttendanceService {
 
     /**
      * 출석 체크
-     * @param studyGroupAttendanceReqDto
-     * @param member
+     *
+     * @param studyGroupAttendanceReqDto 출석 요청 조건
+     * @param member 멤버
      */
-    public void studyGroupAttendanceCheck(StudyGroupAttendanceReqDto studyGroupAttendanceReqDto, Member member) {
-        int attendanceCount = attendanceRepository.findAttendanceCount(studyGroupAttendanceReqDto.getStudyGroupId(), member.getId());
+    public void studyGroupAttendanceCheck(StudyGroupAttendanceReqDto studyGroupAttendanceReqDto,
+                                          Member member
+    ) {
+        int attendanceCount = attendanceRepository.findAttendanceCountNative(studyGroupAttendanceReqDto.getStudyGroupId(), member.getId());
         if (attendanceCount == 0 ) {
             //멤버 여부 확인
             StudyGroupMember studyGroupMember = getStudyGroupMemberPresent(studyGroupAttendanceReqDto, member);
@@ -63,28 +65,46 @@ public class AttendanceService {
     }
 
 
-    //멤버 여부 확인
-    private StudyGroupMember getStudyGroupMemberPresent(StudyGroupAttendanceReqDto studyGroupAttendanceReqDto, Member member) {
+    /**
+     * 멤버 여부 확인
+     *
+     * @param studyGroupAttendanceReqDto
+     * @param member 멤버
+     * @return 그룹 멤버 객체
+     */
+    private StudyGroupMember getStudyGroupMemberPresent(StudyGroupAttendanceReqDto studyGroupAttendanceReqDto,
+                                                        Member member
+    ) {
         return authService.studyGroupMemberJoinChk(studyGroupAttendanceReqDto.getStudyGroupId(), member.getId());
     }
 
+    /**
+     * 스터디 그룹 삭제 여부 조회
+     *
+     * @param studyGroupAttendanceReqDto
+     * @return 그룹 상세 객체
+     */
     private StudyGroupDetail getStudyGroupDetailPresent(StudyGroupAttendanceReqDto studyGroupAttendanceReqDto) {
-        StudyGroupDetail studyGroupDetail = studyGroupDetailRepository.findByStudyGroupIdAndDeleted(studyGroupAttendanceReqDto.getStudyGroupId(), false)
+        return studyGroupDetailRepository.findByStudyGroupIdAndDeleted(studyGroupAttendanceReqDto.getStudyGroupId(), false)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
-        return studyGroupDetail;
     }
 
-    //스케줄 여부 확인
+    /**
+     * 스케줄 여부 확인
+     *
+     * @param studyGroupAttendanceReqDto
+     * @return 스케줄 객체
+     */
     private StudyGroupSchedule getStudyGroupSchedulePresent(StudyGroupAttendanceReqDto studyGroupAttendanceReqDto) {
-        StudyGroupSchedule studyGroupSchedule = studyGroupScheduleRepository.findScheduleDetail(studyGroupAttendanceReqDto.getStudyGroupId())
+        return studyGroupScheduleRepository.findScheduleDetail(studyGroupAttendanceReqDto.getStudyGroupId())
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
-        return studyGroupSchedule;
     }
 
     /**
      * 지각 여부 ENUM 변환
+     *
      * @param studyGroupSchedule
-     * @return
+     * @return enum
      */
     private static AttendanceEnum getAttendanceLateEnumCheck(StudyGroupSchedule studyGroupSchedule) {
         AttendanceEnum attendanceEnum;
@@ -103,4 +123,5 @@ public class AttendanceService {
         }
         return attendanceEnum;
     }
+
 }

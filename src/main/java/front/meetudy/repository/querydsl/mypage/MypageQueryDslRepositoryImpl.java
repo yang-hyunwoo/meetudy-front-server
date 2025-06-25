@@ -22,10 +22,17 @@ public class MypageQueryDslRepositoryImpl implements MypageQueryDslRepository {
 
     QFilesDetails filesDetails = QFilesDetails.filesDetails;
 
+    /**
+     * 멤버 상세 조회
+     *
+     * @param memberId 멤버 id
+     * @return 멤버 상세 객체
+     */
     @Override
     public Optional<MyPageMemberResDto> memberDetail(Long memberId) {
         BooleanBuilder builder = new BooleanBuilder();
         memberCondition(memberId, builder);
+
         MyPageMemberResDto myPageMemberResDto = queryFactory.select(new QMyPageMemberResDto(
                         member.id,
                         member.profileImageId,
@@ -41,11 +48,15 @@ public class MypageQueryDslRepositoryImpl implements MypageQueryDslRepository {
                 .on(member.profileImageId.eq(filesDetails.files.id).and(filesDetails.deleted.eq(false)))
                 .where(builder)
                 .fetchOne();
+
         return Optional.ofNullable(myPageMemberResDto);
     }
 
-    private void memberCondition(Long memberId, BooleanBuilder builder) {
+    private void memberCondition(Long memberId,
+                                 BooleanBuilder builder
+    ) {
         builder.and(member.id.eq(memberId));
         builder.and(member.deleted.isFalse());
     }
+
 }

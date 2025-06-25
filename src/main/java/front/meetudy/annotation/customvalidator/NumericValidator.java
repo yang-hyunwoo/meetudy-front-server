@@ -9,14 +9,13 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 
 /**
- * 숫자 커스텀 어노테이션
+ * 숫자 검증 validator
  * 1.정규식
  * 2.자릿수 (정확한지 / 최소 최대)
  */
 public class NumericValidator implements ConstraintValidator<Numeric,String> {
     private final Pattern pattern = Pattern.compile("^[0-9]+$");
     private final MessageSource messageSource;
-
     private int min;
     private int max;
     private int mid;
@@ -40,6 +39,7 @@ public class NumericValidator implements ConstraintValidator<Numeric,String> {
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
+
         if (value == null || value.trim().isEmpty()) {
             return true; // 공백일 땐 이 유효성 검사는 skip → NotBlank에서 처리
         }
@@ -70,7 +70,6 @@ public class NumericValidator implements ConstraintValidator<Numeric,String> {
             }
             return pattern.matcher(value).matches();
         }
-
     }
 
     private String stripBraces(String key) {

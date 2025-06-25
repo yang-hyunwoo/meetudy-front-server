@@ -17,7 +17,7 @@ import java.util.Set;
 import static front.meetudy.constant.error.ErrorEnum.*;
 
 /**
-
+ 유효성 검사 순서 검증 validator
  */
 @Component
 @RequiredArgsConstructor

@@ -7,7 +7,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import java.util.regex.Pattern;
 
 /**
- * 이메일 유효검사
+ * 이메일 검증 validator
  *
  */
 public class EmailValidator implements ConstraintValidator<Email,String> {

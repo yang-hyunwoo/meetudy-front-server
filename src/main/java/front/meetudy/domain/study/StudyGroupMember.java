@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -56,6 +55,7 @@ public class StudyGroupMember extends BaseEntity {
 
     private LocalDateTime rejectAt;
 
+
     @Builder
     protected StudyGroupMember(Long id,
                                StudyGroup studyGroup,
@@ -86,7 +86,7 @@ public class StudyGroupMember extends BaseEntity {
                                                           LocalDateTime joinApprovedAt,
                                                           LocalDateTime leftAt,
                                                           LocalDateTime rejectAt
-                                                          ) {
+    ) {
         return StudyGroupMember.builder()
                 .studyGroup(studyGroup)
                 .member(member)
@@ -99,17 +99,29 @@ public class StudyGroupMember extends BaseEntity {
                 .build();
     }
 
+    /**
+     * 멤버 강퇴
+     * @param joinStatus
+     */
     public void kickMember(JoinStatusEnum joinStatus) {
         changeStatus(joinStatus);
         this.getStudyGroup().memberCountDecrease();
         this.leftAt = LocalDateTime.now();
     }
 
+    /**
+     * 멤버 거절
+     * @param joinStatus
+     */
     public void rejectMember(JoinStatusEnum joinStatus) {
         changeStatus(joinStatus);
         this.rejectAt = LocalDateTime.now();
     }
 
+    /**
+     * 멤버 승인
+     * @param joinStatus
+     */
     @Transactional
     public void approvedMember(JoinStatusEnum joinStatus) {
         changeStatus(joinStatus);
@@ -117,6 +129,10 @@ public class StudyGroupMember extends BaseEntity {
         this.joinApprovedAt = LocalDateTime.now();
     }
 
+    /**
+     * 상태 변경
+     * @param joinStatus
+     */
     private void changeStatus(JoinStatusEnum joinStatus) {
         this.joinStatus = joinStatus;
     }
@@ -153,7 +169,7 @@ public class StudyGroupMember extends BaseEntity {
         return "StudyGroupMember{" +
                 "id=" + id +
                 ", studyGroup=" + studyGroup +
-                ", member=" + member +
+                ", member.getId()=" + member.getId() +
                 ", joinStatus=" + joinStatus +
                 ", role=" + role +
                 ", joinRequestedAt=" + joinRequestedAt +
@@ -162,4 +178,5 @@ public class StudyGroupMember extends BaseEntity {
                 ", rejectAt=" + rejectAt +
                 '}';
     }
+
 }

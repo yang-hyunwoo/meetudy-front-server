@@ -45,6 +45,7 @@ public class ChatMessage extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime sentAt;
 
+
     @Builder
     protected ChatMessage(Long id,
                           Long studyGroupId,
@@ -76,8 +77,6 @@ public class ChatMessage extends BaseEntity {
                 .build();
     }
 
-
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -102,6 +101,5 @@ public class ChatMessage extends BaseEntity {
                 ", sentAt=" + sentAt +
                 '}';
     }
+
 }
-
-

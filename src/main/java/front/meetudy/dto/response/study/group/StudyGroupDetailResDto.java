@@ -46,17 +46,24 @@ public class StudyGroupDetailResDto {
     @Schema(description = "스터디 댓글 사용 여부" , example = "true")
     private boolean allowComment;
 
+    @Schema(description = "스터디 시작일" , example = "20xx-xx-xx")
     private LocalDate startDate;
 
+    @Schema(description = "스터디 종료일" , example = "20xx-xx-xx")
     private LocalDate endDate;
 
+    @Schema(description = "스터디 시작 시간" , example = "10:00")
     private LocalTime meetingStartTime;
 
+    @Schema(description = "스터디 종료 시간" , example = "10:00")
     private LocalTime meetingEndTime;
 
+    @Schema(description = "스터디 주기" , example = "매일")
     private String meetingFrequency;
 
+    @Schema(description = "스터디 요일" , example = "월")
     private String meetingDay;
+
 
     @QueryProjection
     public StudyGroupDetailResDto(Long id,
@@ -75,7 +82,8 @@ public class StudyGroupDetailResDto {
                                   LocalTime meetingStartTime,
                                   LocalTime meetingEndTime,
                                   String meetingFrequency,
-                                  String meetingDay) {
+                                  String meetingDay
+    ) {
         this.id = id;
         this.thumbnailFileUrl = thumbnailFileUrl;
         this.title = title;
@@ -95,10 +103,8 @@ public class StudyGroupDetailResDto {
         this.meetingDay = meetingDay;
     }
 
-
-
-
     public String getRegionEnum(){
         return regionEnum.getValue();
     }
+
 }

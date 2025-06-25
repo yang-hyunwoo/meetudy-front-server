@@ -20,8 +20,6 @@ public class FileResDto {
     @Schema(description = "파일 상세 리스트", example = "filesDetails")
     private List<FileDetailResDto> filesDetails;
 
-
-
     public static FileResDto from(Files files) {
         return FileResDto.builder()
                 .fileId(files.getId())
@@ -31,5 +29,6 @@ public class FileResDto {
                                 .toList())
                 .build();
     }
+
 }
 

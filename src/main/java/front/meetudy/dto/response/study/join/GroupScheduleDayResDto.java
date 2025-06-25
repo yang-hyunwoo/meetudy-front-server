@@ -32,8 +32,6 @@ public class GroupScheduleDayResDto {
     private LocalDateTime endMeeting;
 
 
-
-
     @QueryProjection
     public GroupScheduleDayResDto(Long groupId,
                                   String groupName,
@@ -41,7 +39,8 @@ public class GroupScheduleDayResDto {
                                   LocalTime startTime,
                                   LocalTime endTime,
                                   String groupImageUrl,
-                                  AttendanceEnum attended) {
+                                  AttendanceEnum attended
+    ) {
         this.groupId = groupId;
         this.groupName = groupName;
         this.nextMeeting = LocalDateTime.of(meetingDate, startTime);
@@ -49,4 +48,5 @@ public class GroupScheduleDayResDto {
         this.groupImageUrl = groupImageUrl;
         this.attended = attended;
     }
+
 }

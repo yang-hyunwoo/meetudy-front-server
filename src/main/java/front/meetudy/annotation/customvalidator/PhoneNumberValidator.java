@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.Locale;
 
 /**
- * 휴대폰 번호 커스텀 어노테이션
+ * 휴대폰 번호 검증 validator
  * 1.010 체크
  * 2.숫자 체크
  * 3.11자리 체크

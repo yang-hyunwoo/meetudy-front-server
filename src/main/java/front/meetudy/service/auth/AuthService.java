@@ -22,39 +22,50 @@ public class AuthService {
 
     /**
      * 그룹 멤버 존재 여부 체크
+     *
      * @param studyGroupId
      * @param memberId
-     * @return
+     * @return 그룹 멤버 객체
      */
-    public StudyGroupMember studyGroupMemberJoinChk(Long studyGroupId , Long memberId) {
+    @Transactional(readOnly = true)
+    public StudyGroupMember studyGroupMemberJoinChk(Long studyGroupId,
+                                                    Long memberId
+    ) {
         return studyGroupMemberRepository.findByStudyGroupIdAndMemberIdAndJoinStatus(studyGroupId, memberId, JoinStatusEnum.APPROVED)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_004, ERR_004.getValue()));
     }
 
     /**
      * 그룹 리더 권한 체크
+     *
      * @param studyGroupId
      * @param memberId
      */
     @Transactional(readOnly = true)
-    public void findGroupAuth(Long studyGroupId , Long memberId) {
-        studyGroupMemberRepository.findGroupAuth(studyGroupId, memberId)
+    public void findGroupAuth(Long studyGroupId,
+                              Long memberId
+    ) {
+        studyGroupMemberRepository.findGroupAuthNative(studyGroupId, memberId)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue()));
     }
 
     /**
      * 그룹 멤버 상태,권한 조회
-     * @param id
-     * @param memberId
-     * @param joinStatusEnum
-     * @param memberRole
-     * @return
+     *
+     * @param id 그룹 id
+     * @param memberId 멤버 id
+     * @param joinStatusEnum 상태
+     * @param memberRole 멤버권한
+     * @return 그룹 멤버 객체
      */
-    public StudyGroupMember studyGroupMemberStatusRole(Long id , Long memberId , JoinStatusEnum joinStatusEnum, MemberRole memberRole) {
+    @Transactional(readOnly = true)
+    public StudyGroupMember studyGroupMemberStatusRole(Long id,
+                                                       Long memberId,
+                                                       JoinStatusEnum joinStatusEnum,
+                                                       MemberRole memberRole
+    ) {
         return studyGroupMemberRepository.findByIdAndMemberIdAndJoinStatusAndRole(id, memberId, joinStatusEnum, memberRole)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
-
     }
-
 
 }

@@ -5,6 +5,7 @@ import front.meetudy.constant.study.MemberRole;
 import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.StudyGroup;
 import front.meetudy.domain.study.StudyGroupMember;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -16,10 +17,14 @@ import java.time.LocalDateTime;
 @Builder
 public class StudyGroupJoinReqDto {
 
+    @Schema(description = "스터디 그룹 ID", example = "1")
     private Long studyGroupId;
 
 
-    public StudyGroupMember toEntity(Member member, StudyGroup studyGroup) {
+    public StudyGroupMember toEntity(
+            Member member,
+            StudyGroup studyGroup
+    ) {
         studyGroup.memberCountIncrease();
         return StudyGroupMember.createStudyGroupMember(
                 studyGroup,

@@ -85,6 +85,22 @@ public class Comment extends BaseEntity {
                 .build();
       }
 
+    /**
+     * 댓글 수정
+     * @param content
+     */
+    public void commentUpdate(String content) {
+        this.content = content;
+    }
+
+    /**
+     * 댓글 삭제
+     * @return
+     */
+    public Long commentDelete() {
+        this.deleted = true;
+        return this.id;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -111,12 +127,4 @@ public class Comment extends BaseEntity {
                 '}';
     }
 
-    public void commentUpdate(String content) {
-        this.content = content;
-    }
-
-    public Long commentDelete() {
-        this.deleted = true;
-        return this.id;
-    }
 }

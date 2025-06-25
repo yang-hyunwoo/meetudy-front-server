@@ -1,9 +1,10 @@
 package front.meetudy.annotation.customannotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
+
+/**
+ * 유효성 검사 순서 annotation
+ */
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

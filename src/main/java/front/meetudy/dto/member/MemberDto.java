@@ -11,19 +11,33 @@ import java.time.LocalDateTime;
 public class MemberDto {
 
     private final Long id;
+
     private final Long profileImageId;
+
     private final String email;
+
     private final String name;
+
     private final String nickname;
+
     private final String birth;
+
     private final String phoneNumber;
+
     private final boolean isEmailAgreed;
+
     private final MemberEnum role;
+
     private final MemberProviderTypeEnum provider;
+
     private final String providerId;
+
     private final int failLoginCount;
+
     private final boolean isDeleted;
+
     private final LocalDateTime deletedAt;
+
     private final LocalDateTime passwordChangeAt;
 
     @Builder
@@ -41,7 +55,8 @@ public class MemberDto {
                       int failLoginCount,
                       boolean isDeleted,
                       LocalDateTime deletedAt,
-                      LocalDateTime passwordChangeAt) {
+                      LocalDateTime passwordChangeAt
+    ) {
         this.id = id;
         this.profileImageId = profileImageId;
         this.email = email;

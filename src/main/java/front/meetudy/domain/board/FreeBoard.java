@@ -63,7 +63,8 @@ public class FreeBoard extends BaseEntity {
     public static FreeBoard createFreeBoard(Member member,
                             String title,
                             String content,
-                            boolean deleted) {
+                            boolean deleted
+    ) {
         return FreeBoard.builder()
                 .member(member)
                 .title(title)
@@ -71,6 +72,27 @@ public class FreeBoard extends BaseEntity {
                 .writeNickname(member.getNickname())
                 .deleted(deleted)
                 .build();
+    }
+
+    /**
+     * 자유 게시판 수정
+     * @param title
+     * @param content
+     * @return
+     */
+    public Long updateFreeBoard(String title,
+                                String content
+    ) {
+        this.title = title;
+        this.content = content;
+        return this.id;
+    }
+
+    /**
+     * 자유 게시판 삭제
+     */
+    public void freeBoardDelete() {
+        this.deleted = true;
     }
 
     @Override
@@ -98,13 +120,4 @@ public class FreeBoard extends BaseEntity {
                 '}';
     }
 
-    public Long updateFreeBoard(String title, String content) {
-        this.title = title;
-        this.content = content;
-        return this.id;
-    }
-
-    public void freeBoardDelete() {
-        this.deleted = true;
-    }
 }

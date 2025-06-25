@@ -4,23 +4,12 @@ import front.meetudy.annotation.ValidationMode;
 import front.meetudy.annotation.customannotation.EnumValidation;
 import front.meetudy.annotation.customannotation.Sanitize;
 import front.meetudy.constant.error.ValidationType;
-import front.meetudy.constant.study.JoinStatusEnum;
-import front.meetudy.constant.study.MemberRole;
 import front.meetudy.constant.study.RegionEnum;
 import front.meetudy.domain.common.BaseEntity;
-import front.meetudy.domain.common.file.Files;
-import front.meetudy.domain.member.Member;
-import front.meetudy.domain.study.StudyGroup;
-import front.meetudy.domain.study.StudyGroupDetail;
-import front.meetudy.domain.study.StudyGroupMember;
-import io.micrometer.common.lang.Nullable;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 import static front.meetudy.annotation.ValidationGroups.*;
 
@@ -38,9 +27,9 @@ public class StudyGroupUpdateReqDto extends BaseEntity {
     @Schema(description = "스터디 그룹 상세id", example = "1")
     private Long studyGroupDetailId;
 
-    /*DTO에서는 enum으로 받지 않음.
-유효성 검사도 힘들기도 하며 계층간의 결합 / 변경 시 수정해야 되는 번거로움이 있음
- */
+    /* DTO에서는 enum으로 받지 않음.
+       유효성 검사도 힘들기도 하며 계층간의 결합 / 변경 시 수정해야 되는 번거로움이 있음
+    */
     @Schema(description = "스터디 그룹 지역", example = "BUSAN")
     @EnumValidation(enumClass = RegionEnum.class, message = "{study.region.blank}", groups = Step1.class)
     private String region;
@@ -110,9 +99,5 @@ public class StudyGroupUpdateReqDto extends BaseEntity {
 
     @Schema(description = "지각비 여부", example = "false")
     private boolean latePay;
-
-
-
-
 
 }

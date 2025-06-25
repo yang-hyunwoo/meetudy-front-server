@@ -15,10 +15,13 @@ import java.io.IOException;
 public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
     @Override
-    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-
+    public void onAuthenticationFailure(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        AuthenticationException exception
+    ) throws IOException {
         String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:4000/errorLogin")
                 .build().toUriString();
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
+
 }

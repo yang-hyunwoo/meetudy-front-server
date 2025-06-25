@@ -36,7 +36,7 @@ public class CloudflareR2Config {
                         AwsBasicCredentials.create(accessKey, secretKey)
                 ))
                 .serviceConfiguration(S3Configuration.builder()
-                        .pathStyleAccessEnabled(true) // R2 필수 설정
+                        .pathStyleAccessEnabled(true)
                         .build())
                 .build();
     }

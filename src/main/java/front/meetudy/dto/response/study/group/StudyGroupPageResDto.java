@@ -12,12 +12,16 @@ import java.time.LocalTime;
 @Getter
 @Builder
 public class StudyGroupPageResDto {
+
     @Schema(description = "스터디그룹 pk", example = "1")
     private Long id;
+
     @Schema(description = "스터디 그룹 썸네일", example = "https://~~")
     private String thumbnailFileUrl;
+
     @Schema(description = "스터디 그룹 제목", example = "asd")
     private String title;
+
     @Schema(description = "스터디 그룹 요약", example = "ffgg")
     private String summary;
 
@@ -26,6 +30,7 @@ public class StudyGroupPageResDto {
 
     @Schema(description = "스터디 그룹 가입조건", example = "true")
     private boolean joinType;
+
     @Schema(description = "스터디 그룹 현재 인원 수", example = "1")
     private int currentMemberCount;
 
@@ -38,17 +43,24 @@ public class StudyGroupPageResDto {
     @Schema(description = "스터디 그룹 태그", example = "리액트,자바")
     private String tag;
 
+    @Schema(description = "스터디 시작일" , example = "20xx-xx-xx")
     private LocalDate startDate;
 
+    @Schema(description = "스터디 종료일" , example = "20xx-xx-xx")
     private LocalDate endDate;
 
+    @Schema(description = "스터디 시작 시간" , example = "10:00")
     private LocalTime meetingStartTime;
 
+    @Schema(description = "스터디 종료 시간" , example = "10:00")
     private LocalTime meetingEndTime;
 
+    @Schema(description = "스터디 주기" , example = "매일")
     private String meetingFrequency;
 
+    @Schema(description = "스터디 요일" , example = "월")
     private String meetingDay;
+
 
     @QueryProjection
     public StudyGroupPageResDto(Long id,
@@ -84,9 +96,6 @@ public class StudyGroupPageResDto {
         this.meetingFrequency = meetingFrequency;
         this.meetingDay = meetingDay;
     }
-
-
-
 
     public String getRegionEnum(){
         return regionEnum.getValue();

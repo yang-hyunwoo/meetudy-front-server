@@ -1,8 +1,6 @@
 package front.meetudy.config;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import jakarta.annotation.PostConstruct;
-import org.apache.catalina.connector.Connector;
 import org.apache.coyote.AbstractProtocol;
 import org.apache.coyote.ProtocolHandler;
 import org.apache.tomcat.util.threads.ThreadPoolExecutor;

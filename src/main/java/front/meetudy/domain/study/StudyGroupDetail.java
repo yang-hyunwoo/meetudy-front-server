@@ -1,7 +1,6 @@
 package front.meetudy.domain.study;
 
 import front.meetudy.domain.common.BaseEntity;
-import front.meetudy.dto.request.study.operate.StudyGroupUpdateReqDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -71,7 +70,6 @@ public class StudyGroupDetail extends BaseEntity {
     private boolean deleted;
 
 
-
     @Builder
     protected StudyGroupDetail(Long id,
                                StudyGroup studyGroup,
@@ -87,7 +85,8 @@ public class StudyGroupDetail extends BaseEntity {
                                boolean secret,
                                boolean allowComment,
                                boolean latePay,
-                               boolean deleted) {
+                               boolean deleted
+    ) {
         this.id = id;
         this.studyGroup = studyGroup;
         this.tag = tag;
@@ -117,7 +116,8 @@ public class StudyGroupDetail extends BaseEntity {
                                                           String secretPassword,
                                                           boolean secret,
                                                           boolean allowComment,
-                                                          boolean latePay) {
+                                                          boolean latePay
+    ) {
         return StudyGroupDetail.builder()
                 .studyGroup(StudyGroup)
                 .tag(tag)
@@ -136,11 +136,17 @@ public class StudyGroupDetail extends BaseEntity {
                 .build();
     }
 
-
+    /**
+     * 그룹 삭제
+     */
     public void groupDelete() {
         this.deleted = true;
     }
 
+    /**
+     * 그룹 상세 수정
+     * @param studyGroupUpdateCommand
+     */
     public void studyGroupDetailUpdate(StudyGroupUpdateCommand studyGroupUpdateCommand) {
         this.tag = studyGroupUpdateCommand.getTag();
         this.content = studyGroupUpdateCommand.getContent();
@@ -186,4 +192,5 @@ public class StudyGroupDetail extends BaseEntity {
                 ", latePay=" + latePay +
                 '}';
     }
+
 }

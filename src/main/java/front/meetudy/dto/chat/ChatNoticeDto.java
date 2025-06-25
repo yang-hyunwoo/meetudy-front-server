@@ -2,10 +2,8 @@ package front.meetudy.dto.chat;
 
 import front.meetudy.constant.chat.ChatMessageType;
 import front.meetudy.constant.member.MemberEnum;
-import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.chat.ChatNotice;
 import front.meetudy.domain.member.Member;
-import front.meetudy.dto.response.mypage.MyPageBoardWriteResDto;
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,9 +12,13 @@ import lombok.Data;
 public class ChatNoticeDto {
 
     private Long studyGroupId;
+
     private Long id;
+
     private String message;
+
     private Long senderId;
+
     private ChatMessageType status;
 
     public ChatNotice toEntity() {
@@ -27,7 +29,9 @@ public class ChatNoticeDto {
         );
     }
 
-    public static ChatNoticeDto from(ChatNotice chatNotice,ChatMessageType status) {
+    public static ChatNoticeDto from(ChatNotice chatNotice,
+                                     ChatMessageType status
+    ) {
         return ChatNoticeDto.builder()
                 .studyGroupId(chatNotice.getStudyGroupId())
                 .id(chatNotice.getId())

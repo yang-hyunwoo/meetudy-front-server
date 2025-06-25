@@ -178,8 +178,8 @@ class StudyGroupQueryDslRepositoryTest {
         StudyGroup save = studyGroupRepository.save(entity);
         studyGroupDetailRepository.save(studyGroupCreateReqDto.toDetailEntity(entity));
         studyGroupMemberRepository.save(studyGroupCreateReqDto.toLeaderEntity(member, entity));
-        int i = studyGroupDetailRepository.existsByGroupIdAndOtp(save.getId(), "123456");
-        int i2 = studyGroupDetailRepository.existsByGroupIdAndOtp(save.getId(), "123457");
+        int i = studyGroupDetailRepository.existsByGroupIdAndOtpNative(save.getId(), "123456");
+        int i2 = studyGroupDetailRepository.existsByGroupIdAndOtpNative(save.getId(), "123457");
         assertThat(i).isEqualTo(1); //성공
         assertThat(i2).isEqualTo(0); //실패
     }

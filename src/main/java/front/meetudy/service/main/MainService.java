@@ -22,6 +22,10 @@ public class MainService {
 
     private final MainQueryDslRepository mainQueryDslRepository;
 
+    /**
+     * 메인 그룹 리스트 조회
+     * @return 그룹 리스트 객체
+     */
     public List<MainStudyGroupResDto> mainStudyGroupList() {
         List<MainStudyGroupResDto> mainStudyGroup = redisService.getMainStudyGroup();
         if(mainStudyGroup.isEmpty()) {
@@ -31,6 +35,10 @@ public class MainService {
         return mainStudyGroup;
     }
 
+    /**
+     * 메인 공지 사항 리스트 조회
+     * @return
+     */
     public List<MainNoticeResDto> mainNoticeList() {
         List<MainNoticeResDto> mainNotice = redisService.getMainNotice();
         if(mainNotice.isEmpty()) {

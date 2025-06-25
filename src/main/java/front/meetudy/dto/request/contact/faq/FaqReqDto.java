@@ -3,7 +3,6 @@ package front.meetudy.dto.request.contact.faq;
 import front.meetudy.annotation.customannotation.EnumValidation;
 import front.meetudy.annotation.customannotation.Sanitize;
 import front.meetudy.constant.contact.faq.FaqType;
-import front.meetudy.constant.study.RegionEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,7 +25,6 @@ public class FaqReqDto {
     @EnumValidation(enumClass = FaqType.class, message = "{qna.type}", groups = Step2.class)
     private String faqType;
 
-
     @Override
     public String toString() {
         return "FaqReqDto{" +
@@ -34,4 +32,5 @@ public class FaqReqDto {
                 ", faqType=" + faqType +
                 '}';
     }
+
 }

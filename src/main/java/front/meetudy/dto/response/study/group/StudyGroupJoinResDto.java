@@ -27,4 +27,5 @@ public class StudyGroupJoinResDto {
                 .currentMemberCount(studyGroupMember.getStudyGroup().getCurrentMemberCount())
                 .build();
     }
+
 }

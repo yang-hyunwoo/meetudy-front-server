@@ -8,8 +8,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Getter
 @Builder
@@ -33,6 +31,7 @@ public class MainStudyGroupResDto {
 
     @Schema(description = "스터디 그룹 태그", example = "리액트,자바")
     private String tag;
+
 
     @QueryProjection
     public MainStudyGroupResDto(Long id,

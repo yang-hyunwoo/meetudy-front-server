@@ -37,11 +37,8 @@ public class ValidationGroupAspect {
                 }
             }
         }
-
         return joinPoint.proceed();
     }
-
-
 
     private Class<?>[] getValidationOrder(Class<?> clazz) {
         if (!clazz.getSimpleName().endsWith("ReqDto")) return null;
@@ -73,4 +70,5 @@ public class ValidationGroupAspect {
         ValidationMode mode = clazz.getAnnotation(ValidationMode.class);
         return (mode != null) ? mode.value() : ValidationType.SINGLE;
     }
+
 }

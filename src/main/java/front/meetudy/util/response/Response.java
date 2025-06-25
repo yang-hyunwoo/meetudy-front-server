@@ -5,7 +5,6 @@ import front.meetudy.constant.error.ErrorEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -71,6 +70,7 @@ public class Response<T> {
     public static ResponseEntity<Response<ValidationErrorResponse>> validationError(HttpStatus status, String message,ErrorEnum errorEnum , String field) {
         return ResponseEntity.status(status).body(new Response<>(ERROR_CODE, status.value(), message,errorEnum.toString(),errorEnum.getValue(), new ValidationErrorResponse(field, message),LocalDateTime.now()));
     }
+
     public static ResponseEntity<Response<List<ValidationErrorResponse>>> validationErrorList(HttpStatus status, String message, ErrorEnum errorEnum, List<ValidationErrorResponse> errors) {
         return ResponseEntity.status(status).body(
                 new Response<>(
@@ -84,9 +84,11 @@ public class Response<T> {
                 )
         );
     }
+
     public static <T> ResponseEntity<Response<T>> ok(String message, T data) {
         return ResponseEntity.status(HttpStatus.OK).body(successRead(message, data));
     }
+
     public static <T> ResponseEntity<Response<T>> ok(String headerValues, String message, T data) {
         return ResponseEntity.status(HttpStatus.OK).header(SET_COOKIE,headerValues).body(successRead(message, data));
     }
@@ -111,7 +113,6 @@ public class Response<T> {
         return new Response<>(ERROR_CODE, httpCode, message,errorEnum.toString(),errorEnum.getValue(), null,LocalDateTime.now());
     }
 
-
     protected static <T> Response<T> successRead(String message, T data) {
         return new Response<>(SUCCESS_CODE, HttpStatus.OK.value(), message,null,null,data,LocalDateTime.now());
     }
@@ -128,7 +129,6 @@ public class Response<T> {
         return new Response<>(SUCCESS_CODE, HttpStatus.OK.value(), message,null,null, data,LocalDateTime.now());
     }
 
-
     @Override
     public String toString() {
         return "Response{" +
@@ -141,4 +141,5 @@ public class Response<T> {
                 ", timestamp=" + timestamp +
                 '}';
     }
+
 }

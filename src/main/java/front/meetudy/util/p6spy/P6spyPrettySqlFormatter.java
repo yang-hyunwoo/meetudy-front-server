@@ -34,7 +34,7 @@ public class P6spyPrettySqlFormatter implements MessageFormattingStrategy {
             }
             sql = "|\nHeFormatSql(P6Spy sql,Hibernate format):"+ sql;
         }
-
         return sql;
     }
+
 }

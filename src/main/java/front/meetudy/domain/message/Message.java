@@ -52,6 +52,7 @@ public class Message extends BaseEntity {
     @Column(nullable = false)
     private boolean deleted;
 
+
     @Builder
     protected Message(Long id,
                       Member receiver,
@@ -60,7 +61,8 @@ public class Message extends BaseEntity {
                       boolean read,
                       LocalDateTime readAt,
                       LocalDateTime sendAt,
-                      boolean deleted) {
+                      boolean deleted
+    ) {
         this.id = id;
         this.receiver = receiver;
         this.sender = sender;
@@ -73,8 +75,8 @@ public class Message extends BaseEntity {
 
     public static Message createMessage(Member receiver,
                                         Member sender,
-                                        String content) {
-
+                                        String content
+    ) {
         return Message.builder()
                 .receiver(receiver)
                 .sender(sender)
@@ -85,14 +87,20 @@ public class Message extends BaseEntity {
                 .build();
     }
 
+    /**
+     * 쪽지 읽음
+     */
     public void messageRead() {
         this.read = true;
         this.readAt = LocalDateTime.now();
     }
+
+    /**
+     * 쪽지 삭제
+     */
     public void messageDelete() {
         this.deleted = true;
     }
-
 
     @Override
     public boolean equals(Object o) {

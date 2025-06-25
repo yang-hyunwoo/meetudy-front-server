@@ -8,4 +8,5 @@ import lombok.Getter;
 public class ValidationErrorResponse {
     private String field;
     private String message;
+
 }

@@ -61,7 +61,7 @@ class NoticeRepositoryTest {
     @Test
     @DisplayName("공지사항 상세 조회")
     void notice_detail() {
-        Optional<NoticeBoard> notice = noticeRepository.findNotice(id2);
+        Optional<NoticeBoard> notice = noticeRepository.findNoticeNative(id2);
         assertThat(notice).isNotNull();
         assertThat(notice.get().getId()).isEqualTo(id2);
     }
@@ -69,8 +69,8 @@ class NoticeRepositoryTest {
     @Test
     @DisplayName("공지사항 이전 조회 - sort 2 조회 -> 이전값 1 조회 ")
     void notice_detail_prev() {
-        Optional<NoticeBoard> notice = noticeRepository.findNotice(id2);
-        Optional<Long> prevNotice = noticeRepository.findPrevNotice(notice.get().getSort());
+        Optional<NoticeBoard> notice = noticeRepository.findNoticeNative(id2);
+        Optional<Long> prevNotice = noticeRepository.findPrevNoticeNative(notice.get().getSort());
 
         assertThat(prevNotice).isNotNull();
         assertThat(prevNotice.get()).isEqualTo(id1);
@@ -79,8 +79,8 @@ class NoticeRepositoryTest {
     @Test
     @DisplayName("공지사항 이전 조회 - sort 1 조회 -> 이전값 x ")
     void notice_detail_prev_none() {
-        Optional<NoticeBoard> notice = noticeRepository.findNotice(id1);
-        Optional<Long> prevNotice = noticeRepository.findPrevNotice(notice.get().getSort());
+        Optional<NoticeBoard> notice = noticeRepository.findNoticeNative(id1);
+        Optional<Long> prevNotice = noticeRepository.findPrevNoticeNative(notice.get().getSort());
 
         assertThat(prevNotice).isEmpty();
     }
@@ -88,8 +88,8 @@ class NoticeRepositoryTest {
     @Test
     @DisplayName("공지사항 이후 조회 - sort 1 조회 -> 다음값 2 조회 ")
     void notice_detail_next() {
-        Optional<NoticeBoard> notice = noticeRepository.findNotice(id1);
-        Optional<Long> nextNotice = noticeRepository.findNextNotice(notice.get().getSort());
+        Optional<NoticeBoard> notice = noticeRepository.findNoticeNative(id1);
+        Optional<Long> nextNotice = noticeRepository.findNextNoticeNative(notice.get().getSort());
 
         assertThat(nextNotice).isNotNull();
         assertThat(nextNotice.get()).isEqualTo(id2);
@@ -98,8 +98,8 @@ class NoticeRepositoryTest {
     @Test
     @DisplayName("공지사항 이후 조회 - sort 3 조회 -> 다음값 x ")
     void notice_detail_next_next() {
-        Optional<NoticeBoard> notice = noticeRepository.findNotice(id3);
-        Optional<Long> nextNotice = noticeRepository.findNextNotice(notice.get().getSort());
+        Optional<NoticeBoard> notice = noticeRepository.findNoticeNative(id3);
+        Optional<Long> nextNotice = noticeRepository.findNextNoticeNative(notice.get().getSort());
         assertThat(nextNotice).isEmpty();
     }
 

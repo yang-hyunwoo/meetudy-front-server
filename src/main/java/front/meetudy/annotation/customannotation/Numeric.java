@@ -8,14 +8,15 @@ import java.lang.annotation.*;
 
 /**
  * 숫자 커스텀 어노테이션
- * 자릿수 정확하게 : @Numeric(message = "정규식메세지", messageKey = "범위메시지", mid=자릿수, numberEquals = true)
- * 자릿수 1~10 : @Numeric(message = "정규식메세지", messageKey = "범위메시지", min=최소 자리수 , max=최대자리수)
+ * Numeric(message = "정규식메세지", messageKey = "범위메시지", mid=자릿수, numberEquals = true , group= 단일 에러 리턴시 순서) : 자릿수 정확하게
+ * Numeric(message = "정규식메세지", messageKey = "범위메시지", min=최소 자리수 , max=최대자리수 , group= 단일 에러 리턴시 순서) : 자릿수 1~10
  */
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = NumericValidator.class)
 @Documented
 public @interface Numeric {
+
     String message() default "{default.numeric}";
     String messageKey() default "default.range";
     int min() default 0;

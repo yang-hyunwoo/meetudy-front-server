@@ -17,4 +17,5 @@ public abstract class BaseEntity extends BaseTimeEntity {
     @LastModifiedBy
     @Column(nullable = true)
     private Long updatedBy;
+
 }

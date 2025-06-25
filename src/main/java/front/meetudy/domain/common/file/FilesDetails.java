@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
-import org.hibernate.annotations.Where;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.Objects;
@@ -56,8 +55,14 @@ public class FilesDetails extends BaseEntity {
     }
 
     @Builder
-    protected FilesDetails(String originFileName,String changeFileName, String fileUrl, Long fileSize,
-                           String fileType, String publicId, boolean deleted) {
+    protected FilesDetails(String originFileName,
+                           String changeFileName,
+                           String fileUrl,
+                           Long fileSize,
+                           String fileType,
+                           String publicId,
+                           boolean deleted
+    ) {
         this.originFileName = originFileName;
         this.changeFileName = changeFileName;
         this.fileUrl = fileUrl;
@@ -67,14 +72,14 @@ public class FilesDetails extends BaseEntity {
         this.deleted = deleted;
     }
 
-    public static FilesDetails createFilesDetails(
-                                                  String originFileName,
+    public static FilesDetails createFilesDetails(String originFileName,
                                                   String changeFileName,
                                                   String fileUrl,
                                                   Long fileSize,
                                                   String fileType,
                                                   String publicId,
-                                                  boolean deleted) {
+                                                  boolean deleted
+    ) {
         return FilesDetails.builder()
                 .originFileName(originFileName)
                 .changeFileName(changeFileName)
@@ -86,6 +91,9 @@ public class FilesDetails extends BaseEntity {
                 .build();
     }
 
+    /**
+     * 파일 상세 삭제
+     */
     public void updateFileDeleted() {
         this.deleted = true;
     }

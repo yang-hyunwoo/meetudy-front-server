@@ -86,5 +86,4 @@ public class RedisService {
         return cached != null ? (List<MainNoticeResDto>) cached : Collections.emptyList();
     }
 
-
 }

@@ -87,17 +87,16 @@ public class NoticeBoard extends BaseEntity {
     }
 
 
-    public static NoticeBoard createNoticeBoard(
-                            Files thumbnailFile,
-                          Member member,
-                          String title,
-                          String summary,
-                          String content,
-                          NoticeType noticeType,
-                          int sort,
-                          boolean visible,
-                          boolean deleted
-                          ) {
+    public static NoticeBoard createNoticeBoard(Files thumbnailFile,
+                                                Member member,
+                                                String title,
+                                                String summary,
+                                                String content,
+                                                NoticeType noticeType,
+                                                int sort,
+                                                boolean visible,
+                                                boolean deleted
+    ) {
         return NoticeBoard.builder()
                 .thumbnailFile(thumbnailFile)
                 .member(member)
@@ -136,5 +135,6 @@ public class NoticeBoard extends BaseEntity {
                 ", deleted=" + deleted +
                 '}';
     }
+
 }
 

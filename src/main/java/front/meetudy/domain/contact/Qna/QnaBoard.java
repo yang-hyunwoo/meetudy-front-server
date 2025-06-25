@@ -52,6 +52,7 @@ public class QnaBoard extends BaseEntity {
 
     private LocalDateTime answerAt;
 
+
     @Builder
     protected QnaBoard(Long id,
                        Member questionUserId,
@@ -61,7 +62,7 @@ public class QnaBoard extends BaseEntity {
                        String answer,
                        FaqType qnaType,
                        LocalDateTime answerAt
-                       ) {
+    ) {
         this.id = id;
         this.questionUserId = questionUserId;
         this.questionTitle = questionTitle;
@@ -78,7 +79,8 @@ public class QnaBoard extends BaseEntity {
                                           Member answerUserId,
                                           String answer,
                                           FaqType qnaType,
-                                          LocalDateTime answerAt) {
+                                          LocalDateTime answerAt
+    ) {
         return QnaBoard.builder()
                 .questionUserId(questionUserId)
                 .questionTitle(questionTitle)
@@ -116,4 +118,5 @@ public class QnaBoard extends BaseEntity {
                 ", answerAt=" + answerAt +
                 '}';
     }
+
 }

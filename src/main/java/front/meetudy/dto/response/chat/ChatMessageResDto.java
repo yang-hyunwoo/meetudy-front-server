@@ -45,4 +45,5 @@ public class ChatMessageResDto {
                 .sentAt(chatMessage.getSentAt())
                 .build();
     }
+
 }

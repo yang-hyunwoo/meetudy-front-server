@@ -27,7 +27,8 @@ public class StudyGroupScheduleDto {
                                StudyGroup studyGroup,
                                LocalDate meetingDate,
                                LocalTime meetingStartTime,
-                               LocalTime meetingEndTime) {
+                               LocalTime meetingEndTime
+    ) {
         this.id = id;
         this.studyGroup = studyGroup;
         this.meetingDate = meetingDate;
@@ -43,4 +44,5 @@ public class StudyGroupScheduleDto {
                 this.meetingEndTime
         );
     }
+
 }

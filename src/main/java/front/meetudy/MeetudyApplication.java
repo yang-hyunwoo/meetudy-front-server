@@ -13,6 +13,4 @@ public class MeetudyApplication {
 		SpringApplication.run(MeetudyApplication.class, args);
 	}
 
-
-
 }

@@ -3,7 +3,6 @@ package front.meetudy.dto.response.study.join;
 
 import com.querydsl.core.annotations.QueryProjection;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
@@ -25,6 +24,7 @@ public class GroupScheduleMonthResDto {
     @Schema(description = "종료 시간")
     private LocalDateTime endMeeting;
 
+
     @QueryProjection
     public GroupScheduleMonthResDto(Long groupId,
                                     String groupName,
@@ -36,4 +36,5 @@ public class GroupScheduleMonthResDto {
         this.nextMeeting = LocalDateTime.of(meetingDate, startTime);
         this.endMeeting = LocalDateTime.of(meetingDate, endTime);
     }
+
 }

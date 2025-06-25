@@ -35,9 +35,9 @@ public class StudyGroupCreateReqDto extends BaseEntity {
     @Schema(description = "썸네일 파일 ID", example = "1")
     private Long thumbnailFileId;
 
-    /*DTO에서는 enum으로 받지 않음.
-유효성 검사도 힘들기도 하며 계층간의 결합 / 변경 시 수정해야 되는 번거로움이 있음
- */
+    /* DTO에서는 enum으로 받지 않음.
+        유효성 검사도 힘들기도 하며 계층간의 결합 / 변경 시 수정해야 되는 번거로움이 있음
+    */
     @Schema(description = "스터디 그룹 지역", example = "BUSAN")
     @EnumValidation(enumClass = RegionEnum.class, message = "{study.region.blank}", groups = Step1.class)
     private String region;
@@ -138,7 +138,10 @@ public class StudyGroupCreateReqDto extends BaseEntity {
         );
     }
 
-    public StudyGroupMember toLeaderEntity(Member member , StudyGroup studyGroup) {
+    public StudyGroupMember toLeaderEntity(
+            Member member,
+            StudyGroup studyGroup
+    ) {
         return StudyGroupMember.createStudyGroupMember(
                 studyGroup,
                 member,
@@ -150,6 +153,5 @@ public class StudyGroupCreateReqDto extends BaseEntity {
                 null
         );
     }
-
 
 }

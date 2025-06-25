@@ -29,10 +29,13 @@ public class Log {
 
     @Column(columnDefinition = "TEXT")
     private String response;
+
     @Column(columnDefinition = "TEXT")
     private String request;
+
     @Column(columnDefinition = "TEXT")
     private String errorMsg;
+
 
     @Builder
     public Log(Member member,
@@ -52,4 +55,5 @@ public class Log {
         this.request = request;
         this.errorMsg = errorMsg;
     }
+
 }

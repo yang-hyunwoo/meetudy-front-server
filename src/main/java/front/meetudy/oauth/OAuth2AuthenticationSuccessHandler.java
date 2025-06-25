@@ -35,33 +35,40 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     /**
      * 성공시 쿠키 생성
      * 자동 로그인 시 refresh 쿠키 7일 아닐시 1일
-     * @param request the request which caused the successful authentication
-     * @param response the response
+     *
+     * @param request        the request which caused the successful authentication
+     * @param response       the response
      * @param authentication the <tt>Authentication</tt> object which was created during
-     * the authentication process.
+     *                       the authentication process.
      * @throws IOException
      */
-   @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+    @Override
+    public void onAuthenticationSuccess(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        Authentication authentication
+    ) throws IOException {
         String targetUrl = determineTargetUrl(request, response, authentication);
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
         LoginReqDto loginReqDto = (LoginReqDto) authentication.getDetails();
         Duration ttl = loginReqDto.isChk() ? Duration.ofDays(7) : Duration.ofDays(1);   // 자동 로그인: 7일;  // 일반 로그인: 1일
         String accessToken = jwtProcess.createAccessToken(loginUser);
-        String refreshToken = jwtProcess.createRefreshToken(loginUser,ttl);
-       if(jwtProperty.isUseCookie()) {
-           response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(accessToken, CookieEnum.accessToken).toString());
-           response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken,ttl).toString());
-           response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(String.valueOf(loginReqDto.isChk()), isAutoLogin).toString());
-       } else {
-           response.addHeader(jwtProperty.getHeader(), accessToken);
-           response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken,ttl).toString());
-           response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(String.valueOf(loginReqDto.isChk()), isAutoLogin).toString());
-       }
-       String refreshUuid = jwtProcess.extractRefreshUuid(refreshToken);
+        String refreshToken = jwtProcess.createRefreshToken(loginUser, ttl);
 
-       redisService.saveRefreshToken(refreshUuid, loginUser.getMember().getId(),loginReqDto.isChk(), ttl);
-       response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken,ttl ).toString());
+        if (jwtProperty.isUseCookie()) {
+            response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(accessToken, CookieEnum.accessToken).toString());
+            response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken, ttl).toString());
+            response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(String.valueOf(loginReqDto.isChk()), isAutoLogin).toString());
+        } else {
+            response.addHeader(jwtProperty.getHeader(), accessToken);
+            response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken, ttl).toString());
+            response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(String.valueOf(loginReqDto.isChk()), isAutoLogin).toString());
+        }
+
+        String refreshUuid = jwtProcess.extractRefreshUuid(refreshToken);
+        redisService.saveRefreshToken(refreshUuid, loginUser.getMember().getId(), loginReqDto.isChk(), ttl);
+
+        response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken, ttl).toString());
+
         clearAuthenticationAttributes(request, response);
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
@@ -73,8 +80,12 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
      * @param authentication
      * @return
      */
-    protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+    protected String determineTargetUrl(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        Authentication authentication
+    ) {
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
+
         if (loginUser.getMember().getProvider().equals(MemberProviderTypeEnum.NAVER)) {
             return UriComponentsBuilder.fromUriString("http://localhost:3000/NaverLoginCallback")
                     .build().toUriString();

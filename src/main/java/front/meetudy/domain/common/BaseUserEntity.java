@@ -17,4 +17,5 @@ public abstract class BaseUserEntity {
     @LastModifiedBy
     @Column(nullable = false)
     private Long updatedBy;
+
 }

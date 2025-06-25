@@ -85,13 +85,6 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        String uri = request.getRequestURI();
-
-        // 인증 대상이 아닌 경우 필터 통과
-//        if (!isProtected(uri)) {
-//            chain.doFilter(request, response);
-//            return;
-//        }
 
         if(jwtProperty.isUseCookie()) {
             cookieVerify(request, response);
@@ -118,7 +111,6 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         if (isHeaderVerify(request)) {
             handleAccessTokenValidation(request, response, request.getHeader(jwtProperty.getHeader()).split(" ")[1].trim());
         }
-
     }
 
     /**
@@ -184,6 +176,10 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         }
     }
 
+    /**
+      cookie 삭제
+     * @param response
+     */
     private static void tokeDelete(HttpServletResponse response) {
         response.addHeader("Set-Cookie", deleteCookie(CookieEnum.accessToken.getValue()).toString());
         response.addHeader("Set-Cookie", deleteCookie(CookieEnum.refreshToken.getValue()).toString());

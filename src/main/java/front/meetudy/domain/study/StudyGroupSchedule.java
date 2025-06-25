@@ -91,4 +91,5 @@ public class StudyGroupSchedule extends BaseEntity {
                 ", meetingEndTime=" + meetingEndTime +
                 '}';
     }
+
 }
