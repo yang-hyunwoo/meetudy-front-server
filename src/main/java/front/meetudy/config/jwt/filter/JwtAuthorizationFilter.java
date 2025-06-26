@@ -159,11 +159,15 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                         handleRefreshToken(request, response, refreshToken); // 재발급
                     } else {
                         sendError(response, SC_REFRESH_TOKEN_EXPIRED.getValue(), SC_REFRESH_TOKEN_EXPIRED.getCode());
-
+                        return ;
                     }
                 } else {
                     sendError(response, SC_REFRESH_TOKEN_EXPIRED.getValue(), SC_REFRESH_TOKEN_EXPIRED.getCode());
+                    return ;
                 }
+            } else {
+                sendError(response, SC_REFRESH_TOKEN_MISSING.getValue(), SC_REFRESH_TOKEN_MISSING.getCode());
+                return ;
             }
         } catch (JWTVerificationException e){
             e.printStackTrace();

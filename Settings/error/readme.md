@@ -1,3 +1,79 @@
+## ❗ 커스텀 예외 처리
+
+[🔝 메인 목차로 이동](../../README.md)
+
+### ✅ 예외 처리 흐름
+
+- 서비스 로직에서 유효성 또는 권한 문제 발생 시 `CustomApiException`, `CustomApiFieldException` 등을 발생시킴
+- 전역 예외 처리기 `@RestControllerAdvice`에서 해당 예외를 `Response.error(...)` 포맷으로 응답
+- 응답 형식은 `Response<T>` 객체에 맞춰 반환됨
+
+<br><br>
+### 🧱 예외 응답 형식 (예시)
+
+```json
+{
+  "resultCode": "ERROR",
+  "httpCode": 403,
+  "message": "권한이 없습니다",
+  "errCode": "ERR_FORBIDDEN",
+  "errCodeMsg": "권한이 없습니다",
+  "data": null,
+  "timestamp": "2025-06-26 12:34:56"
+}
+```
+
+### 사용 예
+
+```java
+public class aa {
+    public void findGroupAuth(Long studyGroupId,
+                              Long memberId
+    ) {
+        studyGroupMemberRepository.findGroupAuthNative(studyGroupId, memberId)
+                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue()));
+    }
+}
+```
+
+### ✅ CustomApiException 클래스 (코드)
+<details> 
+<summary>클릭하여 펼치기</summary>
+
+```java
+
+package front.meetudy.exception;
+
+import front.meetudy.constant.error.ErrorEnum;
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
+@Getter
+public class CustomApiException extends RuntimeException{
+
+    private final HttpStatus status;
+    private final ErrorEnum errorEnum;
+
+    public CustomApiException(HttpStatus status,
+                              ErrorEnum errorEnum,
+                              String message
+    ) {
+        super(message);
+        this.status = status;
+        this.errorEnum = errorEnum;
+    }
+
+}
+
+```
+</details>
+
+### @RestControllerAdvice 이용한 Exception 전역 처리 CustomExceptionHandler 클래스 (코드)   
+<details> 
+<summary>클릭하여 펼치기</summary>
+
+```java
+
 package front.meetudy.exception;
 
 import front.meetudy.constant.error.ErrorEnum;
@@ -57,7 +133,7 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Response<ValidationErrorResponse>> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
-       log.error("DataIntegrityViolationException: {}" , e.getMessage());
+        log.error("DataIntegrityViolationException: {}" , e.getMessage());
         return Response.error(BAD_REQUEST, messageUtil.getMessage("error.not.data.type.ok"), ERR_018, null);
     }
 
@@ -89,3 +165,18 @@ public class CustomExceptionHandler {
         return Response.error(HttpStatus.INTERNAL_SERVER_ERROR, messageUtil.getMessage("error.server.ok"), ErrorEnum.ERR_500, null);
     }
 }
+
+
+```
+</details>
+
+
+### 📑 주요 에러 코드 목록
+- ErrorEnum.java 참조
+
+| 코드       | 의미                 | 설명                    |
+|------------|--------------------|-------------------------|
+| ERR_404    | Not Found          | 존재하지 않는 경로입니다.   |
+| ERR_405    | Method Not Allowed | 허용되지 않은 HTTP 메서드입니다. |
+| ERR_015    | 권한 없음              | 그룹 접근 권한 없음     |
+| ERR_015    | return data null   | 존재하지 않는 데이터 입니다.|

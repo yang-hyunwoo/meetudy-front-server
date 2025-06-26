@@ -17,9 +17,10 @@ import static front.meetudy.constant.error.ErrorEnum.*;
 /**
  * 매핑되지 않은 경로로 들어온 요청은 자동으로 내부적으로 /error로 포워딩(Forward)
  */
+@Deprecated(since = "2025-06-26")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/error")
+//@RequestMapping("/error")
 public class CustomErrorController implements ErrorController {
 
     private final MessageUtil messageUtil;

@@ -315,7 +315,9 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
                 .on(studyGroupMember.member.id.eq(memberq.id)
                         .and(memberq.deleted.eq(false)))
                 .where(studyGroupDetail.deleted.eq(false)
-                        .and(studyGroup.currentMemberCount.lt(studyGroup.maxMemberCount)))
+                        .and(studyGroup.currentMemberCount.lt(studyGroup.maxMemberCount))
+                        .and(studyGroup.status.eq("active"))
+                        .and(studyGroupDetail.secret.eq(false)))
                 .orderBy(Expressions.numberTemplate(Double.class, "random()").asc())
                 .limit(3)
                 .fetch();
