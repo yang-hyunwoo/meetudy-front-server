@@ -3,7 +3,6 @@ package front.meetudy.controller.study;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import front.meetudy.auth.LoginUser;
 import front.meetudy.constant.study.JoinStatusEnum;
 import front.meetudy.constant.study.MemberRole;
 import front.meetudy.constant.study.RegionEnum;
@@ -13,6 +12,8 @@ import front.meetudy.domain.study.StudyGroupDetail;
 import front.meetudy.domain.study.StudyGroupMember;
 import front.meetudy.domain.study.StudyGroupSchedule;
 import front.meetudy.dto.request.study.group.*;
+import front.meetudy.dummy.TestAuthenticate;
+import front.meetudy.dummy.TestMemberFactory;
 import front.meetudy.service.common.file.FilesService;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,8 +24,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,12 +70,9 @@ class StudyGroupControllerTest {
 
     @BeforeEach
     void setUp() {
-        member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
-        member2 = Member.createMember(null, "test2@naver.com", "테스트2", "테스트2", "19950120", "01011112222", "test", false);
-        member3 = Member.createMember(null, "test3@naver.com", "테스트3", "테스트2", "19950120", "01011112222", "test", false);
-        em.persist(member);
-        em.persist(member2);
-        em.persist(member3);
+        member = TestMemberFactory.persistDefaultMember(em);
+        member2 = TestMemberFactory.persistDefaultTwoMember(em);
+        member3 = TestMemberFactory.persistDefaultThreeMember(em);
         studyGroup = StudyGroup.createStudyGroup(null, "title", "dd", RegionEnum.SEOUL, false, 11);
         studyGroupDetail = StudyGroupDetail.createStudyGroupDetail(studyGroup, null, "asdf", LocalDate.now().minusDays(3), LocalDate.now().plusDays(3), "매주", "월",
                 LocalTime.of(14, 0), LocalTime.of(20, 0), null, false, false, false);
@@ -96,8 +92,6 @@ class StudyGroupControllerTest {
         em.persist(studyGroupDetail2);
         em.persist(studyGroupMember);
         em.persist(studyGroupSchedule);
-
-
         em.flush();
         em.clear();
     }
@@ -126,11 +120,7 @@ class StudyGroupControllerTest {
                 false
         );
         Member savedMember = em.merge(member);
-        LoginUser loginUser = new LoginUser(savedMember);
-
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        TestAuthenticate.authenticate(savedMember);
 
         mockMvc.perform(post("/api/private/study-group/insert")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -145,20 +135,14 @@ class StudyGroupControllerTest {
     @DisplayName("스터디 그룹 목록 조회")
     void studyGroupPageSucc() throws Exception {
         Member savedMember = em.merge(member);
-        LoginUser loginUser = new LoginUser(savedMember);
-
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-
+        TestAuthenticate.authenticate(savedMember);
 
         mockMvc.perform(get("/api/study-group/list")
                         .param("page", "0")
                         .param("size", "10")
                         .param("region","SEOUL"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.content.length()").value(2))
+                .andExpect(jsonPath("$.data.content.length()").value(1))
                 .andExpect(jsonPath("$.data.content[0].title").value("title"));
     }
 
@@ -167,11 +151,7 @@ class StudyGroupControllerTest {
     void studyGroupStatusSucc() throws Exception {
 
         Member savedMember = em.merge(member);
-        LoginUser loginUser = new LoginUser(savedMember);
-
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        TestAuthenticate.authenticate(savedMember);
 
         mockMvc.perform(post("/api/study-group/my-status")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -184,11 +164,7 @@ class StudyGroupControllerTest {
     @DisplayName("스터디 그룹 OTP 조회")
     void studyGroupOtpSucc() throws Exception {
         Member savedMember = em.merge(member);
-        LoginUser loginUser = new LoginUser(savedMember);
-
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        TestAuthenticate.authenticate(savedMember);
 
         StudyGroupOtpReqDto studyGroupOtpReqDto = new StudyGroupOtpReqDto(studyGroup2.getId(), "123456");
         mockMvc.perform(post("/api/private/study-group/otp/auth")
@@ -202,11 +178,7 @@ class StudyGroupControllerTest {
     void studyGroupJoinSucc() throws Exception {
 
         Member savedMember2 = em.merge(member2);
-        LoginUser loginUser2 = new LoginUser(savedMember2);
-
-        UsernamePasswordAuthenticationToken authentication2 =
-                new UsernamePasswordAuthenticationToken(loginUser2, null, loginUser2.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication2);
+        TestAuthenticate.authenticate(savedMember2);
         StudyGroupJoinReqDto studyGroupJoinReqDto = new StudyGroupJoinReqDto(studyGroup.getId());
 
         mockMvc.perform(post("/api/private/study-group/join")
@@ -219,11 +191,7 @@ class StudyGroupControllerTest {
     @DisplayName("스터디 그룹 멤버 요청 취소")
     void joinStudyGroupCancel() throws Exception {
         Member savedMember2 = em.merge(member2);
-        LoginUser loginUser2 = new LoginUser(savedMember2);
-
-        UsernamePasswordAuthenticationToken authentication2 =
-                new UsernamePasswordAuthenticationToken(loginUser2, null, loginUser2.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication2);
+        TestAuthenticate.authenticate(savedMember2);
         StudyGroupJoinReqDto studyGroupJoinReqDto = new StudyGroupJoinReqDto(studyGroup2.getId());
         StudyGroupCancelReqDto studyGroupCancelReqDto = new StudyGroupCancelReqDto(studyGroup2.getId());
         mockMvc.perform(post("/api/private/study-group/join")
@@ -239,13 +207,7 @@ class StudyGroupControllerTest {
     @DisplayName("스터디 그룹 상세 조회")
     void studyGroupDetailSucc() throws Exception {
         Member savedMember = em.merge(member);
-        LoginUser loginUser = new LoginUser(savedMember);
-
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-
+        TestAuthenticate.authenticate(savedMember);
 
         mockMvc.perform(get("/api/study-group/detail/"+studyGroup.getId()))
                 .andExpect(status().isOk());
@@ -255,14 +217,10 @@ class StudyGroupControllerTest {
     @DisplayName("스터디 그룹 출석 체크")
     void studyGroupAttendanceSucc() throws Exception {
         Member savedMember = em.merge(member3);
-        LoginUser loginUser = new LoginUser(savedMember);
+        TestAuthenticate.authenticate(savedMember);
         StudyGroupAttendanceReqDto studyGroupAttendanceReqDto = new StudyGroupAttendanceReqDto(studyGroup.getId());
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-
-        mockMvc.perform(post("/api/private/study-group/attendance")
+        mockMvc.perform(post("/api/private/attendance/chk")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(studyGroupAttendanceReqDto)))
                 .andExpect(status().isCreated());
@@ -272,11 +230,8 @@ class StudyGroupControllerTest {
     @DisplayName("스터디 그룹 출석률")
     void studyGroupAttendaceRate() throws Exception {
         Member savedMember = em.merge(member3);
-        LoginUser loginUser = new LoginUser(savedMember);
+        TestAuthenticate.authenticate(savedMember);
         StudyGroupAttendanceReqDto studyGroupAttendanceReqDto = new StudyGroupAttendanceReqDto(studyGroup.getId());
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         mockMvc.perform(get("/api/private/study-group/operate/attendance/rate")
                         .param("studyGroupId", String.valueOf(studyGroupAttendanceReqDto.getStudyGroupId()))

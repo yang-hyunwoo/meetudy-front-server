@@ -1,6 +1,5 @@
 package front.meetudy.controller.member;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import front.meetudy.annotation.SequentialValidator;
@@ -8,19 +7,17 @@ import front.meetudy.auth.LoginUser;
 import front.meetudy.config.jwt.JwtProcess;
 import front.meetudy.constant.member.MemberEnum;
 import front.meetudy.domain.member.Member;
-import front.meetudy.dto.request.member.JoinMemberReqDto;
 import front.meetudy.dto.request.member.LoginReqDto;
-import front.meetudy.dto.response.member.LoginResDto;
 import front.meetudy.exception.CustomExceptionHandler;
 import front.meetudy.property.JwtProperty;
 import front.meetudy.repository.member.MemberRepository;
 import front.meetudy.service.member.MemberService;
 import front.meetudy.service.redis.RedisService;
+import front.meetudy.util.MessageUtil;
 import front.meetudy.util.aop.ValidationGroupAspect;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -30,7 +27,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.*;
-import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -78,6 +74,9 @@ class MemberLoginControllerTest {
 
     @MockBean
     private MemberRepository memberRepository;
+
+    @MockBean
+    private MessageUtil messageUtil;
 
     private LoginReqDto sampleDto(boolean auto) {
         return new LoginReqDto("test@example.com", "password", auto);
@@ -240,4 +239,5 @@ class MemberLoginControllerTest {
                 .andExpect(jsonPath("$.resultCode").value("ERROR"))
                 .andExpect(jsonPath("$.data.field").value("email")); // 커스텀 응답 기준
     }
+
 }

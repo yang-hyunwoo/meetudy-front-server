@@ -1,4 +1,4 @@
-package front.meetudy.service.comment;
+package front.meetudy.service.Integration.comment;
 
 import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.comment.Comment;
@@ -7,8 +7,10 @@ import front.meetudy.dto.request.comment.CommentReqDto;
 import front.meetudy.dto.request.comment.CommentUpdateReqDto;
 import front.meetudy.dto.request.comment.CommentWriteReqDto;
 import front.meetudy.dto.response.comment.CommentResDto;
+import front.meetudy.dummy.TestMemberFactory;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.contact.faq.QuerydslTestConfig;
+import front.meetudy.service.comment.CommentService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Assertions;
@@ -47,8 +49,7 @@ class CommentServiceTest {
 
     @BeforeEach
     void setUp() {
-        member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
-        em.persist(member);
+        member = TestMemberFactory.persistDefaultMember(em);
         em.persist(Comment.createComments(member, "freeboard", 1L, "111", false));
         em.persist(Comment.createComments(member, "freeboard", 1L, "111", false));
         em.persist(Comment.createComments(member, "freeboard", 1L, "111", false));
@@ -96,6 +97,5 @@ class CommentServiceTest {
         commentService.commentDelete(member, comments.getId());
 
     }
-
 
 }

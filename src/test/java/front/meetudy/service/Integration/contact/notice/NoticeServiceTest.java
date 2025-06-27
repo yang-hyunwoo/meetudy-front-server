@@ -1,4 +1,4 @@
-package front.meetudy.service.contact.notice;
+package front.meetudy.service.Integration.contact.notice;
 
 import front.meetudy.constant.contact.faq.FaqType;
 import front.meetudy.constant.contact.faq.NoticeType;
@@ -9,7 +9,9 @@ import front.meetudy.dto.request.contact.qna.QnaWriteReqDto;
 import front.meetudy.dto.response.contact.notice.NoticeDetailResDto;
 import front.meetudy.dto.response.contact.notice.NoticePageResDto;
 import front.meetudy.dto.response.contact.qna.QnaListResDto;
+import front.meetudy.dummy.TestMemberFactory;
 import front.meetudy.repository.contact.notice.NoticeRepository;
+import front.meetudy.service.contact.notice.NoticeService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,8 +48,7 @@ class NoticeServiceTest {
 
     @BeforeEach
     void setUp() {
-        member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
-        em.persist(member);
+        member = TestMemberFactory.persistDefaultMember(em);
         em.persist(NoticeBoard.createNoticeBoard(null,member,"공지","요약","공지", NoticeType.NOTICE,1,true,false));
         em.persist(NoticeBoard.createNoticeBoard(null,member,"공지2","요약","공지2", NoticeType.NOTICE,2,true,false));
         em.persist(NoticeBoard.createNoticeBoard(null,member,"공지3","요약","공지3", NoticeType.NOTICE,3,true,false));

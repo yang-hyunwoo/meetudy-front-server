@@ -3,8 +3,8 @@ package front.meetudy.controller.contact.notice;
 import front.meetudy.constant.contact.faq.NoticeType;
 import front.meetudy.domain.contact.notice.NoticeBoard;
 import front.meetudy.domain.member.Member;
+import front.meetudy.dummy.TestMemberFactory;
 import front.meetudy.exception.CustomApiException;
-import front.meetudy.exception.CustomApiFieldException;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,8 +36,7 @@ class NoticeControllerTest {
 
     @BeforeEach
     void setUp() {
-        Member member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
-        em.persist(member);
+        Member member = TestMemberFactory.persistDefaultMember(em);
         em.persist(NoticeBoard.createNoticeBoard(null,member,"공지","요약","공지", NoticeType.NOTICE,1,true,false));
         em.persist(NoticeBoard.createNoticeBoard(null,member,"공지2","요약","공지2", NoticeType.NOTICE,2,true,false));
         em.persist(NoticeBoard.createNoticeBoard(null,member,"공지3","요약","공지3", NoticeType.NOTICE,3,true,false));

@@ -4,6 +4,7 @@ import front.meetudy.constant.contact.faq.FaqType;
 import front.meetudy.domain.contact.faq.FaqBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.contact.faq.FaqReqDto;
+import front.meetudy.dummy.TestMemberFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @ActiveProfiles("test")
@@ -33,11 +33,10 @@ class FaqQueryDslRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        Member member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
-        Member persist = em.persist(member);
-        em.persist(FaqBoard.createFaqBoard(persist, "질문", "답변", FaqType.ASSIGNMENT, 1, true, false));
-        em.persist(FaqBoard.createFaqBoard(persist, "테스트", "답변2", FaqType.ASSIGNMENT, 2, true, false));
-        em.persist(FaqBoard.createFaqBoard(persist, "질문3", "답변3", FaqType.ASSIGNMENT, 3, true, false));
+        Member member = TestMemberFactory.persistDefaultMember(em);
+        em.persist(FaqBoard.createFaqBoard(member, "질문", "답변", FaqType.ASSIGNMENT, 1, true, false));
+        em.persist(FaqBoard.createFaqBoard(member, "테스트", "답변2", FaqType.ASSIGNMENT, 2, true, false));
+        em.persist(FaqBoard.createFaqBoard(member, "질문3", "답변3", FaqType.ASSIGNMENT, 3, true, false));
         em.flush();
         em.clear();
     }

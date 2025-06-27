@@ -2,9 +2,8 @@ package front.meetudy.repository.contact.qna;
 
 import front.meetudy.constant.contact.faq.FaqType;
 import front.meetudy.domain.contact.Qna.QnaBoard;
-import front.meetudy.domain.contact.faq.FaqBoard;
 import front.meetudy.domain.member.Member;
-import org.assertj.core.api.Assertions;
+import front.meetudy.dummy.TestMemberFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,7 +16,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @ActiveProfiles("test")
@@ -31,7 +29,7 @@ class QnaRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
+        member = TestMemberFactory.persistDefaultMember(em);
         em.persist(member);
         em.flush();
         em.clear();

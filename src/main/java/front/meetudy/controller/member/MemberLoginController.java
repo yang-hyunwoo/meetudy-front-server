@@ -12,12 +12,15 @@ import front.meetudy.service.member.MemberService;
 import front.meetudy.service.redis.RedisService;
 import front.meetudy.util.MessageUtil;
 import front.meetudy.util.response.CustomResponseUtil;
+import front.meetudy.util.response.Response;
 import front.meetudy.util.security.LoginErrorResolver;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -47,12 +50,11 @@ public class MemberLoginController {
 
     private final JwtProperty jwtProperty;
 
-    private final MessageUtil messageUtil;
 
     @Operation(summary = "로그인", description = "로그인 API 성공 시 Bearer 토큰 생성 / 리프래시 토큰 생성")
     @LoginValidationErrorExample
     @PostMapping("/login")
-    public void login(
+    public ResponseEntity<Response<LoginResDto>> login(
             HttpServletResponse response,
             @RequestBody LoginReqDto loginReqDto
     ) {
@@ -78,13 +80,13 @@ public class MemberLoginController {
 
             String refreshUuid = jwtProcess.extractRefreshUuid(refreshToken);
             redisService.saveRefreshToken(refreshUuid, loginUser.getMember().getId(), loginReqDto.isChk(), ttl);
-//            response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken,ttl ).toString());
-            CustomResponseUtil.success(response, loginRespDto, messageUtil.getMessage("member.login.ok"));
+            response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken,ttl ).toString());
+            return Response.ok("로그인 성공", loginRespDto);
 
         } catch (AuthenticationException e) {
             log.warn("로그인 실패: {}", e.getMessage());
             LoginErrorCode errorCode = LoginErrorResolver.resolve(e, loginReqDto, memberService);
-            CustomResponseUtil.fail(response, errorCode.getMessage(), errorCode.getStatus(), ERR_007);
+            return Response.error(errorCode.getStatus(), errorCode.getMessage(), ERR_007, null);
         }
     }
 

@@ -1,6 +1,5 @@
-package front.meetudy.service.board;
+package front.meetudy.service.Integration.board;
 
-import front.meetudy.constant.search.SearchType;
 import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.PageDto;
@@ -9,11 +8,12 @@ import front.meetudy.dto.request.board.FreeUpdateReqDto;
 import front.meetudy.dto.request.board.FreeWriteReqDto;
 import front.meetudy.dto.response.board.FreeDetailResDto;
 import front.meetudy.dto.response.board.FreePageResDto;
+import front.meetudy.dummy.TestMemberFactory;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.contact.faq.QuerydslTestConfig;
+import front.meetudy.service.board.FreeService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import static front.meetudy.constant.error.ErrorEnum.*;
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -50,10 +49,8 @@ class FreeServiceTest {
     Member member2;
     @BeforeEach
     void setUp() {
-        member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
-        member2 = Member.createMember(null, "tes2t@naver.com", "테스트2", "테스트2", "19950120", "01011112222", "test", false);
-        em.persist(member);
-        em.persist(member2);
+        member = TestMemberFactory.persistDefaultMember(em);
+        member2 = TestMemberFactory.persistDefaultTwoMember(em);
         em.persist(FreeBoard.createFreeBoard(member,"1","1",false));
         em.persist(FreeBoard.createFreeBoard(member,"2","2",false));
         em.persist(FreeBoard.createFreeBoard(member,"3","3",false));
@@ -177,4 +174,5 @@ class FreeServiceTest {
         assertThat(customApiException.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(customApiException.getErrorEnum()).isEqualTo(ERR_012);
     }
+
 }

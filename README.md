@@ -27,7 +27,8 @@
 - [🗂️ 프로젝트 폴더 구조](./Settings/structure/readme.md)
 - [🔐 로그인 및 인증](./Settings/auth/readme.md)
 - [📚 API 문서 , 📦 API 응답 구조](./Settings/api/readme.md)
-- [❗ 커스텀 예외 처리](./Settings/error/readme.md)
+- [❗  커스텀 예외 처리](./Settings/error/readme.md)
+- [📦 Entity , Dto](./Settings/object/readme.md)
 
 
 ---

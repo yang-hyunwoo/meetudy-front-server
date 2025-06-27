@@ -7,8 +7,10 @@ import front.meetudy.domain.study.StudyGroup;
 import front.meetudy.domain.study.StudyGroupMember;
 import front.meetudy.dto.request.study.group.StudyGroupCreateReqDto;
 import front.meetudy.dto.request.study.group.StudyGroupPageReqDto;
+import front.meetudy.dto.response.main.MainStudyGroupResDto;
 import front.meetudy.dto.response.study.group.StudyGroupStatusResDto;
 import front.meetudy.dto.response.study.group.StudyGroupPageResDto;
+import front.meetudy.dummy.TestMemberFactory;
 import front.meetudy.repository.contact.faq.QuerydslTestConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -56,10 +58,8 @@ class StudyGroupQueryDslRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
-        member2 = Member.createMember(null, "test2@naver.com", "테스트2", "테스트2", "19950120", "01011112222", "test", false);
-        Member persist = em.persist(member);
-        Member persist2 = em.persist(member2);
+        member = TestMemberFactory.persistDefaultMember(em);
+        member2 = TestMemberFactory.persistDefaultTwoMember(em);
         em.flush();
         em.clear();
     }
@@ -228,6 +228,94 @@ class StudyGroupQueryDslRepositoryTest {
         Optional<StudyGroupMember> deletedId = studyGroupMemberRepository.findById(save1.getId());
         assertThat(deletedId).isEmpty();
 
-
     }
+
+    @Test
+    @DisplayName("메인 스터디 그룹 리스트 조회 성공")
+    void mainStudyGroupListSuccess() {
+        // given
+        StudyGroupCreateReqDto studyGroupCreateReqDto = new StudyGroupCreateReqDto(
+                null,
+                "BUSAN",
+                "스터디 그룹1",
+                "스터디 그룹 요약",
+                false,
+                "리액트,구글",
+                "내용입니다.",
+                LocalDate.now().minusDays(3).toString(),
+                LocalDate.now().plusDays(3).toString(),
+                10,
+                "매주",
+                "월",
+                LocalTime.of(10,0).toString(),
+                LocalTime.of(18,0).toString(),
+                null,
+                false,
+                false,
+                false
+        );
+
+        StudyGroup entity = studyGroupCreateReqDto.toStudyGroupEntity(null);
+        studyGroupRepository.save(entity);
+        studyGroupDetailRepository.save(studyGroupCreateReqDto.toDetailEntity(entity));
+        studyGroupMemberRepository.save(studyGroupCreateReqDto.toLeaderEntity(member, entity));
+
+        // when
+        List<MainStudyGroupResDto> mainStudyGroupList = studyGroupQueryDslRepository.findMainStudyGroupList();
+
+        // then
+        assertThat(mainStudyGroupList.size()).isEqualTo(1);
+    }
+
+
+    @Test
+    @DisplayName("메인 스터디 그룹 리스트 최대 3개 조회 성공")
+    void mainStudyGroupMaxFiveListSuccess() {
+        // given
+        for (int i = 0; i < 10; i++) {
+            StudyGroupCreateReqDto studyGroupCreateReqDto = new StudyGroupCreateReqDto(
+                    null,
+                    "BUSAN",
+                    "스터디 그룹1",
+                    "스터디 그룹 요약",
+                    false,
+                    "리액트,구글",
+                    "내용입니다.",
+                    LocalDate.now().minusDays(3).toString(),
+                    LocalDate.now().plusDays(3).toString(),
+                    10,
+                    "매주",
+                    "월",
+                    LocalTime.of(10,0).toString(),
+                    LocalTime.of(18,0).toString(),
+                    null,
+                    false,
+                    false,
+                    false
+            );
+
+            StudyGroup entity = studyGroupCreateReqDto.toStudyGroupEntity(null);
+            studyGroupRepository.save(entity);
+            studyGroupDetailRepository.save(studyGroupCreateReqDto.toDetailEntity(entity));
+            studyGroupMemberRepository.save(studyGroupCreateReqDto.toLeaderEntity(member, entity));
+        }
+
+        // when
+        List<MainStudyGroupResDto> mainStudyGroupList = studyGroupQueryDslRepository.findMainStudyGroupList();
+
+        // then
+        assertThat(mainStudyGroupList.size()).isEqualTo(3);
+    }
+
+
+    @Test
+    @DisplayName("메인 스터디 그룹 리스트  조회 실패 - 데이터 없음")
+    void mainStudyGroupListEmpty() {
+        // when
+        List<MainStudyGroupResDto> mainStudyGroupList = studyGroupQueryDslRepository.findMainStudyGroupList();
+
+        // then
+        assertThat(mainStudyGroupList).isEmpty();
+    }
+
 }
