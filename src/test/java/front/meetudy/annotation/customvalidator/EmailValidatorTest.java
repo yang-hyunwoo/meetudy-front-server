@@ -9,7 +9,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 class EmailValidatorTest {
@@ -39,10 +38,8 @@ class EmailValidatorTest {
     @Test
     @DisplayName("이메일 어노테이션 검증 실패")
     void invalid_email_should_fail() {
-        //given
-        var dto = new TestDto("test");
-        //when
-        var result = validator.validate(dto);
+        //given when
+        var result = validator.validate(new TestDto("test"));
         //then
         assertThat(result).isNotEmpty();
 
@@ -60,4 +57,5 @@ class EmailValidatorTest {
         assertThat(emailValidator.isValid(" ", context)).isTrue();
         assertThat(emailValidator.isValid(null, context)).isTrue();
     }
+
 }

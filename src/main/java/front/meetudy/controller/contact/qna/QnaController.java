@@ -40,7 +40,7 @@ public class QnaController {
     @Operation(summary = "QNA 등록", description = "QNA 등록")
     @PostMapping("/contact/qna/insert")
     @JoinValidationErrorExample
-    public ResponseEntity<Response<Object>> qnaInsert(
+    public ResponseEntity<Response<Void>> qnaInsert(
             @RequestBody QnaWriteReqDto qnaWriteReqDto,
             @CurrentMember Member member
     ) {

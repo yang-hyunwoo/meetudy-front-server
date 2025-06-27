@@ -1,4 +1,4 @@
-package front.meetudy.service.mypage;
+package front.meetudy.service.Integration.mypage;
 
 import front.meetudy.config.PasswordConfig;
 import front.meetudy.constant.study.JoinStatusEnum;
@@ -11,11 +11,13 @@ import front.meetudy.domain.study.StudyGroupMember;
 import front.meetudy.domain.study.StudyGroupSchedule;
 import front.meetudy.dto.request.mypage.MypageDetailChgReqDto;
 import front.meetudy.dto.request.mypage.MypagePwdChgReqDto;
+import front.meetudy.dto.request.mypage.MypageWithdrawReqDto;
 import front.meetudy.dto.response.mypage.MyPageMemberResDto;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.contact.faq.QuerydslTestConfig;
 import front.meetudy.repository.member.MemberRepository;
 import front.meetudy.repository.mypage.MypageQueryDslRepository;
+import front.meetudy.service.mypage.MyPageService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.assertj.core.api.Assertions;
@@ -135,7 +137,8 @@ class MyPageServiceTest {
     @DisplayName("멤버 탈퇴")
     void memberWithdraw() {
         // given
-        myPageService.memberWithdraw(member);
+        MypageWithdrawReqDto mypageWithdrawReqDto = new MypageWithdrawReqDto("dnfntk1##");
+        myPageService.memberWithdraw(member,mypageWithdrawReqDto);
         // when
         assertThatThrownBy(() -> {
             Member m = memberRepository.findByIdAndDeleted(member.getId(), false)

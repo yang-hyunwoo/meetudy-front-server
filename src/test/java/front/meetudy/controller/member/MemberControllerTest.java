@@ -10,6 +10,7 @@ import front.meetudy.exception.CustomApiException;
 import front.meetudy.exception.CustomExceptionHandler;
 import front.meetudy.repository.member.MemberRepository;
 import front.meetudy.service.member.MemberService;
+import front.meetudy.util.MessageUtil;
 import front.meetudy.util.aop.ValidationGroupAspect;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,6 +51,9 @@ class MemberControllerTest {
     private MemberService memberService;
     @MockBean
     private MemberRepository memberRepository;
+
+    @MockBean
+    private MessageUtil messageUtil;
 
     private  final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())

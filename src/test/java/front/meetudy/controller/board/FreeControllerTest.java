@@ -8,6 +8,8 @@ import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.board.FreeUpdateReqDto;
 import front.meetudy.dto.request.board.FreeWriteReqDto;
+import front.meetudy.dummy.TestAuthenticate;
+import front.meetudy.dummy.TestMemberFactory;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,8 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,10 +45,8 @@ class FreeControllerTest {
 
     @BeforeEach
     void setUp() {
-        member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
-        member2 = Member.createMember(null, "test2@naver.com", "테스트2", "테스트2", "19950120", "01011112222", "test", false);
-        em.persist(member);
-        em.persist(member2);
+        member = TestMemberFactory.persistDefaultMember(em);
+        member2 = TestMemberFactory.persistDefaultTwoMember(em);
         em.persist(FreeBoard.createFreeBoard(member,"1","1",false));
         em.flush();
         em.clear();
@@ -86,17 +84,13 @@ class FreeControllerTest {
                 .content("22")
                 .build();
         Member savedMember = em.merge(member); // 또는 persist 이후 em.find
-        LoginUser loginUser = new LoginUser(savedMember);  // 영속 상태 member 사용
-
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        TestAuthenticate.authenticate(savedMember);
 
         mockMvc.perform(post("/api/private/free-board/insert")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(reqDto)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.message").value("자유 게시판 등록 성공"));
+                .andExpect(jsonPath("$.message").value("자유 게시판 등록 완료"));
 
     }
 
@@ -106,17 +100,12 @@ class FreeControllerTest {
         // given
 
         Member savedMember = em.merge(member); // 또는 persist 이후 em.find
-        LoginUser loginUser = new LoginUser(savedMember);  // ✅ 영속 상태 member 사용
-
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
+        TestAuthenticate.authenticate(savedMember);
         // when & then
         mockMvc.perform(get("/api/free-board/{id}", 1L)
                 )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("자유 게시판 상세 조회 성공"))
+                .andExpect(jsonPath("$.message").value("자유 게시판 상세 조회 완료"))
                 .andExpect(jsonPath("$.data.id").value(1L));
     }
 
@@ -142,17 +131,13 @@ class FreeControllerTest {
         FreeUpdateReqDto freeUpdateReqDto = new FreeUpdateReqDto(board.getId(), "aaa", "bbb");
 
         Member savedMember = em.merge(member); // 또는 persist 이후 em.find
-        LoginUser loginUser = new LoginUser(savedMember);  // ✅ 영속 상태 member 사용
-
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        TestAuthenticate.authenticate(savedMember);
 
         mockMvc.perform(put("/api/private/free-board/update")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(freeUpdateReqDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("자유 게시판 수정 성공"));
+                .andExpect(jsonPath("$.message").value("자유 게시판 수정 완료"));
     }
 
     @Test
@@ -166,11 +151,7 @@ class FreeControllerTest {
         em.flush();
         em.clear();
 
-        LoginUser loginUser = new LoginUser(other);
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
+        TestAuthenticate.authenticate(other);
         FreeUpdateReqDto freeUpdateReqDto = new FreeUpdateReqDto(board.getId(), "aaa", "bbb");
 
         mockMvc.perform(put("/api/private/free-board/update")
@@ -190,15 +171,10 @@ class FreeControllerTest {
         em.flush();
         em.clear();
         Member savedMember = em.merge(member); // 또는 persist 이후 em.find
-        LoginUser loginUser = new LoginUser(savedMember);  // ✅ 영속 상태 member 사용
-
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        TestAuthenticate.authenticate(savedMember);
         mockMvc.perform(put("/api/private/free-board/" + board.getId() + "/delete"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("자유 게시판 삭제 성공"));
+                .andExpect(jsonPath("$.message").value("자유 게시판 삭제 완료"));
     }
-
 
 }

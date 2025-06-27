@@ -1,4 +1,4 @@
-package front.meetudy.service.contact.faq;
+package front.meetudy.service.Integration.contact.faq;
 
 import front.meetudy.constant.contact.faq.FaqType;
 import front.meetudy.domain.contact.faq.FaqBoard;
@@ -6,9 +6,11 @@ import front.meetudy.domain.member.Member;
 import front.meetudy.dto.PageDto;
 import front.meetudy.dto.request.contact.faq.FaqReqDto;
 import front.meetudy.dto.response.contact.faq.FaqResDto;
+import front.meetudy.dummy.TestMemberFactory;
 import front.meetudy.repository.contact.faq.FaqQueryDslRepository;
 import front.meetudy.repository.contact.faq.FaqRepository;
 import front.meetudy.repository.contact.faq.QuerydslTestConfig;
+import front.meetudy.service.contact.faq.FaqService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,8 +46,7 @@ class FaqServiceTest {
 
     @BeforeEach
     void setUp() {
-        Member member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
-        em.persist(member);
+        Member member = TestMemberFactory.persistDefaultMember(em);
         em.persist(FaqBoard.createFaqBoard(member, "질문", "답변", FaqType.ASSIGNMENT, 1, true, false));
         em.persist(FaqBoard.createFaqBoard(member, "테스트", "답변2", FaqType.ASSIGNMENT, 2, true, false));
         em.persist(FaqBoard.createFaqBoard(member, "질문3", "답변3", FaqType.ASSIGNMENT, 3, true, false));

@@ -15,7 +15,6 @@ import java.lang.annotation.Annotation;
 import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,11 +46,8 @@ class KoreanEnglishValidatorTest {
         // given
         ConstraintValidatorContext context = mock(ConstraintValidatorContext.class);
 
-        // when
-        boolean isValid = validator.isValid("홍길동", context);
-
         // then
-        assertThat(isValid).isTrue();
+        assertThat(validator.isValid("홍길동", context)).isTrue();
         verifyNoInteractions(messageSource); //메시지 생성 로직 안 탔는지 검증
     }
 
@@ -61,11 +57,8 @@ class KoreanEnglishValidatorTest {
         // given
         ConstraintValidatorContext context = mock(ConstraintValidatorContext.class);
 
-        // when
-        boolean isValid = validator.isValid("gausadf", context);
-
         // then
-        assertThat(isValid).isTrue();
+        assertThat(validator.isValid("gausadf", context)).isTrue();
         verifyNoInteractions(messageSource); //메시지 생성 로직 안 탔는지 검증
     }
 
@@ -75,11 +68,8 @@ class KoreanEnglishValidatorTest {
         // given
         ConstraintValidatorContext context = mock(ConstraintValidatorContext.class);
 
-        // when
-        boolean isValid = validator.isValid("홍길동asdf", context);
-
         // then
-        assertThat(isValid).isTrue();
+        assertThat(validator.isValid("홍길동asdf", context)).isTrue();
         verifyNoInteractions(messageSource); //메시지 생성 로직 안 탔는지 검증
     }
 

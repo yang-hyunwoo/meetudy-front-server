@@ -1,7 +1,6 @@
-package front.meetudy.service.member;
+package front.meetudy.service.Integration.member;
 
 
-import front.meetudy.constant.member.MemberProviderTypeEnum;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.member.JoinMemberReqDto;
 import front.meetudy.dto.response.member.JoinMemberResDto;
@@ -10,9 +9,9 @@ import front.meetudy.repository.member.MemberRepository;
 import front.meetudy.service.common.CloudinaryService;
 import front.meetudy.service.common.RecaptchaService;
 import front.meetudy.service.common.file.FilesService;
+import front.meetudy.service.member.MemberService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -129,4 +128,5 @@ class MemberServiceTest {
         Member updated = memberRepository.findById(member.getId()).get();
         assertThat(updated.getFailLoginCount()).isEqualTo(0);
     }
+
 }

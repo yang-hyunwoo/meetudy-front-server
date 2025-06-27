@@ -9,12 +9,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import java.util.Arrays;
 
 @Configuration
 @Slf4j
@@ -25,6 +29,11 @@ public class RedisConfig {
 
     @Autowired
     private  RedisSubscriber redisSubscriber;
+
+    @Autowired
+    private Environment env;
+
+
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
 
@@ -51,7 +60,12 @@ public class RedisConfig {
 
     @PostConstruct
     public void checkRedisConnection() {
-        log.info("Redis 연결 상태:{}",connectionFactory.getConnection().ping()); // PONG : 연결 성공
+        String[] profiles = env.getActiveProfiles(); // @Autowired Environment env;
+        if (Arrays.asList(profiles).contains("test")) {
+            log.info("테스트 프로파일에서는 Redis 연결 확인 생략");
+            return;
+        }
+        log.info("Redis 연결 상태: {}", connectionFactory.getConnection().ping());
     }
 
     @Bean

@@ -4,14 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import front.meetudy.annotation.SequentialValidator;
-import front.meetudy.auth.LoginUser;
 import front.meetudy.constant.contact.faq.FaqType;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.contact.qna.QnaWriteReqDto;
+import front.meetudy.dummy.TestAuthenticate;
 import front.meetudy.exception.CustomApiFieldException;
 import front.meetudy.exception.CustomExceptionHandler;
 import front.meetudy.repository.member.MemberRepository;
 import front.meetudy.service.contact.qna.QnaService;
+import front.meetudy.util.MessageUtil;
 import front.meetudy.util.aop.ValidationGroupAspect;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,15 +23,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -56,6 +54,9 @@ class QnaControllerTest {
     @MockBean
     private MemberRepository memberRepository;
 
+    @MockBean
+    private MessageUtil messageUtil;
+
     private  final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -70,17 +71,14 @@ class QnaControllerTest {
                 .build();
         Member member2 = Member.createMember(1L, "test@naver.com", "닉네임", "이름", "19950101", "01012345678", "test", false);
 
-        LoginUser loginUser = new LoginUser(Member.createMember(1L, "test@naver.com", "닉네임", "이름", "19950101", "01012345678", "test", false));
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        TestAuthenticate.authenticate(member2);
         given(memberRepository.findByIdAndDeleted(member2.getId(), false))
                 .willReturn(Optional.of(member2));
         mockMvc.perform(post("/api/private/contact/qna/insert")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(qnaWriteReqDto)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.message").value("정상적으로 문의 등록이 되었습니다."));
+                .andExpect(jsonPath("$.message").value(messageUtil.getMessage("qna.insert.ok")));
     }
 
     @Test
@@ -93,10 +91,7 @@ class QnaControllerTest {
                 .build();
 
         Member member2 = Member.createMember(1L, "test@naver.com", "닉네임", "이름", "19950101", "01012345678", "test", false);
-        LoginUser loginUser = new LoginUser(member2);
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        TestAuthenticate.authenticate(member2);
         given(memberRepository.findByIdAndDeleted(member2.getId(), false))
                 .willReturn(Optional.of(member2));
         mockMvc.perform(post("/api/private/contact/qna/insert")
@@ -120,15 +115,13 @@ class QnaControllerTest {
                 .build();
         Member member2 = Member.createMember(1L, "test@naver.com", "닉네임", "이름", "19950101", "01012345678", "test", false);
 
-        LoginUser loginUser = new LoginUser(Member.createMember(1L, "test@naver.com", "닉네임", "이름", "19950101", "01012345678", "test", false));
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        qnaService.qnaSave(qnaWriteReqDto, loginUser.getMember());
+        TestAuthenticate.authenticate(member2);
+        qnaService.qnaSave(qnaWriteReqDto, member2);
         given(memberRepository.findByIdAndDeleted(member2.getId(), false))
                 .willReturn(Optional.of(member2));
         mockMvc.perform(get("/api/private/contact/qna/list"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Qna 목록 조회 완료"));
+                .andExpect(jsonPath("$.message").value(messageUtil.getMessage("qna.list.read.ok")));
     }
+
 }

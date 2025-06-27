@@ -1,10 +1,9 @@
 package front.meetudy.repository.board;
 
-import front.meetudy.constant.error.ErrorEnum;
-import front.meetudy.constant.search.SearchType;
 import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.board.FreePageReqDto;
+import front.meetudy.dummy.TestMemberFactory;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.contact.faq.QuerydslTestConfig;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +39,7 @@ class FreeQueryDslRepositoryTest {
     Member member;
     @BeforeEach
     void setUp() {
-        member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
+        member = TestMemberFactory.persistDefaultMember(em);
         Member persist = em.persist(member);
         em.persist(FreeBoard.createFreeBoard(persist,"1","1",false));
         em.persist(FreeBoard.createFreeBoard(persist,"2","2",false));
@@ -50,7 +49,7 @@ class FreeQueryDslRepositoryTest {
     }
 
     @Test
-    @DisplayName("자유게시판 페이징 전체 조회")
+    @DisplayName("자유 게시판 페이징 전체 조회")
     void free_paging_all_search() {
         Pageable pageable = PageRequest.of(0, 10);
         FreePageReqDto freePageReqDto = new FreePageReqDto();
@@ -72,7 +71,7 @@ class FreeQueryDslRepositoryTest {
         Page<FreeBoard> result = freeQueryDslRepository.findFreePage(pageable, freePageReqDto);
 
         assertThat(result).isNotNull();
-        assertThat(result.getContent().get(0).getWriteNickname()).isEqualTo("테스트");
+        assertThat(result.getContent().get(0).getWriteNickname()).isEqualTo(member.getNickname());
         assertThat(result.getContent()).hasSize(1);
     }
 
@@ -87,7 +86,7 @@ class FreeQueryDslRepositoryTest {
         Page<FreeBoard> result = freeQueryDslRepository.findFreePage(pageable, freePageReqDto);
 
         assertThat(result).isNotNull();
-        assertThat(result.getContent().get(0).getWriteNickname()).isEqualTo("테스트");
+        assertThat(result.getContent().get(0).getWriteNickname()).isEqualTo(member.getNickname());
         assertThat(result.getContent()).hasSize(1);
     }
 
@@ -139,8 +138,6 @@ class FreeQueryDslRepositoryTest {
         });
         assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getErrorEnum()).isEqualTo(ERR_012);   // 예를 들어 errorEnum이 있다면
-
-
 
     }
 

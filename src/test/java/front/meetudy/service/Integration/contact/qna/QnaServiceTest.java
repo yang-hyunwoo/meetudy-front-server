@@ -1,4 +1,4 @@
-package front.meetudy.service.contact.qna;
+package front.meetudy.service.Integration.contact.qna;
 
 import front.meetudy.constant.contact.faq.FaqType;
 import front.meetudy.domain.contact.Qna.QnaBoard;
@@ -6,8 +6,10 @@ import front.meetudy.domain.contact.faq.FaqBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.contact.qna.QnaWriteReqDto;
 import front.meetudy.dto.response.contact.qna.QnaListResDto;
+import front.meetudy.dummy.TestMemberFactory;
 import front.meetudy.repository.contact.faq.QuerydslTestConfig;
 import front.meetudy.repository.contact.qna.QnaRepository;
+import front.meetudy.service.contact.qna.QnaService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.assertj.core.api.Assertions;
@@ -47,7 +49,7 @@ class QnaServiceTest {
     Member member;
     @BeforeEach
     void setUp() {
-        member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
+        member = TestMemberFactory.persistDefaultMember(em);
         em.persist(member);
         em.flush();
         em.clear();
@@ -67,7 +69,6 @@ class QnaServiceTest {
         Long qnaId = qnaService.qnaSave(qnaWriteReqDto, member);
 
         // then
-
         QnaBoard qnaBoard = qnaRepository.findById(qnaId).orElseThrow();
         assertThat(qnaBoard.getQuestionTitle()).isEqualTo(qnaWriteReqDto.getQuestionTitle());
         assertThat(qnaBoard.getQuestionContent()).isEqualTo(qnaWriteReqDto.getQuestionContent());
@@ -94,8 +95,6 @@ class QnaServiceTest {
         assertThat(qnaListResDtos.size()).isEqualTo(1);
         assertThat(qnaListResDtos.get(0).getQuestionTitle()).isEqualTo("제목");
 
-
     }
-
 
 }

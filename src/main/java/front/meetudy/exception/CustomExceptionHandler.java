@@ -72,17 +72,33 @@ public class CustomExceptionHandler {
         return Response.validationErrorList(e.getStatus(), e.getMessage(), e.getErrorEnum(), e.getErrors());
     }
 
+    /**
+     * 404 에러
+     * @param e
+     * @return
+     */
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<Response<String>> handleNotFound(NoHandlerFoundException ex) {
         log.error("404 에러 발생",ex);
         return Response.error(NOT_FOUND, messageUtil.getMessage("error.not.fount.ok"), ERR_404, null);
     }
+
+    /**
+     * 405 에러
+     * @param e
+     * @return
+     */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<Response<String>> handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex) {
         log.error("405 에러 발생",ex);
         return Response.error(METHOD_NOT_ALLOWED, messageUtil.getMessage("error.not.allow.method.ok"), ERR_405, null);
     }
 
+    /**
+     * 500 에러
+     * @param e
+     * @return
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Response<String>> handleServerError(Exception ex) {
         log.error("500 에러 발생", ex);

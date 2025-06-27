@@ -3,7 +3,7 @@ package front.meetudy.controller.contact.faq;
 import front.meetudy.constant.contact.faq.FaqType;
 import front.meetudy.domain.contact.faq.FaqBoard;
 import front.meetudy.domain.member.Member;
-import front.meetudy.service.contact.faq.FaqService;
+import front.meetudy.dummy.TestMemberFactory;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,7 +15,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -33,8 +32,7 @@ class FaqControllerTest {
 
     @BeforeEach
     void setUp() {
-        Member member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
-        em.persist(member);
+        Member member = TestMemberFactory.persistDefaultMember(em);
         em.persist(FaqBoard.createFaqBoard(member, "질문", "답변", FaqType.SERVICE, 1, true, false));
         em.flush();
         em.clear();

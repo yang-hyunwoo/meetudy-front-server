@@ -174,9 +174,9 @@ public class CustomExceptionHandler {
 ### 📑 주요 에러 코드 목록
 - ErrorEnum.java 참조
 
-| 코드       | 의미                 | 설명                    |
-|------------|--------------------|-------------------------|
-| ERR_404    | Not Found          | 존재하지 않는 경로입니다.   |
-| ERR_405    | Method Not Allowed | 허용되지 않은 HTTP 메서드입니다. |
-| ERR_015    | 권한 없음              | 그룹 접근 권한 없음     |
-| ERR_015    | return data null   | 존재하지 않는 데이터 입니다.|
+| 코드      | 의미                 | 설명                    |
+|---------|--------------------|-------------------------|
+| ERR_404 | Not Found          | 존재하지 않는 경로입니다.   |
+| ERR_405 | Method Not Allowed | 허용되지 않은 HTTP 메서드입니다. |
+| ERR_015 | 권한 없음              | 그룹 접근 권한 없음     |
+| ERR_012 | return data null   | 존재하지 않는 데이터 입니다.|

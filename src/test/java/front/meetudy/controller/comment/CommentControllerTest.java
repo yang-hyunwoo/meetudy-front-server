@@ -3,14 +3,12 @@ package front.meetudy.controller.comment;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import front.meetudy.auth.LoginUser;
-import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.comment.Comment;
 import front.meetudy.domain.member.Member;
-import front.meetudy.dto.request.board.FreeUpdateReqDto;
 import front.meetudy.dto.request.comment.CommentUpdateReqDto;
 import front.meetudy.dto.request.comment.CommentWriteReqDto;
-import front.meetudy.dto.response.board.FreeDetailResDto;
+import front.meetudy.dummy.TestAuthenticate;
+import front.meetudy.dummy.TestMemberFactory;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,15 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -50,10 +44,8 @@ class CommentControllerTest {
 
     @BeforeEach
     void setUp() {
-        member = Member.createMember(null, "test@naver.com", "테스트", "테스트", "19950120", "01011112222", "test", false);
-        member2 = Member.createMember(null, "test2@naver.com", "테스트2", "테스트2", "19950120", "01011112222", "test", false);
-        em.persist(member);
-        em.persist(member2);
+        member = TestMemberFactory.persistDefaultMember(em);
+        member2 = TestMemberFactory.persistDefaultTwoMember(em);
         em.persist(Comment.createComments(member, "freeboard", 1L, "test", false));
         em.flush();
         em.clear();
@@ -72,16 +64,13 @@ class CommentControllerTest {
     void commentSave() throws Exception{
         CommentWriteReqDto commentWriteReqDto = new CommentWriteReqDto("freeboard", 1L, "댓글");
         Member savedMember = em.merge(member); // 또는 persist 이후 em.find
-        LoginUser loginUser = new LoginUser(savedMember);  // 영속 상태 member 사용
+        TestAuthenticate.authenticate(savedMember);
 
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
         mockMvc.perform(post("/api/private/comment/insert")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(commentWriteReqDto)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.message").value("댓글 등록 성공"));
+                .andExpect(jsonPath("$.message").value("댓글 등록 완료"));
     }
 
     @Test
@@ -95,17 +84,13 @@ class CommentControllerTest {
 
         CommentUpdateReqDto commentUpdateReqDto = new CommentUpdateReqDto(comments.getId(), comments.getTargetType(), comments.getTargetId(), "댓글11수정");
         Member savedMember = em.merge(member); // 또는 persist 이후 em.find
-        LoginUser loginUser = new LoginUser(savedMember);  // ✅ 영속 상태 member 사용
+        TestAuthenticate.authenticate(savedMember);
 
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
         mockMvc.perform(put("/api/private/comment/update")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(commentUpdateReqDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("댓글 수정 성공"));
-
+                .andExpect(jsonPath("$.message").value("댓글 수정 완료"));
     }
 
     @Test
@@ -118,11 +103,7 @@ class CommentControllerTest {
         em.persist(comments);
         em.flush();
         em.clear();
-
-        LoginUser loginUser = new LoginUser(other);
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        TestAuthenticate.authenticate(other);
 
         CommentUpdateReqDto commentUpdateReqDto = new CommentUpdateReqDto(comments.getId(), comments.getTargetType(), comments.getTargetId(), "댓글11수정");
 
@@ -143,13 +124,10 @@ class CommentControllerTest {
         em.flush();
         em.clear();
         Member savedMember = em.merge(member); // 또는 persist 이후 em.find
-        LoginUser loginUser = new LoginUser(savedMember);  // ✅ 영속 상태 member 사용
-
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        TestAuthenticate.authenticate(savedMember);
         mockMvc.perform(put("/api/private/comment/" + comments.getId() + "/delete"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("댓글 삭제 성공"));
+                .andExpect(jsonPath("$.message").value("댓글 삭제 완료"));
     }
+
 }

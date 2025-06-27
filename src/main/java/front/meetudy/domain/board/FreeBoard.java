@@ -11,6 +11,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.Objects;
 
+import static jakarta.persistence.FetchType.*;
+
 @Entity
 @Getter
 @EntityListeners(AuditingEntityListener.class)
@@ -28,7 +30,7 @@ public class FreeBoard extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 

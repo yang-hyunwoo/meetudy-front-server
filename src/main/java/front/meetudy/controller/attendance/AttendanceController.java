@@ -1,6 +1,7 @@
 package front.meetudy.controller.attendance;
 
 import front.meetudy.annotation.customannotation.CurrentMember;
+import front.meetudy.domain.board.FreeBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.study.group.StudyGroupAttendanceReqDto;
 import front.meetudy.service.attendance.AttendanceService;
