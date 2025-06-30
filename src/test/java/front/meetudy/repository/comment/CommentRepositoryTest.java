@@ -26,6 +26,7 @@ class CommentRepositoryTest {
     @Autowired
     private TestEntityManager em;
     Member member;
+
     @BeforeEach
     void setUp() {
         member = TestMemberFactory.persistDefaultMember(em);
@@ -39,19 +40,28 @@ class CommentRepositoryTest {
     @Test
     @DisplayName("댓글 조회")
     void comment_search() {
+
+        //when
         List<Comment> freeboard = commentRepository.findCommentList("freeboard");
+
+        //then
         assertThat(freeboard.size()).isEqualTo(3);
     }
 
     @Test
     @DisplayName("댓글 저장")
     void comment_save() {
+
+        //given
         CommentWriteReqDto commentWriteReqDto = new CommentWriteReqDto("freeboard", 1L, "댓글1");
         Comment entity = commentWriteReqDto.toEntity(member);
+
+        //when
         Comment save = commentRepository.save(entity);
+
+        //then
         assertThat(save.getContent()).isEqualTo("댓글1");
         assertThat(save.getTargetType()).isEqualTo("freeboard");
-
     }
 
 }

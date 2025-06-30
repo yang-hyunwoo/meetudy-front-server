@@ -37,6 +37,7 @@ class FreeQueryDslRepositoryTest {
     @Autowired
     private TestEntityManager em;
     Member member;
+
     @BeforeEach
     void setUp() {
         member = TestMemberFactory.persistDefaultMember(em);
@@ -51,11 +52,15 @@ class FreeQueryDslRepositoryTest {
     @Test
     @DisplayName("자유 게시판 페이징 전체 조회")
     void free_paging_all_search() {
+
+        //given
         Pageable pageable = PageRequest.of(0, 10);
         FreePageReqDto freePageReqDto = new FreePageReqDto();
 
+        //when
         Page<FreeBoard> result = freeQueryDslRepository.findFreePage(pageable, freePageReqDto);
 
+        //then
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(3);
     }
@@ -63,13 +68,17 @@ class FreeQueryDslRepositoryTest {
     @Test
     @DisplayName("자유게시판 페이징 검색[타입 전체] 조회 - 데이터 있음")
     void free_paging_all_searchType_all_searchKeyword() {
+
+        //given
         Pageable pageable = PageRequest.of(0, 10);
         FreePageReqDto freePageReqDto = new FreePageReqDto();
         freePageReqDto.setSearchKeyword("1");
         freePageReqDto.setSearchType("ALL");
 
+        //when
         Page<FreeBoard> result = freeQueryDslRepository.findFreePage(pageable, freePageReqDto);
 
+        //then
         assertThat(result).isNotNull();
         assertThat(result.getContent().get(0).getWriteNickname()).isEqualTo(member.getNickname());
         assertThat(result.getContent()).hasSize(1);
@@ -78,13 +87,17 @@ class FreeQueryDslRepositoryTest {
     @Test
     @DisplayName("자유게시판 페이징 검색[타입 타이틀] 조회 - 데이터 있음")
     void free_paging_all_searchType_title_searchKeyword() {
+
+        //given
         Pageable pageable = PageRequest.of(0, 10);
         FreePageReqDto freePageReqDto = new FreePageReqDto();
         freePageReqDto.setSearchKeyword("1");
         freePageReqDto.setSearchType("TITLE");
 
+        //when
         Page<FreeBoard> result = freeQueryDslRepository.findFreePage(pageable, freePageReqDto);
 
+        //then
         assertThat(result).isNotNull();
         assertThat(result.getContent().get(0).getWriteNickname()).isEqualTo(member.getNickname());
         assertThat(result.getContent()).hasSize(1);
@@ -93,6 +106,8 @@ class FreeQueryDslRepositoryTest {
     @Test
     @DisplayName("자유게시판 페이징 검색[타입 전체] 조회 - 데이터 없음")
     void free_paging_all_searchType_all_searchKeyword_none() {
+
+        //given
         Pageable pageable = PageRequest.of(0, 10);
         FreePageReqDto freePageReqDto = new FreePageReqDto();
         freePageReqDto.setSearchKeyword("111");
@@ -107,13 +122,17 @@ class FreeQueryDslRepositoryTest {
     @Test
     @DisplayName("자유게시판 페이징 검색[타입 제목] 조회 - 데이터 없음")
     void free_paging_all_searchType_title_searchKeyword_none() {
+
+        //given
         Pageable pageable = PageRequest.of(0, 10);
         FreePageReqDto freePageReqDto = new FreePageReqDto();
         freePageReqDto.setSearchKeyword("111");
         freePageReqDto.setSearchType("TITLE");
 
+        //when
         Page<FreeBoard> result = freeQueryDslRepository.findFreePage(pageable, freePageReqDto);
 
+        //then
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(0);
     }
@@ -121,10 +140,16 @@ class FreeQueryDslRepositoryTest {
     @Test
     @DisplayName("자유게시판 상세 조회 - 성공")
     void free_details_success() {
+
+        //given
         FreeBoard freeBoard1 = FreeBoard.createFreeBoard(member, "5", "5", false);
         em.persist(freeBoard1);
-        FreeBoard freeBoard = freeRepository.findByIdAndDeleted(freeBoard1.getId(), false).orElseThrow(() -> new CustomApiException(HttpStatus.BAD_GATEWAY, ERR_012, ERR_012.getValue()));
 
+        //when
+        FreeBoard freeBoard = freeRepository.findByIdAndDeleted(freeBoard1.getId(), false)
+                .orElseThrow(() -> new CustomApiException(HttpStatus.BAD_GATEWAY, ERR_012, ERR_012.getValue()));
+
+        //then
         assertThat(freeBoard).isNotNull();
         assertThat(freeBoard.getTitle()).isEqualTo("5");
     }
@@ -132,13 +157,16 @@ class FreeQueryDslRepositoryTest {
     @Test
     @DisplayName("자유게시판 상세 조회 - 실패")
     void free_details_fail() {
+
+        //given&when
         CustomApiException exception = assertThrows(CustomApiException.class, () -> {
             freeRepository.findByIdAndDeleted(1L, true)
                     .orElseThrow(() -> new CustomApiException(HttpStatus.NOT_FOUND, ERR_012, ERR_012.getValue()));
         });
-        assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(exception.getErrorEnum()).isEqualTo(ERR_012);   // 예를 들어 errorEnum이 있다면
 
+        //then
+        assertThat(exception.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(exception.getErrorEnum()).isEqualTo(ERR_012);
     }
 
 }

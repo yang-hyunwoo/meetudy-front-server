@@ -13,4 +13,5 @@ public class TestAuthenticate {
                 new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
+
 }

@@ -42,6 +42,8 @@ class MainQueryDslRepositoryTest {
     @Test
     @DisplayName("메인 공지 사항 리스트 조회")
     void mainNoticeListSuccess() {
+
+        //given
         em.persist(NoticeBoard.createNoticeBoard(null, member, "공지사항1", "요약1", "내용2", NoticeType.NOTICE, 1, true, false));
         em.flush();
         em.clear();

@@ -43,4 +43,5 @@ public class QuerydslTestConfig {
     public MainQueryDslRepository mainQueryDslRepository(JPAQueryFactory queryFactory) {
         return new MainQueryDslRepositoryImpl(queryFactory);
     }
+
 }

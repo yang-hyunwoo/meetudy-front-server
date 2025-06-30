@@ -30,7 +30,6 @@ class FaqQueryDslRepositoryTest {
     @Autowired
     private TestEntityManager em;
 
-
     @BeforeEach
     void setUp() {
         Member member = TestMemberFactory.persistDefaultMember(em);
@@ -44,11 +43,15 @@ class FaqQueryDslRepositoryTest {
     @Test
     @DisplayName("FAQ 페이징 전체 조회")
     void faq_paging_all_search() {
-        Pageable pageable = PageRequest.of(0, 10);
-        FaqReqDto dto = new FaqReqDto(); // 기본값: 전체
 
+        //given
+        Pageable pageable = PageRequest.of(0, 10);
+        FaqReqDto dto = new FaqReqDto();
+
+        //when
         Page<FaqBoard> result = faqQueryDslRepository.findFaqListPage(pageable, dto);
 
+        //then
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(3);
     }
@@ -56,12 +59,16 @@ class FaqQueryDslRepositoryTest {
     @Test
     @DisplayName("FAQ 페이징 타입 조회 - 데이터 있음")
     void faq_paging_type_search_exists() {
+
+        //given
         Pageable pageable = PageRequest.of(0, 10);
-        FaqReqDto dto = new FaqReqDto(); // 기본값: 전체
+        FaqReqDto dto = new FaqReqDto();
         dto.setFaqType("ASSIGNMENT");
+
+        //when
         Page<FaqBoard> result = faqQueryDslRepository.findFaqListPage(pageable, dto);
 
-
+        //then
         assertThat(result).isNotNull();
         assertThat(result.getContent()).isNotEmpty();
         assertThat(result.getTotalElements()).isEqualTo(3);
@@ -70,12 +77,16 @@ class FaqQueryDslRepositoryTest {
     @Test
     @DisplayName("FAQ 페이징 타입 조회 - 데이터 없음")
     void faq_paging_type_search_not_exists() {
+
+        //given
         Pageable pageable = PageRequest.of(0, 10);
-        FaqReqDto dto = new FaqReqDto(); // 기본값: 전체
+        FaqReqDto dto = new FaqReqDto();
         dto.setFaqType("SERVICE");
+
+        //when
         Page<FaqBoard> result = faqQueryDslRepository.findFaqListPage(pageable, dto);
 
-
+        //then
         assertThat(result).isNotNull();
         assertThat(result.getContent()).isEmpty();
         assertThat(result.getTotalElements()).isEqualTo(0);
@@ -84,11 +95,16 @@ class FaqQueryDslRepositoryTest {
     @Test
     @DisplayName("FAQ 페이징 질문 조회 - 데이터 있음")
     void faq_paging_question_search_exists() {
+
+        //given
         Pageable pageable = PageRequest.of(0, 10);
         FaqReqDto dto = new FaqReqDto();
         dto.setQuestion("질문");
+
+        //when
         Page<FaqBoard> result = faqQueryDslRepository.findFaqListPage(pageable, dto);
 
+        //then
         assertThat(result).isNotNull();
         assertThat(result.getContent()).isNotEmpty();
         assertThat(result.getTotalElements()).isEqualTo(2);
@@ -97,11 +113,16 @@ class FaqQueryDslRepositoryTest {
     @Test
     @DisplayName("FAQ 페이징 질문 조회 - 데이터 없음")
     void faq_paging_question_search_not_exists() {
+
+        //given
         Pageable pageable = PageRequest.of(0, 10);
         FaqReqDto dto = new FaqReqDto();
         dto.setQuestion("비비빅");
+
+        //when
         Page<FaqBoard> result = faqQueryDslRepository.findFaqListPage(pageable, dto);
 
+        //then
         assertThat(result).isNotNull();
         assertThat(result.getContent()).isEmpty();
         assertThat(result.getTotalElements()).isEqualTo(0);
@@ -110,12 +131,17 @@ class FaqQueryDslRepositoryTest {
     @Test
     @DisplayName("FAQ 페이징 질문_타입 조회 - 데이터 있음")
     void faq_paging_question_type_search_exists() {
+
+        //given
         Pageable pageable = PageRequest.of(0, 10);
         FaqReqDto dto = new FaqReqDto();
         dto.setQuestion("질문");
         dto.setFaqType("ASSIGNMENT");
+
+        //when
         Page<FaqBoard> result = faqQueryDslRepository.findFaqListPage(pageable, dto);
 
+        //then
         assertThat(result).isNotNull();
         assertThat(result.getContent()).isNotEmpty();
         assertThat(result.getTotalElements()).isEqualTo(2);
@@ -124,12 +150,17 @@ class FaqQueryDslRepositoryTest {
     @Test
     @DisplayName("FAQ 페이징 질문_타입 조회 - 데이터 없음")
     void faq_paging_question_type_search_not_exists() {
+
+        //given
         Pageable pageable = PageRequest.of(0, 10);
         FaqReqDto dto = new FaqReqDto();
         dto.setQuestion("질문");
         dto.setFaqType("SERVICE");
+
+        //when
         Page<FaqBoard> result = faqQueryDslRepository.findFaqListPage(pageable, dto);
 
+        //then
         assertThat(result).isNotNull();
         assertThat(result.getContent()).isEmpty();
         assertThat(result.getTotalElements()).isEqualTo(0);

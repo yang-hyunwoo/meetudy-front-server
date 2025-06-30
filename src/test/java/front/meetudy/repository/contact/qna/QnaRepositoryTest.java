@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 @DataJpaTest
 @ActiveProfiles("test")
 class QnaRepositoryTest {
+
     @Autowired
     private QnaRepository qnaRepository;
 

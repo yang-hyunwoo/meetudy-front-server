@@ -27,10 +27,10 @@ import static org.mockito.BDDMockito.then;
 @ExtendWith(MockitoExtension.class)
 class MainServiceTest {
 
-    @InjectMocks
+    @InjectMocks //테스트 대상 클래스
     private MainService mainService;
 
-    @Mock
+    @Mock //대상 클래스에 의존하는 객체를 명시
     private RedisService redisService;
 
     @Mock

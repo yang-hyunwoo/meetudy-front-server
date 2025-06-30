@@ -1,5 +1,6 @@
 package front.meetudy.repository.study;
 
+import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.constant.study.JoinStatusEnum;
 import front.meetudy.constant.study.MemberRole;
 import front.meetudy.domain.member.Member;
@@ -11,6 +12,7 @@ import front.meetudy.dto.response.main.MainStudyGroupResDto;
 import front.meetudy.dto.response.study.group.StudyGroupStatusResDto;
 import front.meetudy.dto.response.study.group.StudyGroupPageResDto;
 import front.meetudy.dummy.TestMemberFactory;
+import front.meetudy.exception.CustomApiException;
 import front.meetudy.repository.contact.faq.QuerydslTestConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,6 +24,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
@@ -30,7 +33,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static front.meetudy.constant.error.ErrorEnum.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.HttpStatus.*;
 
 @DataJpaTest
 @ActiveProfiles("test")
@@ -67,6 +72,8 @@ class StudyGroupQueryDslRepositoryTest {
     @Test
     @DisplayName("스터디 그룹 페이징 조회")
     void study_group_paging_search() {
+
+        //given
         Pageable pageable = PageRequest.of(0, 10);
         StudyGroupCreateReqDto studyGroupCreateReqDto = new StudyGroupCreateReqDto(
                 null,
@@ -94,22 +101,21 @@ class StudyGroupQueryDslRepositoryTest {
         studyGroupDetailRepository.save(studyGroupCreateReqDto.toDetailEntity(entity));
         studyGroupMemberRepository.save(studyGroupCreateReqDto.toLeaderEntity(member, entity));
 
-//        studyGroupService.studySave(member, studyGroupCreateReqDto);
-
+        //when
         StudyGroupPageReqDto studyGroupPageReqDto = new StudyGroupPageReqDto("BUSAN", null);
-
         Page<StudyGroupPageResDto> studyGroupListPage = studyGroupQueryDslRepository.findStudyGroupListPage(pageable, studyGroupPageReqDto, null);
+
+        //then
         assertThat(studyGroupListPage).isNotNull();
         assertThat(studyGroupListPage.getContent()).hasSize(1);
         assertThat(studyGroupListPage.getContent().get(0).getTitle()).isEqualTo("스터디 그룹1");
-
     }
-
-
 
     @Test
     @DisplayName("스터디 그룹 사용자 상태 조회")
     void study_group_() {
+
+        //given
         Pageable pageable = PageRequest.of(0, 10);
         StudyGroupCreateReqDto studyGroupCreateReqDto = new StudyGroupCreateReqDto(
                 null,
@@ -137,22 +143,23 @@ class StudyGroupQueryDslRepositoryTest {
         studyGroupDetailRepository.save(studyGroupCreateReqDto.toDetailEntity(entity));
         studyGroupMemberRepository.save(studyGroupCreateReqDto.toLeaderEntity(member, entity));
 
-//        studyGroupService.studySave(member, studyGroupCreateReqDto);
-
+        //when
         StudyGroupPageReqDto studyGroupPageReqDto = new StudyGroupPageReqDto("BUSAN", null);
-
         Page<StudyGroupPageResDto> studyGroupListPage = studyGroupQueryDslRepository.findStudyGroupListPage(pageable, studyGroupPageReqDto, null);
         List<Long> groupId = new ArrayList<>();
         groupId.add(studyGroupListPage.getContent().get(0).getId());
         List<StudyGroupStatusResDto> studyGroupStatus = studyGroupQueryDslRepository.findStudyGroupStatus(groupId, member);
+
+        //then
         assertThat(studyGroupStatus).isNotNull();
         assertThat(studyGroupStatus.size()).isEqualTo(1);
-
     }
 
     @Test
     @DisplayName("스터디 그룹 OTP 인증")
     void study_group_OTP() {
+
+        //given
         StudyGroupCreateReqDto studyGroupCreateReqDto = new StudyGroupCreateReqDto(
                 null,
                 "BUSAN",
@@ -178,8 +185,12 @@ class StudyGroupQueryDslRepositoryTest {
         StudyGroup save = studyGroupRepository.save(entity);
         studyGroupDetailRepository.save(studyGroupCreateReqDto.toDetailEntity(entity));
         studyGroupMemberRepository.save(studyGroupCreateReqDto.toLeaderEntity(member, entity));
+
+        //when
         int i = studyGroupDetailRepository.existsByGroupIdAndOtpNative(save.getId(), "123456");
         int i2 = studyGroupDetailRepository.existsByGroupIdAndOtpNative(save.getId(), "123457");
+
+        //then
         assertThat(i).isEqualTo(1); //성공
         assertThat(i2).isEqualTo(0); //실패
     }
@@ -188,6 +199,8 @@ class StudyGroupQueryDslRepositoryTest {
     @Test
     @DisplayName("스터디 그룹 요청 취소")
     void JoinStudyMemberCancel() {
+
+        //given
         StudyGroupCreateReqDto studyGroupCreateReqDto = new StudyGroupCreateReqDto(
                 null,
                 "BUSAN",
@@ -224,15 +237,20 @@ class StudyGroupQueryDslRepositoryTest {
                 null
         );
         StudyGroupMember save1 = studyGroupMemberRepository.save(studyGroupMember);
-        studyGroupMemberRepository.delete(save1);
-        Optional<StudyGroupMember> deletedId = studyGroupMemberRepository.findById(save1.getId());
-        assertThat(deletedId).isEmpty();
 
+        //when
+        studyGroupMemberRepository.delete(save1);
+        StudyGroupMember deletedId = studyGroupMemberRepository.findById(save1.getId())
+                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
+
+        //then
+        assertThat(deletedId).isNotNull();
     }
 
     @Test
     @DisplayName("메인 스터디 그룹 리스트 조회 성공")
     void mainStudyGroupListSuccess() {
+
         // given
         StudyGroupCreateReqDto studyGroupCreateReqDto = new StudyGroupCreateReqDto(
                 null,
@@ -271,6 +289,7 @@ class StudyGroupQueryDslRepositoryTest {
     @Test
     @DisplayName("메인 스터디 그룹 리스트 최대 3개 조회 성공")
     void mainStudyGroupMaxFiveListSuccess() {
+
         // given
         for (int i = 0; i < 10; i++) {
             StudyGroupCreateReqDto studyGroupCreateReqDto = new StudyGroupCreateReqDto(
@@ -311,6 +330,7 @@ class StudyGroupQueryDslRepositoryTest {
     @Test
     @DisplayName("메인 스터디 그룹 리스트  조회 실패 - 데이터 없음")
     void mainStudyGroupListEmpty() {
+
         // when
         List<MainStudyGroupResDto> mainStudyGroupList = studyGroupQueryDslRepository.findMainStudyGroupList();
 
