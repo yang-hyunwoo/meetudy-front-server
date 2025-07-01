@@ -129,7 +129,7 @@ public class StudyGroupManageService {
                             Member member
     ) {
         authService.findGroupAuth(studyGroupId,member.getId());
-        StudyGroupDetail studyGroupDetail = studyGroupDetailRepository.findByStudyGroupIdAndDeleted(studyGroupId, false)
+        StudyGroupDetail studyGroupDetail = studyGroupDetailRepository.findById(studyGroupId)
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue()));
         studyGroupDetail.groupDelete();
     }
@@ -168,11 +168,6 @@ public class StudyGroupManageService {
                 groupMemberStatusReqDto.getMemberId(),
                 JoinStatusEnum.PENDING,
                 MemberRole.MEMBER);
-        StudyGroup studyGroup = studyGroupMember.getStudyGroup();
-
-        if (studyGroup.getCurrentMemberCount() >= studyGroup.getMaxMemberCount()) {
-            throw new CustomApiException(BAD_REQUEST, ERR_020, ERR_020.getValue());
-        }
 
         studyGroupMember.approvedMember(JoinStatusEnum.APPROVED);
         chatGroupMemberPM(groupMemberStatusReqDto,"join");

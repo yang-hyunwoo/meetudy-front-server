@@ -25,14 +25,14 @@ public class StudyGroupAttendanceReqDto {
 
     public Attendance toEntity(StudyGroup studyGroup,
                                Member member,
-                               AttendanceEnum attendanceEnum
+                               LocalDateTime meetingStartDateTime
     ) {
         return Attendance.createAttendance(
                 studyGroup,
                 member,
                 LocalDate.now(),
                 LocalDateTime.now(),
-                attendanceEnum
+                meetingStartDateTime
         );
     }
 

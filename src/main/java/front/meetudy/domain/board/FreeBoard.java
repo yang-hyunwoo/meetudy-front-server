@@ -1,17 +1,22 @@
 package front.meetudy.domain.board;
 
+import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.domain.common.BaseEntity;
 import front.meetudy.domain.member.Member;
+import front.meetudy.exception.CustomApiException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.http.HttpStatus;
 
 import java.util.Objects;
 
+import static front.meetudy.constant.error.ErrorEnum.*;
 import static jakarta.persistence.FetchType.*;
+import static org.springframework.http.HttpStatus.*;
 
 @Entity
 @Getter
@@ -83,8 +88,15 @@ public class FreeBoard extends BaseEntity {
      * @return
      */
     public Long updateFreeBoard(String title,
-                                String content
+                                String content,
+                                Long memberId
     ) {
+        if (memberNotEquals(this.member.getId(),memberId )) {
+            throw new CustomApiException(UNAUTHORIZED, ERR_014, ERR_014.getValue());
+        }
+        if(this.deleted) {
+            throw new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue());
+        }
         this.title = title;
         this.content = content;
         return this.id;
@@ -93,8 +105,20 @@ public class FreeBoard extends BaseEntity {
     /**
      * 자유 게시판 삭제
      */
-    public void freeBoardDelete() {
+    public void freeBoardDelete(Long memberId) {
+        if (memberNotEquals(this.member.getId(),memberId )) {
+            throw new CustomApiException(UNAUTHORIZED, ERR_014, ERR_014.getValue());
+        }
+        if(this.deleted) {
+            throw new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue());
+        }
         this.deleted = true;
+    }
+
+    private boolean memberNotEquals(Long boardMemberId,
+                                    Long memberId
+    ) {
+        return !boardMemberId.equals(memberId);
     }
 
     @Override

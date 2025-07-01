@@ -10,7 +10,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 @Entity
 @Getter
@@ -129,6 +133,23 @@ public class StudyGroup extends BaseEntity {
             this.status = "closed";
         } else {
             this.status = "active";
+        }
+    }
+
+    public void chk(StudyGroupUpdateCommand studyGroupUpdateCommand , Consumer<Boolean> onScheduleUpdateRequired) {
+        LocalDate startDate = this.studyGroupDetail.getStartDate();
+        LocalTime meetingStartTime = this.studyGroupDetail.getMeetingStartTime();
+        LocalDateTime meetingDateTime = LocalDateTime.of(startDate, meetingStartTime);
+        LocalDateTime now = LocalDateTime.now();
+
+        if(meetingDateTime.isBefore(now)) {
+            StudyGroupUpdateCommand fixedCommand =
+                    StudyGroupUpdateCommand.withFixedDates(studyGroupUpdateCommand, this.studyGroupDetail);
+            this.studyGroupUpdate(fixedCommand);
+            onScheduleUpdateRequired.accept(false);
+        } else {
+            this.studyGroupUpdate(studyGroupUpdateCommand);
+            onScheduleUpdateRequired.accept(true);
         }
     }
 

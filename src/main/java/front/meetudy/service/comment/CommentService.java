@@ -15,9 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static front.meetudy.constant.error.ErrorEnum.*;
-import static front.meetudy.constant.error.ErrorEnum.ERR_014;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @Service
 @RequiredArgsConstructor
@@ -65,14 +63,10 @@ public class CommentService {
     public CommentResDto commentUpdate(Member member,
                                        CommentUpdateReqDto commentUpdateReqDto
     ) {
-        Comment comment = commentRepository.findByIdAndDeleted(commentUpdateReqDto.getId(), false)
+        Comment comment = commentRepository.findById(commentUpdateReqDto.getId())
                 .orElseThrow(() -> new CustomApiException(NOT_FOUND, ERR_012, ERR_012.getValue()));
 
-        if (memberNotEquals(comment.getMember().getId(), member.getId())) {
-            throw new CustomApiException(UNAUTHORIZED, ERR_014, ERR_014.getValue());
-        }
-
-        comment.commentUpdate(commentUpdateReqDto.getContent());
+        comment.commentUpdate(commentUpdateReqDto.getContent(),member.getId());
         return CommentResDto.from(comment,member);
     }
 
@@ -85,15 +79,9 @@ public class CommentService {
     public Long commentDelete(Member member,
                               Long id
     ) {
-        Comment comment = commentRepository.findByIdAndDeleted(id, false).orElseThrow(() -> new CustomApiException(NOT_FOUND, ERR_012, ERR_012.getValue()));
-        if (memberNotEquals(comment.getMember().getId(), member.getId())) {
-            throw new CustomApiException(UNAUTHORIZED, ERR_014, ERR_014.getValue());
-        }
-        return comment.commentDelete();
-    }
-
-    private boolean memberNotEquals(Long boardMemberId, Long memberId) {
-        return !boardMemberId.equals(memberId);
+        Comment comment = commentRepository.findById(id)
+                .orElseThrow(() -> new CustomApiException(NOT_FOUND, ERR_012, ERR_012.getValue()));
+        return comment.commentDelete(member.getId());
     }
 
 }

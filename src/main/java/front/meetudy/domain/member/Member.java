@@ -230,6 +230,9 @@ public class Member extends BaseEntity {
                                String newPw,
                                PasswordEncoder passwordEncoder
     ) {
+        if(this.deleted) {
+            throw new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue());
+        }
         if (!passwordEncoder.matches(currentPw, this.password)) {
             throw new CustomApiException(BAD_REQUEST, ERR_022, ERR_022.getValue());
         }
@@ -250,6 +253,10 @@ public class Member extends BaseEntity {
                                    String phoneNumber,
                                    Long profileImageId
     ) {
+        if(this.deleted) {
+            throw new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue());
+        }
+
         this.nickname = nickname;
         this.phoneNumber = phoneNumber;
         this.profileImageId = profileImageId;
@@ -258,6 +265,9 @@ public class Member extends BaseEntity {
     public void withdrawValid(String currentPw,
                               PasswordEncoder passwordEncoder
     ) {
+        if(deleted) {
+            throw new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue());
+        }
         if (!passwordEncoder.matches(currentPw, this.password)) {
             throw new CustomApiException(BAD_REQUEST, ERR_022, ERR_022.getValue());
         }

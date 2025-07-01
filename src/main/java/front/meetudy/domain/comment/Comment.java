@@ -2,6 +2,7 @@ package front.meetudy.domain.comment;
 
 import front.meetudy.domain.common.BaseEntity;
 import front.meetudy.domain.member.Member;
+import front.meetudy.exception.CustomApiException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -10,6 +11,11 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.Objects;
+
+import static front.meetudy.constant.error.ErrorEnum.ERR_012;
+import static front.meetudy.constant.error.ErrorEnum.ERR_014;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @Entity
 @Getter
@@ -89,7 +95,13 @@ public class Comment extends BaseEntity {
      * 댓글 수정
      * @param content
      */
-    public void commentUpdate(String content) {
+    public void commentUpdate(String content,Long memberId) {
+        if (memberNotEquals(this.member.getId(), memberId)) {
+            throw new CustomApiException(UNAUTHORIZED, ERR_014, ERR_014.getValue());
+        }
+        if(this.deleted) {
+            throw new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue());
+        }
         this.content = content;
     }
 
@@ -97,9 +109,19 @@ public class Comment extends BaseEntity {
      * 댓글 삭제
      * @return
      */
-    public Long commentDelete() {
+    public Long commentDelete(Long memberId) {
+        if (memberNotEquals(this.member.getId(), memberId)) {
+            throw new CustomApiException(UNAUTHORIZED, ERR_014, ERR_014.getValue());
+        }
+        if(this.deleted) {
+            throw new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue());
+        }
         this.deleted = true;
         return this.id;
+    }
+
+    private boolean memberNotEquals(Long boardMemberId, Long memberId) {
+        return !boardMemberId.equals(memberId);
     }
 
     @Override

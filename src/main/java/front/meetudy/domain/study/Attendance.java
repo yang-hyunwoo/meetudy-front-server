@@ -4,6 +4,7 @@ package front.meetudy.domain.study;
 import front.meetudy.constant.study.AttendanceEnum;
 import front.meetudy.domain.common.BaseEntity;
 import front.meetudy.domain.member.Member;
+import front.meetudy.exception.CustomApiException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -14,6 +15,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+
+import static front.meetudy.constant.error.ErrorEnum.ERR_024;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Entity
 @Getter
@@ -67,15 +71,35 @@ public class Attendance extends BaseEntity {
                                               Member member,
                                               LocalDate attendanceDate,
                                               LocalDateTime attendanceAt,
-                                              AttendanceEnum status
+                                              LocalDateTime meetingStartDateTime
     ) {
         return Attendance.builder()
                 .studyGroup(studyGroup)
                 .member(member)
                 .attendanceDate(attendanceDate)
                 .attendanceAt(attendanceAt)
-                .status(status)
+                .status(getAttendanceLateEnumCheck(meetingStartDateTime))
                 .build();
+    }
+
+    /**
+     * 지각 여부 ENUM 변환
+     * @param meetingStartDateTime
+     * @return
+     */
+    private static AttendanceEnum getAttendanceLateEnumCheck(LocalDateTime meetingStartDateTime) {
+        AttendanceEnum attendanceEnum;
+        LocalDateTime graceTime = meetingStartDateTime.plusMinutes(1);
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isBefore(meetingStartDateTime.minusHours(1))) {
+            throw new CustomApiException(BAD_REQUEST, ERR_024, ERR_024.getValue());
+        }
+        if(now.isAfter(graceTime)) {
+            attendanceEnum = AttendanceEnum.LATE;
+        } else {
+            attendanceEnum = AttendanceEnum.PRESENT;
+        }
+        return attendanceEnum;
     }
 
     @Override

@@ -1,16 +1,22 @@
 package front.meetudy.domain.chat;
 
+import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.domain.common.BaseEntity;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.chat.ChatNoticeDto;
+import front.meetudy.exception.CustomApiException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.http.HttpStatus;
 
 import java.util.Objects;
+
+import static front.meetudy.constant.error.ErrorEnum.*;
+import static org.springframework.http.HttpStatus.*;
 
 @Entity
 @Getter
@@ -71,6 +77,9 @@ public class ChatNotice extends BaseEntity {
      * @param chatNoticeDto
      */
     public void updateChatNotice(ChatNoticeDto chatNoticeDto) {
+        if(this.deleted) {
+            throw new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue());
+        }
         this.message = chatNoticeDto.getMessage();
     }
 
@@ -78,6 +87,9 @@ public class ChatNotice extends BaseEntity {
      * 태칭방 공지 삭제
      */
     public void deleteChatNoitce() {
+        if(this.deleted) {
+            throw new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue());
+        }
         this.deleted = true;
     }
 

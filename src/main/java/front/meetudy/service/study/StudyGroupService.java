@@ -28,7 +28,6 @@ import front.meetudy.repository.study.*;
 import front.meetudy.service.auth.AuthService;
 import front.meetudy.service.notification.NotificationService;
 import front.meetudy.util.date.CustomDateUtil;
-import front.meetudy.util.redis.RedisPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -40,7 +39,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 
@@ -89,7 +87,6 @@ public class StudyGroupService {
                           StudyGroupCreateReqDto studyGroupCreateReqDto
     ) {
         studyGroupCreateMaxCount(member);
-        studyGroupCreatValidation(studyGroupCreateReqDto);
 
         Files files = null;
 
@@ -281,33 +278,20 @@ public class StudyGroupService {
 
         //그룹 시작일자가 넘을시 수정 불가능  == 날짜랑 시간만 수정 안되게
 
-        LocalDate startDate = studyGroup.getStudyGroupDetail().getStartDate();
-        LocalDate endDate = studyGroup.getStudyGroupDetail().getEndDate();
-        LocalTime meetingStartTime = studyGroup.getStudyGroupDetail().getMeetingStartTime();
-        LocalTime meetingEndTime = studyGroup.getStudyGroupDetail().getMeetingEndTime();
-        LocalDateTime meetingDateTime = LocalDateTime.of(startDate, meetingStartTime);
-        LocalDateTime now = LocalDateTime.now();
-
         //시작일자가 넘었다면 변경하지 않는다.
-        if(meetingDateTime.isBefore(now)) {
-            studyGroupUpdateReqDto.setStartDate(startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-            studyGroupUpdateReqDto.setEndDate(endDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-            studyGroupUpdateReqDto.setMeetingStartTime(meetingStartTime.format(DateTimeFormatter.ofPattern("HH:mm")));
-            studyGroupUpdateReqDto.setMeetingEndTime(meetingEndTime.format(DateTimeFormatter.ofPattern("HH:mm")));
-            studyGroup.studyGroupUpdate(StudyGroupUpdateCommand.from(studyGroupUpdateReqDto));
-        } else { //스케줄 삭제 후 재 생성
-            studyGroup.studyGroupUpdate(StudyGroupUpdateCommand.from(studyGroupUpdateReqDto));
-            //스케줄 삭제
-            studyGroupScheduleRepository.deleteByStudyGroupId(studyGroup.getId());
-            attendanceRepository.deleteByStudyGroupId(studyGroup.getId());
+        studyGroup.chk(StudyGroupUpdateCommand.from(studyGroupUpdateReqDto), scheduleUpdateNeeded -> {
+            if (scheduleUpdateNeeded) {
+                studyGroupScheduleRepository.deleteByStudyGroupId(studyGroup.getId());
+                attendanceRepository.deleteByStudyGroupId(studyGroup.getId());
 
-            //스케줄 생성
-            List<StudyGroupSchedule> studyGroupScheduleList = createGroupSchedule(studyGroup.getStudyGroupDetail())
-                    .stream()
-                    .map(StudyGroupScheduleDto::toEntity)
-                    .toList();
-            studyGroupScheduleRepository.saveAll(studyGroupScheduleList);
-        }
+                List<StudyGroupSchedule> newSchedules = createGroupSchedule(studyGroup.getStudyGroupDetail())
+                        .stream()
+                        .map(StudyGroupScheduleDto::toEntity)
+                        .toList();
+
+                studyGroupScheduleRepository.saveAll(newSchedules);
+            }
+        });
     }
 
     /**
@@ -477,24 +461,6 @@ public class StudyGroupService {
         int studyGroupCreateCount = studyGroupQueryDslRepository.findStudyGroupCreateCount(member);
         if(studyGroupCreateCount>5) {
             throw new CustomApiException(BAD_REQUEST, ERR_019, ERR_019.getValue());
-        }
-    }
-
-    /**
-     * 그룹 생성 유효성 검사
-     * @param studyGroupCreateReqDto
-     */
-    private static void studyGroupCreatValidation(StudyGroupCreateReqDto studyGroupCreateReqDto) {
-        if (LocalDate.parse(studyGroupCreateReqDto.getStartDate()).isAfter(LocalDate.parse(studyGroupCreateReqDto.getEndDate()))) {
-            throw new CustomApiException(BAD_REQUEST, ERR_016, ERR_016.getValue());
-        }
-        if (LocalTime.parse(studyGroupCreateReqDto.getMeetingStartTime()).isAfter(LocalTime.parse(studyGroupCreateReqDto.getMeetingEndTime()))) {
-            throw new CustomApiException(BAD_REQUEST, ERR_017, ERR_017.getValue());
-        }
-        if (studyGroupCreateReqDto.isSecret()) {
-            if (studyGroupCreateReqDto.getSecretPassword().isBlank() || studyGroupCreateReqDto.getSecretPassword().length() != 6) {
-                throw new CustomApiException(BAD_REQUEST, ERR_002, ERR_002.getValue());
-            }
         }
     }
 
