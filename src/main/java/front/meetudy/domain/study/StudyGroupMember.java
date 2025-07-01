@@ -4,6 +4,7 @@ import front.meetudy.constant.study.JoinStatusEnum;
 import front.meetudy.constant.study.MemberRole;
 import front.meetudy.domain.common.BaseEntity;
 import front.meetudy.domain.member.Member;
+import front.meetudy.exception.CustomApiException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -14,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+
+import static front.meetudy.constant.error.ErrorEnum.ERR_020;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Entity
 @Getter
@@ -124,6 +128,9 @@ public class StudyGroupMember extends BaseEntity {
      */
     @Transactional
     public void approvedMember(JoinStatusEnum joinStatus) {
+        if(this.getStudyGroup().getCurrentMemberCount() >= this.getStudyGroup().getMaxMemberCount()) {
+            throw new CustomApiException(BAD_REQUEST, ERR_020, ERR_020.getValue());
+        }
         changeStatus(joinStatus);
         this.getStudyGroup().memberCountApproveIncrease();
         this.joinApprovedAt = LocalDateTime.now();

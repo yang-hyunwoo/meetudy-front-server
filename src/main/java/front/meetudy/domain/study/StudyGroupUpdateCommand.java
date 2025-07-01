@@ -1,9 +1,13 @@
 package front.meetudy.domain.study;
 
 import front.meetudy.dto.request.study.operate.StudyGroupUpdateReqDto;
+import lombok.Builder;
 import lombok.Getter;
 
+import java.time.format.DateTimeFormatter;
+
 @Getter
+@Builder
 public class StudyGroupUpdateCommand {
 
     private final Long studyGroupId;
@@ -81,6 +85,16 @@ public class StudyGroupUpdateCommand {
         this.allowComment = allowComment;
     }
 
+    public static StudyGroupUpdateCommand from(StudyGroupDetail studyGroupDetail) {
+        return StudyGroupUpdateCommand.builder()
+                .startDate(studyGroupDetail.getStartDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                .endDate(studyGroupDetail.getEndDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                .meetingStartTime(studyGroupDetail.getMeetingStartTime().format(DateTimeFormatter.ofPattern("HH:mm")))
+                .meetingEndTime(studyGroupDetail.getMeetingEndTime().format(DateTimeFormatter.ofPattern("HH:mm")))
+                .build();
+    }
+
+
     public static StudyGroupUpdateCommand from(StudyGroupUpdateReqDto studyGroupUpdateReqDto) {
         return new StudyGroupUpdateCommand(
                 studyGroupUpdateReqDto.getStudyGroupId(),
@@ -101,6 +115,36 @@ public class StudyGroupUpdateCommand {
                 studyGroupUpdateReqDto.getSecretPassword(),
                 studyGroupUpdateReqDto.isSecret(),
                 studyGroupUpdateReqDto.isAllowComment()
+        );
+    }
+
+    /**
+     * 그룹 상세 변경 시 일자 fix 메서드
+     * @param original
+     * @param studyGroupDetail
+     * @return
+     */
+    public static StudyGroupUpdateCommand withFixedDates(StudyGroupUpdateCommand original,
+                                                         StudyGroupDetail studyGroupDetail) {
+        return new StudyGroupUpdateCommand(
+                original.getStudyGroupId(),
+                original.getStudyGroupDetailId(),
+                original.getRegion(),
+                original.getTitle(),
+                original.getSummary(),
+                original.isJoinType(),
+                original.getTag(),
+                original.getContent(),
+                studyGroupDetail.getStartDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                studyGroupDetail.getEndDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                original.getMaxMemberCount(),
+                original.getMeetingFrequency(),
+                original.getMeetingDay(),
+                studyGroupDetail.getMeetingStartTime().format(DateTimeFormatter.ofPattern("HH:mm")),
+                studyGroupDetail.getMeetingEndTime().format(DateTimeFormatter.ofPattern("HH:mm")),
+                original.getSecretPassword(),
+                original.isSecret(),
+                original.isAllowComment()
         );
     }
 

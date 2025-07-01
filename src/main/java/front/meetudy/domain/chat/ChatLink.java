@@ -2,6 +2,7 @@ package front.meetudy.domain.chat;
 
 import front.meetudy.domain.common.BaseEntity;
 import front.meetudy.domain.member.Member;
+import front.meetudy.exception.CustomApiException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -10,6 +11,9 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.Objects;
+
+import static front.meetudy.constant.error.ErrorEnum.ERR_012;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Entity
 @Getter
@@ -69,6 +73,9 @@ public class ChatLink extends BaseEntity {
      * 채팅방 링크 삭제
      */
     public void deleteChatLink() {
+        if(this.deleted) {
+            throw new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue());
+        }
         this.deleted = true;
     }
 

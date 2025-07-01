@@ -1,6 +1,7 @@
 package front.meetudy.domain.study;
 
 import front.meetudy.domain.common.BaseEntity;
+import front.meetudy.exception.CustomApiException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -10,7 +11,12 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
+
+import static front.meetudy.constant.error.ErrorEnum.*;
+import static front.meetudy.constant.error.ErrorEnum.ERR_002;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Entity
 @Getter
@@ -118,6 +124,13 @@ public class StudyGroupDetail extends BaseEntity {
                                                           boolean allowComment,
                                                           boolean latePay
     ) {
+        createStudyGroupDetailValidation(startDate,
+                endDate,
+                meetingStartTime,
+                meetingEndTime,
+                secret,
+                secretPassword);
+
         return StudyGroupDetail.builder()
                 .studyGroup(StudyGroup)
                 .tag(tag)
@@ -137,9 +150,40 @@ public class StudyGroupDetail extends BaseEntity {
     }
 
     /**
+     * 그룹 생성 유효성 검사
+     * @param startDate
+     * @param endDate
+     * @param meetingStartTime
+     * @param meetingEndTime
+     * @param secret
+     * @param secretPassword
+     */
+    private static void createStudyGroupDetailValidation(LocalDate startDate,
+                                                        LocalDate endDate,
+                                                        LocalTime meetingStartTime,
+                                                        LocalTime meetingEndTime,
+                                                        boolean secret,
+                                                        String secretPassword) {
+        if (LocalDate.parse(startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))).isAfter(LocalDate.parse(endDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))) {
+            throw new CustomApiException(BAD_REQUEST, ERR_016, ERR_016.getValue());
+        }
+        if (LocalTime.parse(meetingStartTime.format(DateTimeFormatter.ofPattern("HH:mm"))).isAfter(LocalTime.parse(meetingEndTime.format(DateTimeFormatter.ofPattern("HH:mm"))))) {
+            throw new CustomApiException(BAD_REQUEST, ERR_017, ERR_017.getValue());
+        }
+        if (secret) {
+            if (secretPassword.isBlank() || secretPassword.length() != 6) {
+                throw new CustomApiException(BAD_REQUEST, ERR_002, ERR_002.getValue());
+            }
+        }
+    }
+
+    /**
      * 그룹 삭제
      */
     public void groupDelete() {
+        if(this.deleted) {
+            throw new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue());
+        }
         this.deleted = true;
     }
 

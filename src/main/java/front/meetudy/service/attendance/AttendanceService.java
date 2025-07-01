@@ -1,6 +1,5 @@
 package front.meetudy.service.attendance;
 
-import front.meetudy.constant.study.AttendanceEnum;
 import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.Attendance;
 import front.meetudy.domain.study.StudyGroupDetail;
@@ -16,9 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 import static front.meetudy.constant.error.ErrorEnum.*;
 import static org.springframework.http.HttpStatus.*;
@@ -46,6 +43,7 @@ public class AttendanceService {
                                           Member member
     ) {
         int attendanceCount = attendanceRepository.findAttendanceCountNative(studyGroupAttendanceReqDto.getStudyGroupId(), member.getId());
+
         if (attendanceCount == 0 ) {
             //멤버 여부 확인
             StudyGroupMember studyGroupMember = getStudyGroupMemberPresent(studyGroupAttendanceReqDto, member);
@@ -58,7 +56,8 @@ public class AttendanceService {
 
             Attendance attendanceEntity = studyGroupAttendanceReqDto.toEntity(studyGroupDetail.getStudyGroup(),
                     studyGroupMember.getMember(),
-                    getAttendanceLateEnumCheck(studyGroupSchedule));
+                    LocalDateTime.of(studyGroupSchedule.getMeetingDate(),
+                            studyGroupSchedule.getMeetingStartTime()));
 
             attendanceRepository.save(attendanceEntity);
         }
@@ -98,30 +97,6 @@ public class AttendanceService {
     private StudyGroupSchedule getStudyGroupSchedulePresent(StudyGroupAttendanceReqDto studyGroupAttendanceReqDto) {
         return studyGroupScheduleRepository.findScheduleDetail(studyGroupAttendanceReqDto.getStudyGroupId())
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue()));
-    }
-
-    /**
-     * 지각 여부 ENUM 변환
-     *
-     * @param studyGroupSchedule
-     * @return enum
-     */
-    private static AttendanceEnum getAttendanceLateEnumCheck(StudyGroupSchedule studyGroupSchedule) {
-        AttendanceEnum attendanceEnum;
-        LocalDate meetingDate = studyGroupSchedule.getMeetingDate();
-        LocalTime meetingStartTime = studyGroupSchedule.getMeetingStartTime();
-        LocalDateTime meetingStartDateTime = LocalDateTime.of(meetingDate, meetingStartTime);
-        LocalDateTime graceTime = meetingStartDateTime.plusMinutes(1);
-        LocalDateTime now = LocalDateTime.now();
-        if (now.isBefore(meetingStartDateTime.minusHours(1))) {
-            throw new CustomApiException(BAD_REQUEST, ERR_024, ERR_024.getValue());
-        }
-        if(now.isAfter(graceTime)) {
-            attendanceEnum = AttendanceEnum.LATE;
-        } else {
-            attendanceEnum = AttendanceEnum.PRESENT;
-        }
-        return attendanceEnum;
     }
 
 }

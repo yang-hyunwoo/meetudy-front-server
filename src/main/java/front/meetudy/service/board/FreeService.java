@@ -94,10 +94,9 @@ public class FreeService {
                            FreeUpdateReqDto freeUpdateReqDto
     ) {
         FreeBoard freeBoard = getFreeBoardPresent(freeUpdateReqDto.getId());
-        if (memberNotEquals(freeBoard.getMember().getId(), member.getId())) {
-            throw new CustomApiException(UNAUTHORIZED, ERR_014, ERR_014.getValue());
-        }
-        freeBoard.updateFreeBoard(freeUpdateReqDto.getTitle(), freeUpdateReqDto.getContent());
+        freeBoard.updateFreeBoard(freeUpdateReqDto.getTitle(),
+                freeUpdateReqDto.getContent(),
+                member.getId());
         return freeBoard.getId();
     }
 
@@ -111,16 +110,7 @@ public class FreeService {
                            Long id
     ) {
         FreeBoard freeBoard = getFreeBoardPresent(id);
-        if (memberNotEquals(freeBoard.getMember().getId(), member.getId())) {
-            throw new CustomApiException(UNAUTHORIZED, ERR_014, ERR_014.getValue());
-        }
-        freeBoard.freeBoardDelete();
-    }
-
-    private boolean memberNotEquals(Long boardMemberId,
-                                    Long memberId
-    ) {
-        return !boardMemberId.equals(memberId);
+        freeBoard.freeBoardDelete(member.getId());
     }
 
     /**
@@ -129,7 +119,7 @@ public class FreeService {
      * @return 게시판 객체
      */
     private FreeBoard getFreeBoardPresent(Long id) {
-        return freeRepository.findByIdAndDeleted(id, false)
+        return freeRepository.findById(id)
                 .orElseThrow(() -> new CustomApiException(NOT_FOUND, ERR_012, ERR_012.getValue()));
     }
 

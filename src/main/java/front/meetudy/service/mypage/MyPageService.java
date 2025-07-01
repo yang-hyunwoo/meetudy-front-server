@@ -80,7 +80,7 @@ public class MyPageService {
     public void changePassword(Member member,
                                MypagePwdChgReqDto mypagePwdChgReqDto
     ) {
-        Member memberDb = memberRepository.findByIdAndDeleted(member.getId(), false)
+        Member memberDb = memberRepository.findById(member.getId())
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_013, ERR_013.getValue()));
 
         memberDb.passwordChange(mypagePwdChgReqDto.getCurrentPw(),mypagePwdChgReqDto.getNewPw(),passwordEncoder);
@@ -94,7 +94,7 @@ public class MyPageService {
     public void memberDetailChange(Member member,
                                    MypageDetailChgReqDto mypageDetailChgReqDto
     ) {
-        Member memberDb = memberRepository.findByIdAndDeleted(member.getId(), false)
+        Member memberDb = memberRepository.findById(member.getId())
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_013, ERR_013.getValue()));
 
         memberDb.memberDetailChange(mypageDetailChgReqDto.getNickname(),
@@ -110,7 +110,7 @@ public class MyPageService {
     public void memberWithdraw(Member member,
                                MypageWithdrawReqDto mypageWithdrawReqDto
     ) {
-        Member memberDb = memberRepository.findByIdAndDeleted(member.getId(), false)
+        Member memberDb = memberRepository.findById(member.getId())
                 .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_013, ERR_013.getValue()));
         memberDb.withdrawValid(mypageWithdrawReqDto.getCurrentPw(), passwordEncoder);
         List<StudyGroupMember> byGroupIncludeMember = studyGroupMemberRepository.findByGroupIncludeMember(member.getId());
