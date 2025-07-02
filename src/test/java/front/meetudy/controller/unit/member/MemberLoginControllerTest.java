@@ -10,7 +10,7 @@ import front.meetudy.controller.member.MemberLoginController;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.member.LoginReqDto;
 import front.meetudy.exception.CustomExceptionHandler;
-import front.meetudy.property.JwtProperty;
+import front.meetudy.property.FrontJwtProperty;
 import front.meetudy.repository.member.MemberRepository;
 import front.meetudy.service.member.MemberService;
 import front.meetudy.service.redis.RedisService;
@@ -65,7 +65,7 @@ class MemberLoginControllerTest {
     private JwtProcess jwtProcess;
 
     @MockBean
-    private JwtProperty jwtProperty;
+    private FrontJwtProperty jwtProperty;
 
     @MockBean
     private MemberService memberService;

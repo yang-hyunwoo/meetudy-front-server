@@ -5,7 +5,7 @@ import front.meetudy.config.jwt.filter.JwtAuthorizationFilter;
 import front.meetudy.oauth.OAuth2AuthenticationFailureHandler;
 import front.meetudy.oauth.OAuth2AuthenticationSuccessHandler;
 import front.meetudy.oauth.PrincipalOauth2UserService;
-import front.meetudy.property.JwtProperty;
+import front.meetudy.property.FrontJwtProperty;
 import front.meetudy.repository.member.MemberRepository;
 import front.meetudy.security.handler.CustomLogOutHandler;
 import front.meetudy.service.redis.RedisService;
@@ -34,7 +34,7 @@ public class SecurityConfig {
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
     private final JwtProcess jwtProcess;
-    private final JwtProperty jwtProperty;
+    private final FrontJwtProperty frontJwtProperty;
     private final RedisService redisService;
 
     @Bean
@@ -43,7 +43,7 @@ public class SecurityConfig {
     }
     @Bean
     public JwtAuthorizationFilter jwtAuthorizationFilter(AuthenticationManager authenticationManager) {
-        return new JwtAuthorizationFilter(authenticationManager, memberRepository, jwtProcess, jwtProperty,redisService);
+        return new JwtAuthorizationFilter(authenticationManager, memberRepository, jwtProcess, frontJwtProperty,redisService);
     }
 
     /**
@@ -90,7 +90,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
 
                 .addFilterBefore(jwtAuthorizationFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(handler -> handler.authenticationEntryPoint(new CustomAuthenticationEntryPoint(jwtProperty)))
+                .exceptionHandling(handler -> handler.authenticationEntryPoint(new CustomAuthenticationEntryPoint(frontJwtProperty)))
                 .exceptionHandling(handler -> handler.accessDeniedHandler(new CustomAccessDeniedHandler()))
                 .logout(logout-> logout.logoutUrl("/api/logout").logoutSuccessHandler(new CustomLogOutHandler(jwtProcess,redisService)))
                 .authorizeHttpRequests(requests -> requests
@@ -125,7 +125,7 @@ public class SecurityConfig {
                         .failureHandler(oAuth2AuthenticationFailureHandler)
                 )
                 .addFilterBefore(jwtAuthorizationFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(handler -> handler.authenticationEntryPoint(new CustomAuthenticationEntryPoint(jwtProperty)))
+                .exceptionHandling(handler -> handler.authenticationEntryPoint(new CustomAuthenticationEntryPoint(frontJwtProperty)))
                 .exceptionHandling(handler -> handler.accessDeniedHandler(new CustomAccessDeniedHandler()))
                 .logout(logout-> logout.logoutUrl("/api/logout").logoutSuccessHandler(new CustomLogOutHandler(jwtProcess,redisService)))
                 .authorizeHttpRequests(requests -> requests

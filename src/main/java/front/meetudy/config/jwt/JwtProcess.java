@@ -12,7 +12,7 @@ import front.meetudy.constant.member.MemberEnum;
 import front.meetudy.constant.security.CookieEnum;
 import front.meetudy.domain.member.Member;
 import front.meetudy.exception.CustomApiException;
-import front.meetudy.property.JwtProperty;
+import front.meetudy.property.FrontJwtProperty;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,6 @@ import java.util.UUID;
 import static front.meetudy.constant.error.ErrorEnum.*;
 import static front.meetudy.constant.security.CookieEnum.*;
 import static front.meetudy.constant.security.TokenErrorCodeEnum.*;
-import static java.nio.charset.StandardCharsets.*;
 import static org.springframework.http.HttpStatus.*;
 
 @Component
@@ -38,12 +37,12 @@ public class JwtProcess {
     private static final String CLAIM_ID = "id";
     private static final String CLAIM_ROLE = "role";
 
-    private final JwtProperty jwtProperty;
+    private final FrontJwtProperty jwtProperty;
 
     private final JWTVerifier jwtVerifier;
 
-    public JwtProcess(JwtProperty jwtProperty) {
-        this.jwtProperty = jwtProperty;
+    public JwtProcess(FrontJwtProperty frontJwtProperty) {
+        this.jwtProperty = frontJwtProperty;
         this.jwtVerifier = JWT.require(algorithm()).build();
     }
 

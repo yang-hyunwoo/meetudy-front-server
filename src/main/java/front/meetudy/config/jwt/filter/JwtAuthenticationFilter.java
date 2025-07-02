@@ -9,7 +9,7 @@ import front.meetudy.constant.security.CookieEnum;
 import front.meetudy.dto.request.member.LoginReqDto;
 import front.meetudy.dto.response.member.LoginResDto;
 import front.meetudy.constant.login.LoginErrorCode;
-import front.meetudy.property.JwtProperty;
+import front.meetudy.property.FrontJwtProperty;
 import front.meetudy.service.member.MemberService;
 import front.meetudy.service.redis.RedisService;
 import front.meetudy.util.response.CustomResponseUtil;
@@ -41,14 +41,14 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     private final JwtProcess jwtProcess;
-    private final JwtProperty jwtProperty;
+    private final FrontJwtProperty jwtProperty;
 
     private final RedisService redisService;
 
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager
             , MemberService memberService
             , JwtProcess jwtProcess
-            , JwtProperty jwtProperty
+            , FrontJwtProperty jwtProperty
             , RedisService redisService) {
         super(authenticationManager);
         //setFilterProcessesUrl("/api/login");

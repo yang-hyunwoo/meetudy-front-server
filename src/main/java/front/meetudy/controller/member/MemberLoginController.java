@@ -7,11 +7,9 @@ import front.meetudy.constant.security.CookieEnum;
 import front.meetudy.docs.login.LoginValidationErrorExample;
 import front.meetudy.dto.request.member.LoginReqDto;
 import front.meetudy.dto.response.member.LoginResDto;
-import front.meetudy.property.JwtProperty;
+import front.meetudy.property.FrontJwtProperty;
 import front.meetudy.service.member.MemberService;
 import front.meetudy.service.redis.RedisService;
-import front.meetudy.util.MessageUtil;
-import front.meetudy.util.response.CustomResponseUtil;
 import front.meetudy.util.response.Response;
 import front.meetudy.util.security.LoginErrorResolver;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,7 +17,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -48,7 +45,7 @@ public class MemberLoginController {
 
     private final RedisService redisService;
 
-    private final JwtProperty jwtProperty;
+    private final FrontJwtProperty frontJwtProperty;
 
 
     @Operation(summary = "로그인", description = "로그인 API 성공 시 Bearer 토큰 생성 / 리프래시 토큰 생성")
@@ -96,12 +93,12 @@ public class MemberLoginController {
                               Duration ttl,
                               LoginReqDto loginReqDtoAuth
     ) {
-        if (jwtProperty.isUseCookie()) {
+        if (frontJwtProperty.isUseCookie()) {
             response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(accessToken, CookieEnum.accessToken).toString());
             response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken, ttl).toString());
             response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(String.valueOf(loginReqDtoAuth.isChk()), isAutoLogin).toString());
         } else {
-            response.addHeader(jwtProperty.getHeader(), accessToken);
+            response.addHeader(frontJwtProperty.getHeader(), accessToken);
             response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken, ttl).toString());
             response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(String.valueOf(loginReqDtoAuth.isChk()), isAutoLogin).toString());
         }

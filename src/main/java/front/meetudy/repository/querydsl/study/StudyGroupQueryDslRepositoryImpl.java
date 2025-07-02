@@ -482,6 +482,7 @@ public class StudyGroupQueryDslRepositoryImpl implements StudyGroupQueryDslRepos
     ) {
         builder.and(studyGroupMember.member.id.eq(member.getId()));
         builder.and(studyGroupDetail.deleted.eq(false));
+        builder.and(studyGroupMember.role.eq(MemberRole.LEADER));
     }
 
     private void groupJoinCondition(Member member,

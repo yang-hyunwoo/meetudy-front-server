@@ -9,7 +9,7 @@ import front.meetudy.constant.member.MemberEnum;
 import front.meetudy.constant.security.CookieEnum;
 import front.meetudy.domain.member.Member;
 import front.meetudy.exception.CustomApiException;
-import front.meetudy.property.JwtProperty;
+import front.meetudy.property.FrontJwtProperty;
 import front.meetudy.repository.member.MemberRepository;
 import front.meetudy.service.redis.RedisService;
 import jakarta.servlet.http.Cookie;
@@ -48,7 +48,7 @@ public class JwtAuthorizationFilterTest {
     @MockBean
     JwtProcess jwtProcess;  // 실제 필터에 주입됨
     @MockBean(name = "jwtProperty")
-    JwtProperty jwtProperty;
+    FrontJwtProperty jwtProperty;
     @MockBean
     MemberRepository memberRepository;
     @MockBean
