@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import front.meetudy.constant.login.LoginErrorCode;
-import front.meetudy.property.JwtProperty;
+import front.meetudy.property.FrontJwtProperty;
 import front.meetudy.util.response.Response;
 import front.meetudy.util.response.ResponseBuilder;
 import jakarta.servlet.http.Cookie;
@@ -22,9 +22,9 @@ import static front.meetudy.constant.security.CookieEnum.*;
 
 
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
-    private final JwtProperty jwtProperty;
+    private final FrontJwtProperty jwtProperty;
 
-    public CustomAuthenticationEntryPoint(JwtProperty jwtProperty) {
+    public CustomAuthenticationEntryPoint(FrontJwtProperty jwtProperty) {
         this.jwtProperty = jwtProperty;
     }
 

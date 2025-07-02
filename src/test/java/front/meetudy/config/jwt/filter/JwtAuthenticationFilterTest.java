@@ -6,7 +6,7 @@ import front.meetudy.config.jwt.JwtProcess;
 import front.meetudy.constant.member.MemberEnum;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.member.LoginReqDto;
-import front.meetudy.property.JwtProperty;
+import front.meetudy.property.FrontJwtProperty;
 import front.meetudy.service.member.MemberService;
 import front.meetudy.service.redis.RedisService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -51,7 +51,7 @@ class JwtAuthenticationFilterTest {
     private JwtProcess jwtProcess;
 
     @Mock
-    private JwtProperty jwtProperty;
+    private FrontJwtProperty jwtProperty;
 
     @Mock
     private RedisService redisService;

@@ -5,7 +5,7 @@ import front.meetudy.config.jwt.JwtProcess;
 import front.meetudy.constant.member.MemberProviderTypeEnum;
 import front.meetudy.constant.security.CookieEnum;
 import front.meetudy.dto.request.member.LoginReqDto;
-import front.meetudy.property.JwtProperty;
+import front.meetudy.property.FrontJwtProperty;
 import front.meetudy.service.redis.RedisService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,7 +27,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private final JwtProcess jwtProcess;
 
-    private final JwtProperty jwtProperty;
+    private final FrontJwtProperty frontJwtProperty;
 
     private final RedisService redisService;
 
@@ -54,12 +54,12 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String accessToken = jwtProcess.createAccessToken(loginUser);
         String refreshToken = jwtProcess.createRefreshToken(loginUser, ttl);
 
-        if (jwtProperty.isUseCookie()) {
+        if (frontJwtProperty.isUseCookie()) {
             response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(accessToken, CookieEnum.accessToken).toString());
             response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken, ttl).toString());
             response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(String.valueOf(loginReqDto.isChk()), isAutoLogin).toString());
         } else {
-            response.addHeader(jwtProperty.getHeader(), accessToken);
+            response.addHeader(frontJwtProperty.getHeader(), accessToken);
             response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken, ttl).toString());
             response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(String.valueOf(loginReqDto.isChk()), isAutoLogin).toString());
         }

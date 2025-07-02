@@ -21,7 +21,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "chat_link",
         indexes = {
-                @Index(name = "idx_chat_document_study_group_id", columnList = "study_group_id"),
+                @Index(name = "idx_chat_link_study_group_id", columnList = "study_group_id"),
         })
 public class ChatLink extends BaseEntity {
 

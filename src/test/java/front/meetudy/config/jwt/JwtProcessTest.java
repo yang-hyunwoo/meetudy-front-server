@@ -3,7 +3,7 @@ package front.meetudy.config.jwt;
 import front.meetudy.auth.LoginUser;
 import front.meetudy.constant.member.MemberEnum;
 import front.meetudy.domain.member.Member;
-import front.meetudy.property.JwtProperty;
+import front.meetudy.property.FrontJwtProperty;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,11 +15,11 @@ import static org.junit.jupiter.api.Assertions.*;
 public class JwtProcessTest {
 
     private JwtProcess jwtProcess;
-    private JwtProperty jwtProperty;
+    private FrontJwtProperty jwtProperty;
 
     @BeforeEach
     void setUp() {
-        jwtProperty = new JwtProperty();
+        jwtProperty = new FrontJwtProperty();
         jwtProperty.setSecretKey("test-secret");
         jwtProperty.setTokenPrefix("Bearer ");
         jwtProperty.setExpirationTime(1000 * 60 * 10); // 10분

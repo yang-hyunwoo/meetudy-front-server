@@ -12,7 +12,7 @@ import front.meetudy.config.jwt.JwtProcess;
 import front.meetudy.constant.security.CookieEnum;
 import front.meetudy.domain.member.Member;
 import front.meetudy.exception.CustomApiException;
-import front.meetudy.property.JwtProperty;
+import front.meetudy.property.FrontJwtProperty;
 import front.meetudy.repository.member.MemberRepository;
 import front.meetudy.service.redis.RedisService;
 import front.meetudy.util.MultiReadHttpServletRequest;
@@ -62,7 +62,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
     private final MemberRepository memberRepository;
     private final JwtProcess jwtProcess;
-    private final JwtProperty jwtProperty;
+    private final FrontJwtProperty jwtProperty;
 
     private final RedisService redisService;
     private static final ObjectMapper objectMapper = new ObjectMapper()
@@ -72,7 +72,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     public JwtAuthorizationFilter(AuthenticationManager authenticationManager
             , MemberRepository memberRepository
             , JwtProcess jwtProcess
-            , JwtProperty jwtProperty
+            , FrontJwtProperty jwtProperty
             , RedisService redisService) {
 
         super(authenticationManager);
