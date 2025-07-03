@@ -1,6 +1,7 @@
 package front.meetudy.domain.chat;
 
 import front.meetudy.domain.common.BaseEntity;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import front.meetudy.exception.CustomApiException;
 import jakarta.persistence.*;
@@ -36,8 +37,10 @@ public class ChatLink extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @Column(columnDefinition = "TEXT" , nullable = false)
-    private String linkUrl;
+    @Embedded
+    @AttributeOverride(name = "value",
+            column = @Column(name = "link_url", nullable = false))
+    private Content linkUrl;
 
     @Column(nullable = false)
     private boolean deleted;
@@ -47,7 +50,7 @@ public class ChatLink extends BaseEntity {
     protected ChatLink(Long id,
                        Long studyGroupId,
                        Member member,
-                       String linkUrl,
+                       Content linkUrl,
                        boolean deleted
     ) {
         this.id = id;
@@ -59,7 +62,7 @@ public class ChatLink extends BaseEntity {
 
     public static ChatLink createChatLink(Long studyGroupId,
                                           Member member,
-                                          String linkUrl
+                                          Content linkUrl
     ) {
         return ChatLink.builder()
                 .studyGroupId(studyGroupId)
@@ -102,4 +105,5 @@ public class ChatLink extends BaseEntity {
                 ", deleted=" + deleted +
                 '}';
     }
+
 }

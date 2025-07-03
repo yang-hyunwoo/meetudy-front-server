@@ -1,6 +1,7 @@
 package front.meetudy.domain.study;
 
 import front.meetudy.domain.common.BaseEntity;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.exception.CustomApiException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -39,8 +40,10 @@ public class StudyGroupDetail extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String tag;
 
-    @Column(columnDefinition = "TEXT")
-    private String content;
+    @Embedded
+    @AttributeOverride(name = "value",
+            column = @Column(name = "content"))
+    private Content content;
 
     @Column(length = 50,nullable = false)
     private LocalDate startDate;
@@ -80,7 +83,7 @@ public class StudyGroupDetail extends BaseEntity {
     protected StudyGroupDetail(Long id,
                                StudyGroup studyGroup,
                                String tag,
-                               String content,
+                               Content content,
                                LocalDate startDate,
                                LocalDate endDate,
                                String meetingFrequency,
@@ -112,7 +115,7 @@ public class StudyGroupDetail extends BaseEntity {
 
     public static StudyGroupDetail createStudyGroupDetail(StudyGroup StudyGroup,
                                                           String tag,
-                                                          String content,
+                                                          Content content,
                                                           LocalDate startDate,
                                                           LocalDate endDate,
                                                           String meetingFrequency,
@@ -193,7 +196,7 @@ public class StudyGroupDetail extends BaseEntity {
      */
     public void studyGroupDetailUpdate(StudyGroupUpdateCommand studyGroupUpdateCommand) {
         this.tag = studyGroupUpdateCommand.getTag();
-        this.content = studyGroupUpdateCommand.getContent();
+        this.content = Content.notRequired(studyGroupUpdateCommand.getContent());
         this.startDate = LocalDate.parse(studyGroupUpdateCommand.getStartDate());
         this.endDate = LocalDate.parse(studyGroupUpdateCommand.getEndDate());
         this.meetingFrequency = studyGroupUpdateCommand.getMeetingFrequency();

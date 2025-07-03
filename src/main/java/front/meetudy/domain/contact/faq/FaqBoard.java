@@ -2,6 +2,7 @@ package front.meetudy.domain.contact.faq;
 
 import front.meetudy.constant.contact.faq.FaqType;
 import front.meetudy.domain.common.BaseEntity;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -33,8 +34,10 @@ public class FaqBoard extends BaseEntity {
     @Column(length = 500)
     private String question;
 
-    @Column(columnDefinition = "TEXT")
-    private String answer;
+    @Embedded
+    @AttributeOverride(name = "value",
+            column = @Column(name = "answer"))
+    private Content answer;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 10)
@@ -54,7 +57,7 @@ public class FaqBoard extends BaseEntity {
     protected FaqBoard(Long id,
                        Member member,
                        String question,
-                       String answer,
+                       Content answer,
                        FaqType faqType,
                        int sort,
                        boolean visible,
@@ -72,7 +75,7 @@ public class FaqBoard extends BaseEntity {
 
     public static FaqBoard createFaqBoard(Member member,
                                           String question,
-                                          String answer,
+                                          Content answer,
                                           FaqType faqType,
                                           int sort,
                                           boolean visible,

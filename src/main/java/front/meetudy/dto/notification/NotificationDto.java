@@ -2,6 +2,7 @@ package front.meetudy.dto.notification;
 
 import front.meetudy.constant.member.MemberEnum;
 import front.meetudy.constant.notification.NotificationType;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import front.meetudy.domain.notification.Notification;
 import lombok.Builder;
@@ -44,7 +45,7 @@ public class NotificationDto {
                 Member.partialOf(senderId, MemberEnum.USER),
                 tableId,
                 notificationType,
-                message,
+                Content.required(message),
                 linkUrl,
                 importance
         );
@@ -55,7 +56,7 @@ public class NotificationDto {
                 .id(notification.getId())
                 .receiverId(notification.getReceiver().getId())
                 .senderId(notification.getSender().getId())
-                .message(notification.getMessage())
+                .message(notification.getMessage().getValue())
                 .linkUrl(notification.getLinkUrl())
                 .read(notification.isRead())
                 .importance(notification.getImportance())

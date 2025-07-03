@@ -2,6 +2,7 @@ package front.meetudy.domain.chat;
 
 import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.domain.common.BaseEntity;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.chat.ChatNoticeDto;
 import front.meetudy.exception.CustomApiException;
@@ -39,8 +40,10 @@ public class ChatNotice extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @Column(columnDefinition = "TEXT" , nullable = false)
-    private String message;
+    @Embedded
+    @AttributeOverride(name = "value",
+            column = @Column(name = "message", nullable = false))
+    private Content message;
 
     @Column(nullable = false)
     private boolean deleted;
@@ -50,7 +53,7 @@ public class ChatNotice extends BaseEntity {
     protected ChatNotice(Long id,
                          Long studyGroupId,
                          Member member,
-                         String message,
+                         Content message,
                          boolean deleted
     ) {
         this.id = id;
@@ -62,7 +65,7 @@ public class ChatNotice extends BaseEntity {
 
     public static ChatNotice createChatNotice(Long studyGroupId,
                                               Member member,
-                                              String message
+                                              Content message
     ) {
         return ChatNotice.builder()
                 .studyGroupId(studyGroupId)
@@ -80,7 +83,7 @@ public class ChatNotice extends BaseEntity {
         if(this.deleted) {
             throw new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue());
         }
-        this.message = chatNoticeDto.getMessage();
+        this.message = Content.required(chatNoticeDto.getMessage());
     }
 
     /**

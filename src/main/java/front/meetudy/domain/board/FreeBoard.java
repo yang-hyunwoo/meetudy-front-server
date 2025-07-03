@@ -1,7 +1,8 @@
 package front.meetudy.domain.board;
 
-import front.meetudy.constant.error.ErrorEnum;
+import front.meetudy.domain.board.vo.FreeTitle;
 import front.meetudy.domain.common.BaseEntity;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import front.meetudy.exception.CustomApiException;
 import jakarta.persistence.*;
@@ -10,7 +11,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.http.HttpStatus;
 
 import java.util.Objects;
 
@@ -39,11 +39,15 @@ public class FreeBoard extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @Column(length = 200)
-    private String title;
+    @Embedded
+    @AttributeOverride(name = "value",
+            column = @Column(name = "title", nullable = false, length = 200))
+    private FreeTitle title;
 
-    @Column(columnDefinition = "TEXT")
-    private String content;
+    @Embedded
+    @AttributeOverride(name = "value",
+            column = @Column(name = "content", nullable = false))
+    private Content content;
 
     @Column(length = 30, nullable = false)
     private String writeNickname;
@@ -54,8 +58,8 @@ public class FreeBoard extends BaseEntity {
     @Builder
     protected FreeBoard(Long id,
                         Member member,
-                        String title,
-                        String content,
+                        FreeTitle title,
+                        Content content,
                         String writeNickname,
                         boolean deleted) {
         this.id = id;
@@ -68,9 +72,9 @@ public class FreeBoard extends BaseEntity {
     }
 
     public static FreeBoard createFreeBoard(Member member,
-                            String title,
-                            String content,
-                            boolean deleted
+                                            FreeTitle title,
+                                            Content content,
+                                            boolean deleted
     ) {
         return FreeBoard.builder()
                 .member(member)
@@ -97,8 +101,8 @@ public class FreeBoard extends BaseEntity {
         if(this.deleted) {
             throw new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue());
         }
-        this.title = title;
-        this.content = content;
+        this.title = FreeTitle.of(title);
+        this.content = Content.required(content);
         return this.id;
     }
 
@@ -139,11 +143,10 @@ public class FreeBoard extends BaseEntity {
         return "FreeBoard{" +
                 "id=" + id +
                 ", member=" + member +
-                ", title='" + title + '\'' +
-                ", content='" + content + '\'' +
+                ", title=" + title +
+                ", content=" + content +
                 ", writeNickname='" + writeNickname + '\'' +
                 ", deleted=" + deleted +
                 '}';
     }
-
 }

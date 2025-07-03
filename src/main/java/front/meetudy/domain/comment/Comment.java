@@ -1,6 +1,7 @@
 package front.meetudy.domain.comment;
 
 import front.meetudy.domain.common.BaseEntity;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import front.meetudy.exception.CustomApiException;
 import jakarta.persistence.*;
@@ -46,8 +47,10 @@ public class Comment extends BaseEntity {
     @Column(nullable = false)
     private Long targetId;
 
-    @Column(columnDefinition = "TEXT" , nullable = false)
-    private String content;
+    @Embedded
+    @AttributeOverride(name = "value",
+            column = @Column(name = "content", nullable = false))
+    private Content content;
 
     @Column(length = 30)
     private String writeNickname;
@@ -61,7 +64,7 @@ public class Comment extends BaseEntity {
                       Member member,
                       String targetType,
                       Long targetId,
-                      String content,
+                      Content content,
                       String writeNickname,
                       boolean deleted
     ) {
@@ -77,7 +80,7 @@ public class Comment extends BaseEntity {
     public static Comment createComments(Member member,
                                          String targetType,
                                          Long targetId,
-                                         String content,
+                                         Content content,
                                          boolean deleted
 
     ) {
@@ -102,7 +105,7 @@ public class Comment extends BaseEntity {
         if(this.deleted) {
             throw new CustomApiException(BAD_REQUEST, ERR_012, ERR_012.getValue());
         }
-        this.content = content;
+        this.content = Content.required(content);
     }
 
     /**

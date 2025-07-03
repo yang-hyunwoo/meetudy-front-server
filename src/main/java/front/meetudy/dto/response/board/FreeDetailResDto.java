@@ -45,8 +45,8 @@ public class FreeDetailResDto {
     ) {
         return FreeDetailResDto.builder()
                 .id(freeBoard.getId())
-                .title(freeBoard.getTitle())
-                .content(freeBoard.getContent())
+                .title(freeBoard.getTitle().getValue())
+                .content(freeBoard.getContent().getValue())
                 .writeNickname(freeBoard.getWriteNickname())
                 .createdAt(freeBoard.getCreatedAt())
                 .memberId(freeBoard.getMember().getId())

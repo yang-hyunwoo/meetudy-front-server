@@ -1,6 +1,7 @@
 package front.meetudy.domain.message;
 
 import front.meetudy.domain.common.BaseEntity;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import front.meetudy.exception.CustomApiException;
 import jakarta.persistence.*;
@@ -42,8 +43,10 @@ public class Message extends BaseEntity {
     @JoinColumn(name = "senderId", nullable = false)
     private Member sender;
 
-    @Column(columnDefinition = "TEXT" , nullable = false)
-    private String content;
+    @Embedded
+    @AttributeOverride(name = "value",
+            column = @Column(name = "content", nullable = false))
+    private Content content;
 
     @Column(nullable = false)
     private boolean read;
@@ -61,7 +64,7 @@ public class Message extends BaseEntity {
     protected Message(Long id,
                       Member receiver,
                       Member sender,
-                      String content,
+                      Content content,
                       boolean read,
                       LocalDateTime readAt,
                       LocalDateTime sendAt,
@@ -79,7 +82,7 @@ public class Message extends BaseEntity {
 
     public static Message createMessage(Member receiver,
                                         Member sender,
-                                        String content
+                                        Content content
     ) {
         return Message.builder()
                 .receiver(receiver)

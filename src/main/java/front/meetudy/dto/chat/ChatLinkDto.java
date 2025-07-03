@@ -3,6 +3,7 @@ package front.meetudy.dto.chat;
 import front.meetudy.constant.chat.ChatMessageType;
 import front.meetudy.constant.member.MemberEnum;
 import front.meetudy.domain.chat.ChatLink;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import lombok.Builder;
 import lombok.Data;
@@ -25,7 +26,7 @@ public class ChatLinkDto {
         return ChatLink.createChatLink(
                 studyGroupId,
                 Member.partialOf(memberId, MemberEnum.USER),
-                linkUrl
+                Content.required(linkUrl)
         );
     }
 
@@ -35,7 +36,7 @@ public class ChatLinkDto {
         return ChatLinkDto.builder()
                 .studyGroupId(chatLink.getStudyGroupId())
                 .id(chatLink.getId())
-                .linkUrl(chatLink.getLinkUrl())
+                .linkUrl(chatLink.getLinkUrl().getValue())
                 .memberId(chatLink.getMember().getId())
                 .status(status)
                 .build();

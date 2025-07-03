@@ -27,7 +27,7 @@ public class FreePageResDto {
     public static FreePageResDto from(FreeBoard freeBoard) {
         return FreePageResDto.builder()
                 .id(freeBoard.getId())
-                .title(freeBoard.getTitle())
+                .title(freeBoard.getTitle().getValue())
                 .writeNickname(freeBoard.getWriteNickname())
                 .createdAt(freeBoard.getCreatedAt())
                 .build();

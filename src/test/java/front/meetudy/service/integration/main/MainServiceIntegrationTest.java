@@ -1,5 +1,6 @@
 package front.meetudy.service.integration.main;
 
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.contact.notice.NoticeBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.StudyGroup;
@@ -62,7 +63,7 @@ class MainServiceIntegrationTest {
     void mainNoticeListSuccess() {
 
         //given
-        em.persist(NoticeBoard.createNoticeBoard(null, member, "공지사항1", "요약1", "내용2", NOTICE, 1, true, false));
+        em.persist(NoticeBoard.createNoticeBoard(null, member, "공지사항1", "요약1", Content.notRequired("내용2"), NOTICE, 1, true, false));
         em.flush();
         em.clear();
 
@@ -79,7 +80,7 @@ class MainServiceIntegrationTest {
 
         //given
         for (int i = 0; i < 10; i++) {
-            em.persist(NoticeBoard.createNoticeBoard(null, member, "공지사항1", "요약1", "내용2", NOTICE, 1, true, false));
+            em.persist(NoticeBoard.createNoticeBoard(null, member, "공지사항1", "요약1", Content.notRequired("내용2"), NOTICE, 1, true, false));
         }
         em.flush();
         em.clear();

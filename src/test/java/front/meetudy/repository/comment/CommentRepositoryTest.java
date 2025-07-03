@@ -1,6 +1,7 @@
 package front.meetudy.repository.comment;
 
 import front.meetudy.domain.comment.Comment;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.comment.CommentWriteReqDto;
 import front.meetudy.dummy.TestMemberFactory;
@@ -30,9 +31,9 @@ class CommentRepositoryTest {
     @BeforeEach
     void setUp() {
         member = TestMemberFactory.persistDefaultMember(em);
-        em.persist(Comment.createComments(member,"freeboard",1L,"111",false));
-        em.persist(Comment.createComments(member,"freeboard",1L,"111",false));
-        em.persist(Comment.createComments(member,"freeboard",1L,"111",false));
+        em.persist(Comment.createComments(member,"freeboard",1L, Content.required("111"),false));
+        em.persist(Comment.createComments(member,"freeboard",1L,Content.required("111"),false));
+        em.persist(Comment.createComments(member,"freeboard",1L,Content.required("111"),false));
         em.flush();
         em.clear();
     }

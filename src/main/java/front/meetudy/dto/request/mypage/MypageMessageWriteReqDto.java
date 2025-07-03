@@ -3,6 +3,7 @@ package front.meetudy.dto.request.mypage;
 import front.meetudy.annotation.ValidationMode;
 import front.meetudy.constant.error.ValidationType;
 import front.meetudy.constant.member.MemberEnum;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import front.meetudy.domain.message.Message;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -30,7 +31,7 @@ public class MypageMessageWriteReqDto {
         return Message.createMessage(
                 Member.partialOf(receiverId, MemberEnum.USER),
                 member,
-                content
+                Content.required(content)
         );
     }
 

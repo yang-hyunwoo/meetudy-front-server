@@ -24,7 +24,7 @@ public class MyPageBoardWriteResDto {
     public static MyPageBoardWriteResDto from(FreeBoard freeBoard) {
         return MyPageBoardWriteResDto.builder()
                 .id(freeBoard.getId())
-                .title(freeBoard.getTitle())
+                .title(freeBoard.getTitle().getValue())
                 .createdAt(freeBoard.getCreatedAt())
                 .build();
     }
