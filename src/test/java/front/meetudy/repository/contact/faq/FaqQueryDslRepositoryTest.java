@@ -1,6 +1,7 @@
 package front.meetudy.repository.contact.faq;
 
 import front.meetudy.constant.contact.faq.FaqType;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.contact.faq.FaqBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.contact.faq.FaqReqDto;
@@ -33,9 +34,9 @@ class FaqQueryDslRepositoryTest {
     @BeforeEach
     void setUp() {
         Member member = TestMemberFactory.persistDefaultMember(em);
-        em.persist(FaqBoard.createFaqBoard(member, "질문", "답변", FaqType.ASSIGNMENT, 1, true, false));
-        em.persist(FaqBoard.createFaqBoard(member, "테스트", "답변2", FaqType.ASSIGNMENT, 2, true, false));
-        em.persist(FaqBoard.createFaqBoard(member, "질문3", "답변3", FaqType.ASSIGNMENT, 3, true, false));
+        em.persist(FaqBoard.createFaqBoard(member, "질문", Content.notRequired("답변"), FaqType.ASSIGNMENT, 1, true, false));
+        em.persist(FaqBoard.createFaqBoard(member, "테스트", Content.notRequired("답변"), FaqType.ASSIGNMENT, 2, true, false));
+        em.persist(FaqBoard.createFaqBoard(member, "질문3", Content.notRequired("답변"), FaqType.ASSIGNMENT, 3, true, false));
         em.flush();
         em.clear();
     }

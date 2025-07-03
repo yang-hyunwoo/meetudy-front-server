@@ -2,6 +2,7 @@ package front.meetudy.domain.chat;
 
 import front.meetudy.constant.chat.MessageType;
 import front.meetudy.domain.common.BaseEntity;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -35,8 +36,10 @@ public class ChatMessage extends BaseEntity {
     @JoinColumn(name = "sender_id", nullable = false)
     private Member member;
 
-    @Column(columnDefinition = "TEXT" , nullable = false)
-    private String message;
+    @Embedded
+    @AttributeOverride(name = "value",
+            column = @Column(name = "message", nullable = false))
+    private Content message;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -50,7 +53,7 @@ public class ChatMessage extends BaseEntity {
     protected ChatMessage(Long id,
                           Long studyGroupId,
                           Member member,
-                          String message,
+                          Content message,
                           MessageType messageType,
                           LocalDateTime sentAt
     ) {
@@ -64,7 +67,7 @@ public class ChatMessage extends BaseEntity {
 
     public static ChatMessage createChatMessage(Long studyGroupId,
                                                 Member member,
-                                                String message,
+                                                Content message,
                                                 MessageType messageType,
                                                 LocalDateTime sentAt
     ) {

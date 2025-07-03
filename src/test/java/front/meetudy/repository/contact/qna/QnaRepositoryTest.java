@@ -1,6 +1,7 @@
 package front.meetudy.repository.contact.qna;
 
 import front.meetudy.constant.contact.faq.FaqType;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.contact.Qna.QnaBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dummy.TestMemberFactory;
@@ -41,7 +42,7 @@ class QnaRepositoryTest {
     void qna_insert() {
 
         // given
-        QnaBoard qnaBoard = QnaBoard.createQnaBoard(member, "질문", "질문내용", null, null, FaqType.SERVICE, LocalDateTime.now());
+        QnaBoard qnaBoard = QnaBoard.createQnaBoard(member, "질문", Content.notRequired("질문내용"), null, null, FaqType.SERVICE, LocalDateTime.now());
 
         // when
         QnaBoard save = qnaRepository.save(qnaBoard);
@@ -59,7 +60,7 @@ class QnaRepositoryTest {
     @DisplayName("QNA 조회")
     void qna_select() {
         // given
-        QnaBoard qnaBoard = QnaBoard.createQnaBoard(member, "질문", "질문내용", null, null, FaqType.SERVICE, LocalDateTime.now());
+        QnaBoard qnaBoard = QnaBoard.createQnaBoard(member, "질문", Content.notRequired("질문내용"), null, null, FaqType.SERVICE, LocalDateTime.now());
         qnaRepository.save(qnaBoard);
         // when
         List<QnaBoard> byQuestionUserIdNative = qnaRepository.findByQuestionUserIdNative(member.getId());

@@ -36,7 +36,7 @@ public class MyPageMessageResDto {
     public static MyPageMessageResDto from(Message message) {
         return MyPageMessageResDto.builder()
                 .id(message.getId())
-                .content(message.getContent())
+                .content(message.getContent().getValue())
                 .senderId(message.getSender().getId())
                 .receiverId(message.getReceiver().getId())
                 .nickname(message.getSender().getNickname())

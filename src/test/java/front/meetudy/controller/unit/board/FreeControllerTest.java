@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import front.meetudy.auth.LoginUser;
 import front.meetudy.domain.board.FreeBoard;
+import front.meetudy.domain.board.vo.FreeTitle;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.board.FreeUpdateReqDto;
 import front.meetudy.dto.request.board.FreeWriteReqDto;
@@ -47,7 +49,7 @@ class FreeControllerTest {
     void setUp() {
         member = TestMemberFactory.persistDefaultMember(em);
         member2 = TestMemberFactory.persistDefaultTwoMember(em);
-        em.persist(FreeBoard.createFreeBoard(member,"1","1",false));
+        em.persist(FreeBoard.createFreeBoard(member, FreeTitle.of("1"), Content.required("1"),false));
         em.flush();
         em.clear();
     }
@@ -123,7 +125,7 @@ class FreeControllerTest {
     @DisplayName("자유게시판 수정 성공")
     void free_update() throws Exception {
         Member author = em.merge(member);      // 게시글 작성자
-        FreeBoard board = FreeBoard.createFreeBoard(author, "title", "content", false);
+        FreeBoard board = FreeBoard.createFreeBoard(author, FreeTitle.of("title"), Content.required("content"), false);
         em.persist(board);
         em.flush();
         em.clear();
@@ -146,7 +148,7 @@ class FreeControllerTest {
         Member author = em.merge(member);      // 게시글 작성자
         Member other = em.merge(member2);      // 수정 시도자
 
-        FreeBoard board = FreeBoard.createFreeBoard(author, "title", "content", false);
+        FreeBoard board = FreeBoard.createFreeBoard(author, FreeTitle.of("title"), Content.required("content"), false);
         em.persist(board);
         em.flush();
         em.clear();
@@ -166,7 +168,7 @@ class FreeControllerTest {
     @DisplayName("자유게시판 삭제 성공")
     void free_delete() throws Exception {
         Member author = em.merge(member);      // 게시글 작성자
-        FreeBoard board = FreeBoard.createFreeBoard(author, "title", "content", false);
+        FreeBoard board = FreeBoard.createFreeBoard(author, FreeTitle.of("title"), Content.required("content"), false);
         em.persist(board);
         em.flush();
         em.clear();

@@ -2,6 +2,7 @@ package front.meetudy.repository.contact.notice;
 
 import front.meetudy.constant.contact.faq.NoticeType;
 import front.meetudy.constant.error.ErrorEnum;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.contact.notice.NoticeBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dummy.TestMemberFactory;
@@ -46,11 +47,11 @@ class NoticeRepositoryTest {
     @BeforeEach
     void setUp() {
         member = TestMemberFactory.persistDefaultMember(em);
-        NoticeBoard persist1 = em.persist(NoticeBoard.createNoticeBoard(null,member, "공지","요약", "공지", NoticeType.NOTICE, 1, true, false));
+        NoticeBoard persist1 = em.persist(NoticeBoard.createNoticeBoard(null,member, "공지","요약", Content.notRequired("공지"), NoticeType.NOTICE, 1, true, false));
         id1 = persist1.getId();
-        NoticeBoard persist2 = em.persist(NoticeBoard.createNoticeBoard(null,member, "공지2","요약", "공지2", NoticeType.NOTICE, 2, true, false));
+        NoticeBoard persist2 = em.persist(NoticeBoard.createNoticeBoard(null,member, "공지2","요약", Content.notRequired("공지2"), NoticeType.NOTICE, 2, true, false));
         id2 = persist2.getId();
-        NoticeBoard persist3 = em.persist(NoticeBoard.createNoticeBoard(null,member, "공지3","요약", "공지3", NoticeType.NOTICE, 3, true, false));
+        NoticeBoard persist3 = em.persist(NoticeBoard.createNoticeBoard(null,member, "공지3","요약", Content.notRequired("공지3"), NoticeType.NOTICE, 3, true, false));
         id3 = persist3.getId();
         em.flush();
         em.clear();

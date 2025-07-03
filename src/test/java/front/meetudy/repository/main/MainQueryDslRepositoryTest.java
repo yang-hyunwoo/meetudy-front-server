@@ -1,6 +1,7 @@
 package front.meetudy.repository.main;
 
 import front.meetudy.constant.contact.faq.NoticeType;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.contact.notice.NoticeBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.response.main.MainNoticeResDto;
@@ -44,7 +45,7 @@ class MainQueryDslRepositoryTest {
     void mainNoticeListSuccess() {
 
         //given
-        em.persist(NoticeBoard.createNoticeBoard(null, member, "공지사항1", "요약1", "내용2", NoticeType.NOTICE, 1, true, false));
+        em.persist(NoticeBoard.createNoticeBoard(null, member, "공지사항1", "요약1", Content.notRequired("공지2"), NoticeType.NOTICE, 1, true, false));
         em.flush();
         em.clear();
         // when
@@ -60,7 +61,7 @@ class MainQueryDslRepositoryTest {
 
         //given
         for (int i = 0; i < 10; i++) {
-            em.persist(NoticeBoard.createNoticeBoard(null, member, "공지사항1", "요약1", "내용2", NoticeType.NOTICE, 1, true, false));
+            em.persist(NoticeBoard.createNoticeBoard(null, member, "공지사항1", "요약1", Content.notRequired("내용2"), NoticeType.NOTICE, 1, true, false));
         }
         em.flush();
         em.clear();

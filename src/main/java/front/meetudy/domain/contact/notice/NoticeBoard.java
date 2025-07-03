@@ -3,6 +3,7 @@ package front.meetudy.domain.contact.notice;
 import front.meetudy.constant.contact.faq.NoticeType;
 import front.meetudy.domain.common.BaseEntity;
 import front.meetudy.domain.common.file.Files;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -44,8 +45,10 @@ public class NoticeBoard extends BaseEntity {
     @Column(length = 100)
     private String summary;
 
-    @Column(columnDefinition = "TEXT")
-    private String content;
+    @Embedded
+    @AttributeOverride(name = "value",
+            column = @Column(name = "content"))
+    private Content content;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 10)
@@ -67,7 +70,7 @@ public class NoticeBoard extends BaseEntity {
                           Member member,
                           String title,
                           String summary,
-                          String content,
+                          Content content,
                           NoticeType noticeType,
                           int sort,
                           boolean visible,
@@ -91,7 +94,7 @@ public class NoticeBoard extends BaseEntity {
                                                 Member member,
                                                 String title,
                                                 String summary,
-                                                String content,
+                                                Content content,
                                                 NoticeType noticeType,
                                                 int sort,
                                                 boolean visible,

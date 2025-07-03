@@ -26,7 +26,7 @@ public class NotificationResDto {
     public static NotificationResDto from(Notification notification) {
         return NotificationResDto.builder()
                 .id(notification.getId())
-                .message(notification.getMessage())
+                .message(notification.getMessage().getValue())
                 .linkUrl(notification.getLinkUrl())
                 .receiverId(notification.getReceiver().getId())
                 .build();

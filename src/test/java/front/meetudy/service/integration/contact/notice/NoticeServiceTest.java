@@ -1,6 +1,7 @@
 package front.meetudy.service.integration.contact.notice;
 
 import front.meetudy.constant.contact.faq.NoticeType;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.contact.notice.NoticeBoard;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.PageDto;
@@ -41,9 +42,9 @@ class NoticeServiceTest {
     @BeforeEach
     void setUp() {
         member = TestMemberFactory.persistDefaultMember(em);
-        em.persist(NoticeBoard.createNoticeBoard(null,member,"공지","요약","공지", NoticeType.NOTICE,1,true,false));
-        em.persist(NoticeBoard.createNoticeBoard(null,member,"공지2","요약","공지2", NoticeType.NOTICE,2,true,false));
-        em.persist(NoticeBoard.createNoticeBoard(null,member,"공지3","요약","공지3", NoticeType.NOTICE,3,true,false));
+        em.persist(NoticeBoard.createNoticeBoard(null,member,"공지","요약", Content.notRequired("공지"), NoticeType.NOTICE,1,true,false));
+        em.persist(NoticeBoard.createNoticeBoard(null,member,"공지2","요약",Content.notRequired("공지2"), NoticeType.NOTICE,2,true,false));
+        em.persist(NoticeBoard.createNoticeBoard(null,member,"공지3","요약",Content.notRequired("공지3"), NoticeType.NOTICE,3,true,false));
         em.flush();
         em.clear();
     }

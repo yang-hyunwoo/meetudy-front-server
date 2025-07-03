@@ -41,7 +41,7 @@ public class NoticeDetailResDto {
         return NoticeDetailResDto.builder()
                 .id(noticeBoard.getId())
                 .title(noticeBoard.getTitle())
-                .content(noticeBoard.getContent())
+                .content(noticeBoard.getContent().getValue())
                 .noticeType(noticeBoard.getNoticeType())
                 .createdAt(noticeBoard.getCreatedAt())
                 .prevId(prevId)

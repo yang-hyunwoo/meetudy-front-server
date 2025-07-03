@@ -35,7 +35,7 @@ public class CommentResDto {
     public static CommentResDto from(Comment comment, Member member) {
         return CommentResDto.builder()
                 .id(comment.getId())
-                .content(comment.getContent())
+                .content(comment.getContent().getValue())
                 .writeNickname(comment.getWriteNickname())
                 .memberId(comment.getMember().getId())
                 .modifyChk(member != null && Objects.equals(comment.getMember().getId(), member.getId()))

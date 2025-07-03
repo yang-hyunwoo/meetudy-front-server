@@ -2,6 +2,7 @@ package front.meetudy.domain.notification;
 
 import front.meetudy.constant.notification.NotificationType;
 import front.meetudy.domain.common.BaseEntity;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -43,8 +44,10 @@ public class Notification extends BaseEntity {
     @Column(nullable = false)
     private NotificationType notificationType;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
-    private String message;
+    @Embedded
+    @AttributeOverride(name = "value",
+            column = @Column(name = "message", nullable = false))
+    private Content message;
 
     @Column(length = 2000)
     private String linkUrl;
@@ -68,7 +71,7 @@ public class Notification extends BaseEntity {
                            Member sender,
                            Long tableId,
                            NotificationType notificationType,
-                           String message,
+                           Content message,
                            String linkUrl,
                            boolean read,
                            String importance,
@@ -94,7 +97,7 @@ public class Notification extends BaseEntity {
                                                   Member sender,
                                                   Long tableId,
                                                   NotificationType notificationType,
-                                                  String message,
+                                                  Content message,
                                                   String linkUrl,
                                                   String importance
     ) {
@@ -128,7 +131,7 @@ public class Notification extends BaseEntity {
     public void notificationMessageChg(String message,
                                        NotificationType notificationType
     ) {
-        this.message = message;
+        this.message = Content.required(message);
         this.notificationType = notificationType;
     }
 

@@ -5,6 +5,7 @@ import front.meetudy.annotation.ValidationMode;
 import front.meetudy.annotation.customannotation.Sanitize;
 import front.meetudy.constant.error.ValidationType;
 import front.meetudy.domain.comment.Comment;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -38,7 +39,7 @@ public class CommentWriteReqDto {
         return Comment.createComments(member,
                 targetType,
                 targetId,
-                content,
+                Content.required(content),
                 false);
     }
 

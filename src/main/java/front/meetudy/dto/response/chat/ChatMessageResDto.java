@@ -38,7 +38,7 @@ public class ChatMessageResDto {
         return ChatMessageResDto.builder()
                 .id(chatMessage.getId())
                 .studyGroupId(chatMessage.getStudyGroupId())
-                .message(chatMessage.getMessage())
+                .message(chatMessage.getMessage().getValue())
                 .senderId(chatMessage.getMember().getId())
                 .nickname(chatMessage.getMember().getNickname())
                 .messageType(chatMessage.getMessageType())

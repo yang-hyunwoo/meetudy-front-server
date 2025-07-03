@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import front.meetudy.domain.comment.Comment;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.comment.CommentUpdateReqDto;
 import front.meetudy.dto.request.comment.CommentWriteReqDto;
@@ -46,7 +47,7 @@ class CommentControllerTest {
     void setUp() {
         member = TestMemberFactory.persistDefaultMember(em);
         member2 = TestMemberFactory.persistDefaultTwoMember(em);
-        em.persist(Comment.createComments(member, "freeboard", 1L, "test", false));
+        em.persist(Comment.createComments(member, "freeboard", 1L, Content.required("test"), false));
         em.flush();
         em.clear();
     }
@@ -77,7 +78,7 @@ class CommentControllerTest {
     @DisplayName("댓글 수정")
     void comment_update() throws Exception{
         Member author = em.merge(member);      // 게시글 작성자
-        Comment comments = Comment.createComments(author, "freeboard", 1L, "댓글11", false);
+        Comment comments = Comment.createComments(author, "freeboard", 1L, Content.required("댓글11"), false);
         em.persist(comments);
         em.flush();
         em.clear();
@@ -99,7 +100,7 @@ class CommentControllerTest {
         Member author = em.merge(member);      // 게시글 작성자
         Member other = em.merge(member2);      // 수정 시도자
 
-        Comment comments = Comment.createComments(author, "freeboard", 1L, "댓글11", false);
+        Comment comments = Comment.createComments(author, "freeboard", 1L, Content.required("댓글11"), false);
         em.persist(comments);
         em.flush();
         em.clear();
@@ -119,7 +120,7 @@ class CommentControllerTest {
     @DisplayName("댓글 삭제 성공")
     void comment_delete() throws Exception {
         Member author = em.merge(member);      // 게시글 작성자
-        Comment comments = Comment.createComments(author, "freeboard", 1L, "댓글11", false);
+        Comment comments = Comment.createComments(author, "freeboard", 1L, Content.required("댓글11"), false);
         em.persist(comments);
         em.flush();
         em.clear();

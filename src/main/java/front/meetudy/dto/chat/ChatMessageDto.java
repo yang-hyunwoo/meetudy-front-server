@@ -3,6 +3,7 @@ package front.meetudy.dto.chat;
 import front.meetudy.constant.chat.MessageType;
 import front.meetudy.constant.member.MemberEnum;
 import front.meetudy.domain.chat.ChatMessage;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import lombok.Data;
 
@@ -27,7 +28,7 @@ public class ChatMessageDto {
         return ChatMessage.createChatMessage(
                 studyGroupId,
                 Member.partialOf(senderId, MemberEnum.USER),
-                message,
+                Content.required(message),
                 messageType,
                 sentAt);
     }

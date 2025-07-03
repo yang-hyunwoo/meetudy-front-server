@@ -1,6 +1,8 @@
 package front.meetudy.service.integration.board;
 
 import front.meetudy.domain.board.FreeBoard;
+import front.meetudy.domain.board.vo.FreeTitle;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.PageDto;
 import front.meetudy.dto.request.board.FreePageReqDto;
@@ -51,9 +53,9 @@ class FreeServiceTest {
     void setUp() {
         member = TestMemberFactory.persistDefaultMember(em);
         member2 = TestMemberFactory.persistDefaultTwoMember(em);
-        em.persist(FreeBoard.createFreeBoard(member,"1","1",false));
-        em.persist(FreeBoard.createFreeBoard(member,"2","2",false));
-        em.persist(FreeBoard.createFreeBoard(member,"3","3",false));
+        em.persist(FreeBoard.createFreeBoard(member, FreeTitle.of("1"), Content.required("1"),false));
+        em.persist(FreeBoard.createFreeBoard(member,FreeTitle.of("2"),Content.required("2"),false));
+        em.persist(FreeBoard.createFreeBoard(member,FreeTitle.of("3"),Content.required("3"),false));
         em.flush();
         em.clear();
     }
@@ -103,7 +105,7 @@ class FreeServiceTest {
     @Test
     @DisplayName("자유게시판 상세 조회 - 성공")
     void free_detail_success() {
-        FreeBoard freeBoard = FreeBoard.createFreeBoard(member, "5", "5", false);
+        FreeBoard freeBoard = FreeBoard.createFreeBoard(member, FreeTitle.of("5"), Content.required("5"), false);
         em.persist(freeBoard);
         FreeDetailResDto freeDetailResDto = freeService.freeDetail(freeBoard.getId(), member);
         assertThat(freeDetailResDto).isNotNull();
@@ -124,7 +126,7 @@ class FreeServiceTest {
     @DisplayName("자유게시판 수정")
     void free_update() {
         // given
-        FreeBoard freeBoard = FreeBoard.createFreeBoard(member, "5", "5", false);
+        FreeBoard freeBoard = FreeBoard.createFreeBoard(member, FreeTitle.of("5"), Content.required("5"), false);
         em.persist(freeBoard);
         FreeUpdateReqDto freeUpdateReqDto = new FreeUpdateReqDto(freeBoard.getId(),"aaa","bbb");
         // when
@@ -151,7 +153,7 @@ class FreeServiceTest {
     @Test
     @DisplayName("자유게시판 수정 - 실패 -수정 권한이 없을 경우")
     void free_update_fail_auth() {
-        FreeBoard freeBoard = FreeBoard.createFreeBoard(member2, "5", "5", false);
+        FreeBoard freeBoard = FreeBoard.createFreeBoard(member2, FreeTitle.of("5"), Content.required("5"), false);
         em.persist(freeBoard);
         FreeUpdateReqDto freeUpdateReqDto = new FreeUpdateReqDto(freeBoard.getId(),"aaa","bbb");
         CustomApiException customApiException = assertThrows(CustomApiException.class, () -> {
@@ -165,7 +167,7 @@ class FreeServiceTest {
     @DisplayName("자유게시판 삭제 후 EXCEPTION 반환")
     void free_delete() {
         // when
-        FreeBoard freeBoard = FreeBoard.createFreeBoard(member, "5", "5", false);
+        FreeBoard freeBoard = FreeBoard.createFreeBoard(member, FreeTitle.of("5"), Content.required("5"), false);
         em.persist(freeBoard);
         freeService.freeDelete(member, freeBoard.getId());
         CustomApiException customApiException = assertThrows(CustomApiException.class, () -> {

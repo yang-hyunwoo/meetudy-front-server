@@ -9,6 +9,7 @@ import front.meetudy.constant.study.MemberRole;
 import front.meetudy.constant.study.RegionEnum;
 import front.meetudy.domain.common.BaseEntity;
 import front.meetudy.domain.common.file.Files;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import front.meetudy.domain.study.StudyGroup;
 import front.meetudy.domain.study.StudyGroupDetail;
@@ -124,7 +125,7 @@ public class StudyGroupCreateReqDto extends BaseEntity {
         return StudyGroupDetail.createStudyGroupDetail(
                 studyGroup,
                 tag,
-                content,
+                Content.notRequired(content),
                 LocalDate.parse(startDate),
                 LocalDate.parse(endDate),
                 meetingFrequency,

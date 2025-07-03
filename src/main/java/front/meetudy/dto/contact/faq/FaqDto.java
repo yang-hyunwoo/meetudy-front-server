@@ -33,7 +33,7 @@ public class FaqDto {
         return FaqDto.builder()
                 .id(faqBoard.getId())
                 .question(faqBoard.getQuestion())
-                .answer(faqBoard.getAnswer())
+                .answer(faqBoard.getAnswer().getValue())
                 .faqType(faqBoard.getFaqType())
                 .build();
     }

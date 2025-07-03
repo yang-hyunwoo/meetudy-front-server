@@ -5,6 +5,7 @@ import front.meetudy.annotation.customannotation.EnumValidation;
 import front.meetudy.annotation.customannotation.Sanitize;
 import front.meetudy.constant.contact.faq.FaqType;
 import front.meetudy.constant.error.ValidationType;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.contact.Qna.QnaBoard;
 import front.meetudy.domain.member.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -44,7 +45,7 @@ public class QnaWriteReqDto {
         return QnaBoard.createQnaBoard(
                 member,
                 questionTitle,
-                questionContent,
+                Content.notRequired(questionContent),
                 null,
                 null,
                 FaqType.valueOf(qnaType),

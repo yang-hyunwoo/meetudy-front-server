@@ -3,6 +3,7 @@ package front.meetudy.dto.chat;
 import front.meetudy.constant.chat.ChatMessageType;
 import front.meetudy.constant.member.MemberEnum;
 import front.meetudy.domain.chat.ChatNotice;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import lombok.Builder;
 import lombok.Data;
@@ -25,7 +26,7 @@ public class ChatNoticeDto {
         return ChatNotice.createChatNotice(
                 studyGroupId,
                 Member.partialOf(senderId, MemberEnum.USER),
-                message
+                Content.required(message)
         );
     }
 
@@ -35,7 +36,7 @@ public class ChatNoticeDto {
         return ChatNoticeDto.builder()
                 .studyGroupId(chatNotice.getStudyGroupId())
                 .id(chatNotice.getId())
-                .message(chatNotice.getMessage())
+                .message(chatNotice.getMessage().getValue())
                 .senderId(chatNotice.getMember().getId())
                 .status(status)
                 .build();

@@ -1,6 +1,8 @@
 package front.meetudy.repository.board;
 
 import front.meetudy.domain.board.FreeBoard;
+import front.meetudy.domain.board.vo.FreeTitle;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import front.meetudy.dto.request.board.FreePageReqDto;
 import front.meetudy.dummy.TestMemberFactory;
@@ -42,9 +44,9 @@ class FreeQueryDslRepositoryTest {
     void setUp() {
         member = TestMemberFactory.persistDefaultMember(em);
         Member persist = em.persist(member);
-        em.persist(FreeBoard.createFreeBoard(persist,"1","1",false));
-        em.persist(FreeBoard.createFreeBoard(persist,"2","2",false));
-        em.persist(FreeBoard.createFreeBoard(persist,"3","3",false));
+        em.persist(FreeBoard.createFreeBoard(persist, FreeTitle.of("1"), Content.required("1"),false));
+        em.persist(FreeBoard.createFreeBoard(persist,FreeTitle.of("2"),Content.required("2"),false));
+        em.persist(FreeBoard.createFreeBoard(persist,FreeTitle.of("3"),Content.required("3"),false));
         em.flush();
         em.clear();
     }
@@ -142,7 +144,7 @@ class FreeQueryDslRepositoryTest {
     void free_details_success() {
 
         //given
-        FreeBoard freeBoard1 = FreeBoard.createFreeBoard(member, "5", "5", false);
+        FreeBoard freeBoard1 = FreeBoard.createFreeBoard(member, FreeTitle.of("5"), Content.required("5"), false);
         em.persist(freeBoard1);
 
         //when

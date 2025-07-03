@@ -2,6 +2,8 @@ package front.meetudy.dto.request.board;
 
 import front.meetudy.annotation.customannotation.Sanitize;
 import front.meetudy.domain.board.FreeBoard;
+import front.meetudy.domain.board.vo.FreeTitle;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -31,8 +33,8 @@ public class FreeWriteReqDto {
     public FreeBoard toEntity(Member member) {
         return FreeBoard.createFreeBoard(
                 member,
-                title,
-                content,
+                FreeTitle.of(title),
+                Content.required(content),
                 false
         );
     }

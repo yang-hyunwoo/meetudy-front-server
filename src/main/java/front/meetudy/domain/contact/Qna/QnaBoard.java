@@ -2,6 +2,7 @@ package front.meetudy.domain.contact.Qna;
 
 import front.meetudy.constant.contact.faq.FaqType;
 import front.meetudy.domain.common.BaseEntity;
+import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -36,15 +37,19 @@ public class QnaBoard extends BaseEntity {
     @Column(length = 500,nullable = false)
     private String questionTitle;
 
-    @Column(columnDefinition = "TEXT")
-    private String questionContent;
+    @Embedded
+    @AttributeOverride(name = "value",
+            column = @Column(name = "question_content"))
+    private Content questionContent;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "answer_user_id")
     private Member answerUserId;
 
-    @Column(columnDefinition = "TEXT")
-    private String answer;
+    @Embedded
+    @AttributeOverride(name = "value",
+            column = @Column(name = "answer"))
+    private Content answer;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 10,nullable = false)
@@ -57,9 +62,9 @@ public class QnaBoard extends BaseEntity {
     protected QnaBoard(Long id,
                        Member questionUserId,
                        String questionTitle,
-                       String questionContent,
+                       Content questionContent,
                        Member answerUserId,
-                       String answer,
+                       Content answer,
                        FaqType qnaType,
                        LocalDateTime answerAt
     ) {
@@ -75,9 +80,9 @@ public class QnaBoard extends BaseEntity {
 
     public static QnaBoard createQnaBoard(Member questionUserId,
                                           String questionTitle,
-                                          String questionContent,
+                                          Content questionContent,
                                           Member answerUserId,
-                                          String answer,
+                                          Content answer,
                                           FaqType qnaType,
                                           LocalDateTime answerAt
     ) {
