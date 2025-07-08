@@ -18,7 +18,7 @@ public class CorsConfig {
     public CorsConfigurationSource configurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         //Origin 제한 (운영 시 실제 프론트 주소만 허용)
-        corsConfiguration.setAllowedOriginPatterns(List.of("http://localhost:3000","http://192.168.0.101:3000"));
+        corsConfiguration.setAllowedOriginPatterns(List.of("http://localhost:3000","http://192.168.0.101:3000","http://134.185.108.223:3000","http://134.185.108.223:80"));
         //요청 메서드 제한
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
         //요청 헤더 제한

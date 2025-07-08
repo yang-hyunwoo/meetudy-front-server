@@ -1,10 +1,9 @@
 package front.meetudy.domain.chat;
 
-import front.meetudy.constant.error.ErrorEnum;
 import front.meetudy.domain.common.BaseEntity;
 import front.meetudy.domain.common.vo.Content;
 import front.meetudy.domain.member.Member;
-import front.meetudy.dto.chat.ChatNoticeDto;
+import front.meetudy.user.dto.chat.ChatNoticeDto;
 import front.meetudy.exception.CustomApiException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -12,7 +11,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.http.HttpStatus;
 
 import java.util.Objects;
 

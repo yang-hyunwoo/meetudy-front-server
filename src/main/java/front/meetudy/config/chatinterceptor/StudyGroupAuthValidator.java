@@ -1,6 +1,6 @@
 package front.meetudy.config.chatinterceptor;
 
-import front.meetudy.service.auth.AuthService;
+import front.meetudy.user.service.auth.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

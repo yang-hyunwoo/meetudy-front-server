@@ -12,12 +12,22 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SwaggerConfig {
     @Bean
-    public GroupedOpenApi OpenApi() {
-        String[] paths = {"/api/**"};
-
+    public GroupedOpenApi userApi() {
         return GroupedOpenApi.builder()
-                .group("TEST-API-v1")
-                .pathsToMatch(paths)
+                .group("user-api")
+                .pathsToMatch(
+                        "/api/private/**",
+                        "/api/**"
+                )
+                .pathsToExclude("/api/admin/**") // 관리자 API는 제외
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi adminApi() {
+        return GroupedOpenApi.builder()
+                .group("admin-api")
+                .pathsToMatch("/api/admin/**")
                 .build();
     }
 }

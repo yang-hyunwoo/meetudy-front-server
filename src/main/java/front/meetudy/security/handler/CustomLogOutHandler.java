@@ -3,7 +3,7 @@ package front.meetudy.security.handler;
 
 import front.meetudy.config.jwt.JwtProcess;
 import front.meetudy.constant.security.CookieEnum;
-import front.meetudy.service.redis.RedisService;
+import front.meetudy.user.service.redis.RedisService;
 import front.meetudy.util.response.CustomResponseUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;

@@ -4,7 +4,7 @@ import front.meetudy.annotation.customannotation.CurrentMember;
 import front.meetudy.auth.LoginUser;
 import front.meetudy.domain.member.Member;
 import front.meetudy.exception.CustomApiException;
-import front.meetudy.repository.member.MemberRepository;
+import front.meetudy.user.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;

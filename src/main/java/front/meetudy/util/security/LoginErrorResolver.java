@@ -1,8 +1,8 @@
 package front.meetudy.util.security;
 
-import front.meetudy.dto.request.member.LoginReqDto;
+import front.meetudy.user.dto.request.member.LoginReqDto;
 import front.meetudy.constant.login.LoginErrorCode;
-import front.meetudy.service.member.MemberService;
+import front.meetudy.user.service.member.MemberService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;

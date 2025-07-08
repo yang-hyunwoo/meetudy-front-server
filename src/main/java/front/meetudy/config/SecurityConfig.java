@@ -2,13 +2,13 @@ package front.meetudy.config;
 
 import front.meetudy.config.jwt.JwtProcess;
 import front.meetudy.config.jwt.filter.JwtAuthorizationFilter;
-import front.meetudy.oauth.OAuth2AuthenticationFailureHandler;
-import front.meetudy.oauth.OAuth2AuthenticationSuccessHandler;
-import front.meetudy.oauth.PrincipalOauth2UserService;
+import front.meetudy.user.oauth.OAuth2AuthenticationFailureHandler;
+import front.meetudy.user.oauth.OAuth2AuthenticationSuccessHandler;
+import front.meetudy.user.oauth.PrincipalOauth2UserService;
 import front.meetudy.property.FrontJwtProperty;
-import front.meetudy.repository.member.MemberRepository;
+import front.meetudy.user.repository.member.MemberRepository;
 import front.meetudy.security.handler.CustomLogOutHandler;
-import front.meetudy.service.redis.RedisService;
+import front.meetudy.user.service.redis.RedisService;
 import front.meetudy.util.CustomAccessDeniedHandler;
 import front.meetudy.util.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;

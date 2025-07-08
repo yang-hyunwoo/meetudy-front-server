@@ -1,8 +1,8 @@
 package front.meetudy.util.aop;
 
 import front.meetudy.auth.LoginUser;
-import front.meetudy.dto.request.log.LogReqDto;
-import front.meetudy.service.log.LogService;
+import front.meetudy.user.dto.request.log.LogReqDto;
+import front.meetudy.user.service.log.LogService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +31,7 @@ public class AspectAdvice {
     private final LogService logService;
     private final ThreadLocal<AspectUUID> traceIdHolder = new ThreadLocal<>();
 
-    @Pointcut("execution(* front.meetudy.controller..*.*(..)) && !within(front.meetudy.controller.chat.ChatController)")
+    @Pointcut("execution(* front.meetudy.controller..*.*(..)) && !within(front.meetudy.user.controller.chat.ChatController)")
     private void cut() {}
 
     private void syncTraceId() {

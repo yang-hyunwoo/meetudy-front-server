@@ -1,6 +1,6 @@
 package front.meetudy.domain.study;
 
-import front.meetudy.dto.request.study.operate.StudyGroupUpdateReqDto;
+import front.meetudy.user.dto.request.study.operate.StudyGroupUpdateReqDto;
 import lombok.Builder;
 import lombok.Getter;
 

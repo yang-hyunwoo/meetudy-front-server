@@ -2,7 +2,7 @@ package front.meetudy.auth;
 
 import front.meetudy.domain.member.Member;
 import front.meetudy.constant.login.LoginErrorCode;
-import front.meetudy.repository.member.MemberRepository;
+import front.meetudy.user.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;

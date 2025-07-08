@@ -4,7 +4,7 @@ import front.meetudy.auth.LoginUser;
 import front.meetudy.config.jwt.JwtProcess;
 import front.meetudy.domain.member.Member;
 import front.meetudy.exception.CustomApiException;
-import front.meetudy.repository.member.MemberRepository;
+import front.meetudy.user.repository.member.MemberRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.server.ServerHttpRequest;

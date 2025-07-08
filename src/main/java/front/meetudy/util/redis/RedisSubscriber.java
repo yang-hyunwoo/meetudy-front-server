@@ -1,8 +1,8 @@
 package front.meetudy.util.redis;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import front.meetudy.dto.response.mypage.MyPageMessageResDto;
-import front.meetudy.dto.response.notification.NotificationResDto;
+import front.meetudy.user.dto.response.mypage.MyPageMessageResDto;
+import front.meetudy.user.dto.response.notification.NotificationResDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.Message;
