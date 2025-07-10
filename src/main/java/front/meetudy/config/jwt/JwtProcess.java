@@ -13,6 +13,7 @@ import front.meetudy.constant.security.CookieEnum;
 import front.meetudy.domain.member.Member;
 import front.meetudy.exception.CustomApiException;
 import front.meetudy.property.FrontJwtProperty;
+import front.meetudy.security.config.EnvironmentProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
@@ -149,15 +150,18 @@ public class JwtProcess {
      * @param cookieName
      * @return
      */
-    public ResponseCookie createJwtCookie(String accessToken , CookieEnum cookieName) {
 
-        return ResponseCookie.from(cookieName.getValue(), accessToken)
+
+    public ResponseCookie createJwtCookie(String accessToken , CookieEnum cookieName) {
+        ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(cookieName.getValue(), accessToken)
                 .maxAge(600)
-//                    .httpOnly(true)
-//                    .secure(true)
-                //.sameSite("Lax")
-                .path("/")
-                .build();
+                .path("/");
+        if(EnvironmentProvider.isProd()) {
+            builder.httpOnly(true)
+                    .secure(true)
+                    .sameSite("None");
+        }
+        return builder.build();
     }
 
     /**
@@ -167,23 +171,27 @@ public class JwtProcess {
      * @return
      */
     public ResponseCookie createRefreshJwtCookie(String accessToken , CookieEnum cookieName , Duration ttl) {
-        return ResponseCookie.from(cookieName.getValue(), accessToken)
+        ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(cookieName.getValue(), accessToken)
                 .maxAge(ttl)
-//                    .httpOnly(true)
-//                    .secure(true)
-                //.sameSite("Lax")
-                .path("/")
-                .build();
+                .path("/");
+        if(EnvironmentProvider.isProd()) {
+            builder.httpOnly(true)
+                    .secure(true)
+                    .sameSite("None");
+        }
+        return builder.build();
     }
 
     public ResponseCookie createPlainCookie(String cookieValue , CookieEnum cookieName) {
-        return ResponseCookie.from(cookieName.getValue(), cookieValue)
+        ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(cookieName.getValue(), cookieValue)
                 .maxAge(7 * 24 * 60 * 60)
-//                    .httpOnly(true)
-//                    .secure(true)
-                //.sameSite("Lax")
-                .path("/")
-                .build();
+                .path("/");
+        if(EnvironmentProvider.isProd()) {
+            builder.httpOnly(true)
+                    .secure(true)
+                    .sameSite("None");
+        }
+        return builder.build();
     }
 
     private Algorithm algorithm() {

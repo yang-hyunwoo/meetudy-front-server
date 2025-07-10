@@ -1,5 +1,6 @@
 package front.meetudy.util.cookie;
 
+import front.meetudy.security.config.EnvironmentProvider;
 import org.springframework.http.ResponseCookie;
 
 public abstract class CustomCookie {
@@ -12,15 +13,18 @@ public abstract class CustomCookie {
      * @return
      */
     public static ResponseCookie createCookie(String cookieName, String cookieValue, int time) {
-        return ResponseCookie.from(cookieName, cookieValue)
+        ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(cookieName, cookieValue)
                 .maxAge(time)
-//                    .httpOnly(true)
-//                    .secure(true)
-                //.sameSite("Lax")
-                .path("/")
-                .build();
-    }
+                .path("/");
 
+        if (EnvironmentProvider.isProd()) {
+            builder.httpOnly(true)
+                    .secure(true)
+                    .sameSite("None");
+        }
+
+        return builder.build();
+    }
     /**
      * 쿠키 삭제
      * @param name
