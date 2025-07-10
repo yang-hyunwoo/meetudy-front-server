@@ -4,7 +4,7 @@
 
 이 프로젝트는 Swagger를 사용해 API 명세를 제공합니다.
 
-- Swagger UI: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+- Swagger UI: [https://meetudy-backend.fly.dev/swagger-ui.html](https://meetudy-backend.fly.dev/swagger-ui/index.html)
 ---
 
 ## 📦 API 응답 구조
