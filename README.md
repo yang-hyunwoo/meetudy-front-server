@@ -2,6 +2,8 @@
   <img src="./Settings/image/meetudy-logo2.png" alt="로고" width="100" style="vertical-align: middle;" />
   <br />
   <strong>Meetudy</strong> - 당신의 스터디를 더 스마트하게 💡
+  <br />
+  <a href="https://meetudy.fly.dev">https://meetudy.fly.dev</a>
 </h1>
 
 > 🤝 **혼자보다는 함께할 때 더 큰 동기부여가 생깁니다.**  
@@ -9,6 +11,9 @@
 > 🚀 함께 성장해 보세요.
 
 ---
+> 🔑 **테스트 계정 안내**
+> - 이메일: `test@meetudy.com`
+> - 비밀번호: `test1234@`
 
 ## 📝 프로젝트 개요
 
@@ -23,12 +28,12 @@
 
 - [⚙️ 개발 환경](#️-개발-환경)
 - [🚀 실행 방법](./Settings/setting/readme.md)
-- [✨ 주요 기능](#-주요-기능)
 - [🗂️ 프로젝트 폴더 구조](./Settings/structure/readme.md)
 - [🔐 로그인 및 인증](./Settings/auth/readme.md)
 - [📚 API 문서 , 📦 API 응답 구조](./Settings/api/readme.md)
 - [❗  커스텀 예외 처리](./Settings/error/readme.md)
 - [📦 Entity , Dto](./Settings/object/readme.md)
+- [✅ 배포 서버](#-배포-서버)
 
 
 ---
@@ -61,4 +66,29 @@
 > 포트를 변경하거나 로컬 설치 버전을 **삭제**해 주세요.
 
 ---
+
+## ✅ 배포 서버
+
+### 📦 배포 플랫폼: [Fly.io](https://fly.io)
+- 이 프로젝트는 Fly.io를 이용해 **도커 컨테이너 기반**으로 배포되었습니다.
+- 프론트엔드와 백엔드는 각각 독립된 컨테이너로 실행되며,  
+  Fly.io의 `fly.toml` 및 `Dockerfile`을 기반으로 관리됩니다.
+
+### 🌐 서비스 주소
+- 🖥️ **프론트엔드**: [https://meetudy.fly.dev](https://meetudy.fly.dev) 
+   - ※추후 도메인 변경 가능성 
+- 🛠️ **백엔드 API**: [https://meetudy-backend.fly.dev](https://meetudy-backend.fly.dev)
+- 🔐 **Swagger 문서**: [https://meetudy-backend.fly.dev/swagger-ui/index.html](https://meetudy-backend.fly.dev/swagger-ui/index.html)
+
+### 📡 인프라 구성
+- 🧩 **PostgreSQL**: Fly.io의 `fly postgres`를 사용하여 영구 저장소 구성
+- ⚡ **Redis**: [Upstash](https://upstash.com) Redis 사용 (Pub/Sub, 캐시, 토큰 저장 등)
+
+---
+
+### ⚠️ 배포 시 유의사항 (프론트 ↔ 백엔드 연동)
+- ✅ **HTTPS 기반 쿠키 설정 필수** (`Secure`, `SameSite=None`)
+- ✅ **프론트와 백엔드 도메인이 다를 경우** → 프론트에서 **프록시 설정으로 도메인 통합 필요**
+- ✅ **CORS 설정에서 allowCredentials=true**, `allowedOrigins`에 프론트 도메인 명시
+- ✅ `withCredentials: true` 옵션을 프론트 axios 또는 fetch 요청에 반드시 포함
 
