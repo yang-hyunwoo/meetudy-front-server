@@ -34,6 +34,7 @@
 - [❗  커스텀 예외 처리](./Settings/error/readme.md)
 - [📦 Entity , Dto](./Settings/object/readme.md)
 - [✅ 배포 서버](#-배포-서버)
+- [🔌 DB 다이어 그램](./Settings/db/readme.md)
 
 
 ---
