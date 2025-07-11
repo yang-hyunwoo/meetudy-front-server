@@ -59,18 +59,19 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
 
         } else if(userRequest.getClientRegistration().getRegistrationId().equals("kakao")){
             log.info("카카오 로그인 요청");
-            oAuth2UserInfo = new KakaoUserInfo((Map) oAuth2User.getAttributes().get("response"));
+            oAuth2UserInfo = new KakaoUserInfo(oAuth2User.getAttributes());
 
         }else {
             log.error("오류");
         }
 
-        MemberProviderTypeEnum providerType = oAuth2UserInfo.getProvider(); //google 계정
+        MemberProviderTypeEnum providerType = oAuth2UserInfo.getProvider();
         String providerId = oAuth2UserInfo.getProviderId();
 //        String username = provider + "_" + providerId;  //google_sub
         String username = oAuth2UserInfo.getName();  //google_sub
         String password = encoder.encode("oauth2-user-" + UUID.randomUUID());
-        String email = oAuth2UserInfo.getEmail();
+        //null은 카카오이기 때문에 kakao.com으로 임의 생성
+        String email = oAuth2UserInfo.getEmail() == null ? UUID.randomUUID() + "@kakao.com" : oAuth2UserInfo.getEmail();
 
         Member oauthMember;
         if(memberRepository.findByEmailAndProvider(email , providerType).isPresent()) {

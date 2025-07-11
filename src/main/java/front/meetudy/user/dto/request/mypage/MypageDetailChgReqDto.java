@@ -26,7 +26,6 @@ public class MypageDetailChgReqDto {
     private String nickname;
 
     @Schema(description = "휴대폰번호", example = "01011112222")
-    @NotBlank(message = "{phone.notBlank}",groups = Step2.class)
     @PhoneNumber(groups = Step2.class)
     private String phoneNumber;
 

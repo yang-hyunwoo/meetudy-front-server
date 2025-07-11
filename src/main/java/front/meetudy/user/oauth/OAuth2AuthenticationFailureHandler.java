@@ -19,7 +19,7 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
                                         HttpServletResponse response,
                                         AuthenticationException exception
     ) throws IOException {
-        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:4000/errorLogin")
+        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:3000")
                 .build().toUriString();
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }

@@ -52,7 +52,6 @@ public class JoinMemberReqDto {
     private String birth;
 
     @Schema(description = "휴대폰번호", example = "01011112222")
-    @NotBlank(message = "{phone.notBlank}",groups = Step5.class)
     @PhoneNumber(groups = Step5.class)
     private String phoneNumber;
 

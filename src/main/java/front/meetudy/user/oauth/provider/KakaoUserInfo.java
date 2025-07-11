@@ -5,9 +5,9 @@ import front.meetudy.constant.member.MemberProviderTypeEnum;
 import java.util.Map;
 
 
-public class KakaoUserInfo implements OAuth2UserInfo{
+public class KakaoUserInfo implements OAuth2UserInfo {
 
-    private Map<String , Object> attributes; // oauth2User.getAttributes() 받기
+    private final Map<String, Object> attributes;
 
     public KakaoUserInfo(Map<String, Object> attributes) {
         this.attributes = attributes;
@@ -15,7 +15,7 @@ public class KakaoUserInfo implements OAuth2UserInfo{
 
     @Override
     public String getProviderId() {
-        return attributes.get("id").toString();
+        return String.valueOf(attributes.get("id"));
     }
 
     @Override
@@ -25,12 +25,22 @@ public class KakaoUserInfo implements OAuth2UserInfo{
 
     @Override
     public String getEmail() {
-        return attributes.get("email").toString();
+        Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
+        if (kakaoAccount != null) {
+            return (String) kakaoAccount.get("email");
+        }
+        return null;
     }
 
     @Override
     public String getName() {
-        return attributes.get("name").toString();
+        Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
+        if (kakaoAccount != null) {
+            Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
+            if (profile != null) {
+                return (String) profile.get("nickname");
+            }
+        }
+        return null;
     }
-
 }

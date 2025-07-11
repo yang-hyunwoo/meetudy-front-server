@@ -73,7 +73,7 @@ public class MemberLoginController {
             }
             memberService.memberLgnFailInit(loginUser.getMember().getId()); // 로그인 실패 횟수 초기화
 
-            jetGenerated(response, accessToken, refreshToken, ttl, loginReqDtoAuth);
+            jetGenerated(response, accessToken, loginReqDtoAuth);
 
             String refreshUuid = jwtProcess.extractRefreshUuid(refreshToken);
             redisService.saveRefreshToken(refreshUuid, loginUser.getMember().getId(), loginReqDto.isChk(), ttl);
@@ -89,17 +89,13 @@ public class MemberLoginController {
 
     private void jetGenerated(HttpServletResponse response,
                               String accessToken,
-                              String refreshToken,
-                              Duration ttl,
                               LoginReqDto loginReqDtoAuth
     ) {
         if (frontJwtProperty.isUseCookie()) {
             response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(accessToken, CookieEnum.accessToken).toString());
-            response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken, ttl).toString());
             response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(String.valueOf(loginReqDtoAuth.isChk()), isAutoLogin).toString());
         } else {
             response.addHeader(frontJwtProperty.getHeader(), accessToken);
-            response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken, ttl).toString());
             response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(String.valueOf(loginReqDtoAuth.isChk()), isAutoLogin).toString());
         }
     }

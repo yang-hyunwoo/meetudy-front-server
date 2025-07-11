@@ -47,34 +47,32 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                                         HttpServletResponse response,
                                         Authentication authentication
     ) throws IOException {
-        String targetUrl = determineTargetUrl(request, response, authentication);
-        LoginUser loginUser = (LoginUser) authentication.getPrincipal();
-        LoginReqDto loginReqDto = (LoginReqDto) authentication.getDetails();
-        Duration ttl = loginReqDto.isChk() ? Duration.ofDays(7) : Duration.ofDays(1);   // 자동 로그인: 7일;  // 일반 로그인: 1일
-        String accessToken = jwtProcess.createAccessToken(loginUser);
-        String refreshToken = jwtProcess.createRefreshToken(loginUser, ttl);
 
+        LoginUser loginUser = (LoginUser) authentication.getPrincipal();
+//        LoginReqDto loginReqDto = (LoginReqDto) authentication.getDetails();
+//        Duration ttl = loginReqDto.isChk() ? Duration.ofDays(7) : Duration.ofDays(1);   // 자동 로그인: 7일;  // 일반 로그인: 1일
+        String accessToken = jwtProcess.createAccessToken(loginUser);
+        String refreshToken = jwtProcess.createRefreshToken(loginUser, Duration.ofDays(1));
+        String targetUrl = determineTargetUrl(request, response, authentication,accessToken);
         if (frontJwtProperty.isUseCookie()) {
             response.addHeader("Set-Cookie", jwtProcess.createJwtCookie(accessToken, CookieEnum.accessToken).toString());
-            response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken, ttl).toString());
-            response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(String.valueOf(loginReqDto.isChk()), isAutoLogin).toString());
+            response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(String.valueOf(false), isAutoLogin).toString());
         } else {
             response.addHeader(frontJwtProperty.getHeader(), accessToken);
-            response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken, ttl).toString());
-            response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(String.valueOf(loginReqDto.isChk()), isAutoLogin).toString());
+            response.addHeader("Set-Cookie", jwtProcess.createPlainCookie(String.valueOf(false), isAutoLogin).toString());
         }
 
         String refreshUuid = jwtProcess.extractRefreshUuid(refreshToken);
-        redisService.saveRefreshToken(refreshUuid, loginUser.getMember().getId(), loginReqDto.isChk(), ttl);
+        redisService.saveRefreshToken(refreshUuid, loginUser.getMember().getId(), false, Duration.ofDays(1));
 
-        response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken, ttl).toString());
+        response.addHeader("Set-Cookie", jwtProcess.createRefreshJwtCookie(refreshToken, CookieEnum.refreshToken, Duration.ofDays(1)).toString());
 
         clearAuthenticationAttributes(request, response);
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 
     /**
-     * 실패
+     * url 호출
      * @param request
      * @param response
      * @param authentication
@@ -82,25 +80,20 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
      */
     protected String determineTargetUrl(HttpServletRequest request,
                                         HttpServletResponse response,
-                                        Authentication authentication
-    ) {
+                                        Authentication authentication,
+                                        String accessToken) {
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
 
-        if (loginUser.getMember().getProvider().equals(MemberProviderTypeEnum.NAVER)) {
-            return UriComponentsBuilder.fromUriString("http://localhost:3000/NaverLoginCallback")
-                    .build().toUriString();
-        } else if (loginUser.getMember().getProvider().equals(MemberProviderTypeEnum.KAKAO)) {
-                return null;
-//            return UriComponentsBuilder.fromUriString("http://localhost:3000/NaverLoginCallback")
-//                    .build().toUriString();
-        } else if (loginUser.getMember().getProvider().equals(MemberProviderTypeEnum.GOOGLE)) {
-                return null;
-//            return UriComponentsBuilder.fromUriString("http://localhost:3000/NaverLoginCallback")
-//                    .build().toUriString();
-        } else {
-            return UriComponentsBuilder.fromUriString("http://localhost:3000")
-                    .build().toUriString();
-        }
+        String baseRedirectUrl = switch (loginUser.getMember().getProvider()) {
+            case NAVER -> "http://localhost:3000/social/callback";
+            case KAKAO -> "http://localhost:3000/social/callback";
+            case GOOGLE -> "http://localhost:3000/social/callback";
+            default -> "http://localhost:3000";
+        };
+
+        return UriComponentsBuilder.fromUriString(baseRedirectUrl)
+                .queryParam("accessToken", accessToken)
+                .build().toUriString();
     }
 
     protected void clearAuthenticationAttributes(HttpServletRequest request, HttpServletResponse response) {
