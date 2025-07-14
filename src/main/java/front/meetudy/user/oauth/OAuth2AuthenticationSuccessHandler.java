@@ -4,12 +4,14 @@ import front.meetudy.auth.LoginUser;
 import front.meetudy.config.jwt.JwtProcess;
 import front.meetudy.constant.member.MemberProviderTypeEnum;
 import front.meetudy.constant.security.CookieEnum;
+import front.meetudy.security.config.EnvironmentProvider;
 import front.meetudy.user.dto.request.member.LoginReqDto;
 import front.meetudy.property.FrontJwtProperty;
 import front.meetudy.user.service.redis.RedisService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -23,6 +25,7 @@ import static front.meetudy.constant.security.CookieEnum.*;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtProcess jwtProcess;
@@ -83,13 +86,26 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                                         Authentication authentication,
                                         String accessToken) {
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
+        String baseRedirectUrl = "";
+        log.info("environment: {}",EnvironmentProvider.isProd());
+        if(EnvironmentProvider.isProd()) {
+             baseRedirectUrl = switch (loginUser.getMember().getProvider()) {
+                case NAVER -> "https://meetudy.fly.dev/social/callback";
+                case KAKAO -> "https://meetudy.fly.dev/social/callback";
+                case GOOGLE -> "https://meetudy.fly.dev/social/callback";
+                default -> "https://meetudy.fly.dev";
+            };
+        } else {
+             baseRedirectUrl = switch (loginUser.getMember().getProvider()) {
+                case NAVER -> "http://localhost:3000/social/callback";
+                case KAKAO -> "http://localhost:3000/social/callback";
+                case GOOGLE -> "http://localhost:3000/social/callback";
+                default -> "http://localhost:3000";
+            };
+        }
 
-        String baseRedirectUrl = switch (loginUser.getMember().getProvider()) {
-            case NAVER -> "http://localhost:3000/social/callback";
-            case KAKAO -> "http://localhost:3000/social/callback";
-            case GOOGLE -> "http://localhost:3000/social/callback";
-            default -> "http://localhost:3000";
-        };
+
+
 
         return UriComponentsBuilder.fromUriString(baseRedirectUrl)
                 .queryParam("accessToken", accessToken)

@@ -1,5 +1,6 @@
 package front.meetudy.user.oauth;
 
+import front.meetudy.security.config.EnvironmentProvider;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,7 +20,12 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
                                         HttpServletResponse response,
                                         AuthenticationException exception
     ) throws IOException {
-        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:3000")
+        String url = "http://localhost:3000";
+        if(EnvironmentProvider.isProd()) {
+            url = "https://meetudy.fly.dev";
+        }
+
+        String targetUrl = UriComponentsBuilder.fromUriString(url)
                 .build().toUriString();
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
