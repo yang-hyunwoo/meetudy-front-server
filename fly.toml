@@ -1,10 +1,15 @@
-# fly.toml app configuration file generated for meetudy-backend on 2025-07-08T14:19:00+09:00
+# fly.toml app configuration file generated for meetudy-backend on 2025-07-14T17:37:07+09:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
 app = 'meetudy-backend'
 primary_region = 'nrt'
+
+[build]
+
+[env]
+  SPRING_PROFILES_ACTIVE = 'prod'
 
 [http_service]
   internal_port = 8080
@@ -18,6 +23,3 @@ primary_region = 'nrt'
   memory = '1gb'
   cpu_kind = 'shared'
   cpus = 1
-
-[env]
-  SPRING_PROFILES_ACTIVE = "prod"
