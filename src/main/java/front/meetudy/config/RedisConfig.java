@@ -68,6 +68,11 @@ public class RedisConfig {
         log.info("Redis 연결 상태: {}", connectionFactory.getConnection().ping());
     }
 
+    /**
+     * 지정된 채널을 구독(Subscribe) 하며,
+     * 메시지가 오면 리스너에게 전달
+     * @return
+     */
     @Bean
     public RedisMessageListenerContainer redisMessageListenerContainer() {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();

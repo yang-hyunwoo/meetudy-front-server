@@ -105,7 +105,7 @@ public class JwtProcess {
     /**
      * 리프레시 토큰 검증
      * @param token
-     * @return
+     * @return MemberId
      */
     public Long verifyRefreshToken(String token) {
         try {
@@ -133,6 +133,11 @@ public class JwtProcess {
         }
     }
 
+    /**
+     * refresh 토큰 검증
+     * @param refreshToken
+     * @return uuid
+     */
     public String extractRefreshUuid(String refreshToken) {
         DecodedJWT decodedJWT;
         try {
@@ -145,13 +150,11 @@ public class JwtProcess {
     }
 
     /**
-     * accessToken
+     * accessToken 쿠키 생성
      * @param accessToken
      * @param cookieName
      * @return
      */
-
-
     public ResponseCookie createJwtCookie(String accessToken , CookieEnum cookieName) {
         ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(cookieName.getValue(), accessToken)
                 .maxAge(600)
@@ -165,7 +168,7 @@ public class JwtProcess {
     }
 
     /**
-     * refreshToken
+     * refreshToken 쿠키 생성
      * @param accessToken
      * @param cookieName
      * @return

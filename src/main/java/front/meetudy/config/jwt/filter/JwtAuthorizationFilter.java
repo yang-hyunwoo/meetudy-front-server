@@ -50,16 +50,7 @@ import static front.meetudy.util.cookie.CustomCookie.deleteCookie;
  */
 @Slf4j
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
-    private boolean isProtected(String uri) {
-        return PROTECTED_PATHS.stream().anyMatch(pattern -> pathMatcher.match(pattern, uri));
-    }
-    private static final List<String> PROTECTED_PATHS = List.of(
-            "/api/private/**",
-            "/api/admin/**",
-            "/api/user/**"
-    );
 
-    private final AntPathMatcher pathMatcher = new AntPathMatcher();
     private final MemberRepository memberRepository;
     private final JwtProcess jwtProcess;
     private final FrontJwtProperty jwtProperty;
